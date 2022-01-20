@@ -1,0 +1,113 @@
+list_all_20_aa:
+  - A
+  - C
+  - D
+  - E
+  - F
+  - G
+  - H
+  - I
+  - K
+  - L
+  - M
+  - N
+  - P
+  - Q
+  - R
+  - S
+  - T
+  - V
+  - W
+  - Y
+
+# Pbeta
+Chou-Fasman_Beta-Strand_Preference:
+  A: 0.72
+  C: 1.40
+  D: 0.39
+  E: 0.52
+  F: 1.33
+  G: 0.58
+  H: 0.80
+  I: 1.67
+  K: 0.69
+  L: 1.22
+  M: 1.14
+  N: 0.48
+  P: 0.31
+  Q: 0.98
+  R: 0.84
+  S: 0.96
+  T: 1.17
+  V: 1.87
+  W: 1.35
+  Y: 1.45
+
+# Palpha
+Chou-Fasman_Alpha-Helix_Preference:
+  A: 1.41
+  C: 0.66
+  D: 0.99
+  E: 1.59
+  F: 1.16
+  G: 0.43
+  H: 1.05
+  I: 1.09
+  K: 1.23
+  L: 1.34
+  M: 1.30
+  N: 0.99
+  P: 0.34
+  Q: 1.27
+  R: 1.21
+  S: 0.57
+  T: 0.76
+  V: 0.90
+  W: 1.02
+  Y: 0.74
+
+# Pt
+Chou-Fasman_Reverse_Turn_Preference:
+  A: 0.82
+  C: 0.54
+  D: 1.24
+  E: 1.01
+  F: 0.59
+  G: 1.77
+  H: 0.81
+  I: 0.47
+  K: 1.07
+  L: 0.57
+  M: 0.52
+  N: 1.34
+  P: 1.32
+  Q: 0.84
+  R: 0.90
+  S: 1.22
+  T: 0.90
+  V: 0.41
+  W: 0.65
+  Y: 0.76
+
+# MEAN BETA-SHEET PROPENSITY = Pbeta / (0.5 * (Palpha + Pt))
+BETA-SHEET_OVER_AVG_OF_ALPHA-HELIX_AND_BETA_TURN:
+  A: 3.2
+  C: 3.2
+  D: 3.2
+  E: 3.2
+  F: 3.2
+  G: 3.2
+  H: 3.2
+  I: 3.2
+  K: 3.2
+  L: 3.2
+  M: 3.2
+  N: 3.2
+  P: 3.2
+  Q: 3.2
+  R: 3.2
+  S: 3.2
+  T: 3.2
+  V: 3.2
+  W: 3.2
+  Y: 3.2

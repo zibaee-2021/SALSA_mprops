@@ -1,0 +1,3 @@
+Palpha, Pbeta and Pt are taken from 'Conformational Preferences of the Amino Acids' Table 6.5, p256 of 'Proteins Structures and Molecular Properties' 2nd Edition by Thomas E. Creighton 
+These numbers are calculated as follows: "The normalised frequencies for each conformation (Palpha, Pbeta, Pt) were calculated from the fraction of residues of each amino acid that occured in that conformation, divided by this fraction for all residues. Random occurence of a particular amino acid in a conformation would give a value of unity."
+They are based on: 'Empirical predictions of protein conformation' P.Y.Chou and G.D. Fasman. Ann. Rev. Biochem. 47: 251-276 (1978) 
