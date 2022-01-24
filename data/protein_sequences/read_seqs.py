@@ -1,6 +1,4 @@
 import os
-
-import numpy as np
 import pandas as pd
 from pandas import DataFrame as pDF
 from root_path import abspath_root
@@ -47,6 +45,27 @@ def is_invalid_protein_sequence(aa_props: pDF, sequence: str) -> bool:
         else:
             continue
     return False
+
+
+def get_sequences_by_uniprot_accession_nums_or_names(accs=None, names=None) -> List[dict]:
+    """
+    Retrieve protein sequence(s) of interest corresponding to the given identifier(s) and/or name(s).
+    Uniprot "accession number". NOTE: It is not a number. It has an alphanumeric format, such as 'Q16143'.
+    Uniprot protein name is a mnemonic that incorporates species information, e.g. 'SYUA_HUMAN'.
+    :param acc: Uniprot accession number(s), as a string or list of strings. None by default.
+    :param names: Uniprot protein name(s), as a string or list of strings. None by default.
+    :return: Protein sequences mapped to the given accession number or name.
+    """
+    protein_ids_sequences = list(dict())
+    prot_recs = read_protein_sequences_csv()
+    if accs is not None:
+        if isinstance(accs, str): accs = [accs]
+        protein_ids_sequences = [{acc: prot_recs.loc[(prot_recs.AC == acc)].iloc[0]['sequence']} for acc in accs]
+    if names is not None:
+        if isinstance(names, str): names = [names]
+        protein_ids_sequences.extend([{name: prot_recs.loc[(prot_recs.name == name)].iloc[0]['sequence']}
+                                      for name in names])
+    return protein_ids_sequences
 
 
 if __name__ == '__main__':
