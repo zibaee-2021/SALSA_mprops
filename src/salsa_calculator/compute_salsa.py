@@ -1,8 +1,8 @@
 from enum import Enum, unique
 from typing import List
-from src.mean_properties_calculator import compute_mbp as mbp
+from src.mean_properties_calculator import compute_mean_betasheet_propensity as mbp
 from src.mean_properties_calculator import compute_sequence_complexity as lsc
-from src.mean_properties_calculator import compute_mha as mha
+from src.mean_properties_calculator import compute_mean_helical_amphipathicity as mha
 import numpy as np
 from matplotlib import pyplot as plt
 from src.steps.SALSA.salsa_prot_props import SalsaProtProps

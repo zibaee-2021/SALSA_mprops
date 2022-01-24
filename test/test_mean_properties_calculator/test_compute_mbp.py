@@ -1,6 +1,6 @@
 from unittest import TestCase
 from data.protein_sequences import read_seqs
-from src.mean_properties_calculator.compute_mbp import compute_mean_beta_sheet_prop
+from src.mean_properties_calculator.compute_mean_betasheet_propensity import compute_mean_beta_sheet_prop
 
 
 class TestComputeMBP(TestCase):
