@@ -5,9 +5,6 @@ from data.aa_properties import read_props
 from data.protein_sequences import read_seqs
 import numpy as np
 
-rel_path_aa_props = os.path.join('data', 'aa_properties')
-abs_path_aa_props = os.path.join(abspath_root, rel_path_aa_props)
-
 
 def compute_mean_beta_sheet_prop(sequence: str) -> float:
     """
