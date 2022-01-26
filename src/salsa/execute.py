@@ -14,19 +14,19 @@ def integrate_salsa_plot(summed_scores: dict) -> dict:
     return integrals
 
 
+# def plot_summed_scores_against_aa_sequence(summed_scores, _property: str, protein_names):
+#     TODO
+#     Plot the given summed salsa scores against the given protein sequence, using 1-character format for the (sequence)
+#     Unlike the plotting function that uses plots this against the amino acid sequence position, this plotting tool
+#     cannot plot two overlapping proteins as a result.
+
+
 def _get_length_of_longest_prot_seq(summed_scores: dict) -> int:
     max_len, index_of_longest = 0, 0
     for prot_id_name, summed_scores_ in summed_scores.items():
         if len(summed_scores_) > max_len:
             max_len = len(summed_scores_)
     return max_len
-
-
-# def plot_summed_scores_against_aa_sequence(summed_scores, _property: str, protein_names):
-#     TODO
-#     Plot the given summed salsa scores against the given protein sequence, using 1-character format for the (sequence)
-#     Unlike the plotting function that uses plots this against the amino acid sequence position, this plotting tool
-#     cannot plot two overlapping proteins as a result.
 
 
 def plot_summed_scores(summed_scores: dict, _property: str, protein_names):
