@@ -36,4 +36,22 @@ def convert_alpha_beta_turn_pdf_to_dicts(aa_props: pDF) -> Tuple:
 
 
 if __name__ == '__main__':
-    print(read_hydrophobicity_scale())
+    from matplotlib import pyplot as plt
+    import seaborn as sns
+    #
+    # In order to estimate a value for Proline in the Radzicka-Wolfenden scale, I am
+    #     making a visualisation of the other scales, after separating and sorting them
+    # Move this to a notebook in sandbox
+    hyd_sc = read_all_hydrophobicity_scales_csv()
+    hyd_sc_kd = hyd_sc[['aa', 'Kyte-Doolittle']].sort_values(by='Kyte-Doolittle')
+    # ax = sns.barplot(x='aa', y='Kyte-Doolittle', data=hyd_sc_kd)
+    sns.catplot(data=hyd_sc_kd, x='aa', y='Kyte-Doolittle', kind='point')
+    plt.show()
+    hyd_sc_hw = hyd_sc[['aa', 'Hopp-Woods']].sort_values(by='Hopp-Woods')
+    hyd_sc_co = hyd_sc[['aa', 'Cornette']].sort_values(by='Cornette')
+    hyd_sc_ei = hyd_sc[['aa', 'Eisenberg']].sort_values(by='Eisenberg')
+    hyd_sc_ro = hyd_sc[['aa', 'Rose']].sort_values(by='Rose')
+    hyd_sc_ja = hyd_sc[['aa', 'Janin']].sort_values(by='Janin')
+    hyd_sc_en = hyd_sc[['aa', 'Engelman_(GES)']].sort_values(by='Engelman_(GES)')
+    hyd_sc_rw = hyd_sc[['aa', 'Radzicka-Wolfenden']].sort_values(by='Radzicka-Wolfenden')
+    hyd_sc_rw

@@ -1,6 +1,6 @@
 from unittest import TestCase
 from data.protein_sequences import read_seqs
-from src.mean_properties_calculator.compute_sequence_complexity import compute_low_sequence_complexity
+from src.mean_properties.calc_seq_complexity import compute_low_sequence_complexity
 
 
 class TestComputeSequenceComplexity(TestCase):

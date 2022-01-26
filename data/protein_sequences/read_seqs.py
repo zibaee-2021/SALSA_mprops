@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from pandas import DataFrame as pDF
 from root_path import abspath_root
+from typing import List
 
 # abs_path = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
 rel_path_prot_seq = os.path.join('data', 'protein_sequences')
@@ -34,7 +35,7 @@ def read_protein_sequences_csv(csv=None) -> pDF:
     """
     if csv is None:
         csv = 'protein_sequences.csv'
-    return pd.read_csv(os.path.join(abs_path_prot_seq, csv), skipinitialspace=True, quotechar="'")
+    return pd.read_csv(os.path.join(abs_path_prot_seq, csv))
 
 
 def is_invalid_protein_sequence(aa_props: pDF, sequence: str) -> bool:
@@ -47,24 +48,25 @@ def is_invalid_protein_sequence(aa_props: pDF, sequence: str) -> bool:
     return False
 
 
-def get_sequences_by_uniprot_accession_nums_or_names(accs=None, names=None) -> List[dict]:
+def get_sequences_by_uniprot_accession_nums_or_names(accs=None, names=None) -> dict:
     """
     Retrieve protein sequence(s) of interest corresponding to the given identifier(s) and/or name(s).
     Uniprot "accession number". NOTE: It is not a number. It has an alphanumeric format, such as 'Q16143'.
     Uniprot protein name is a mnemonic that incorporates species information, e.g. 'SYUA_HUMAN'.
-    :param acc: Uniprot accession number(s), as a string or list of strings. None by default.
+    :param accs: Uniprot accession number(s), as a string or list of strings. None by default.
     :param names: Uniprot protein name(s), as a string or list of strings. None by default.
     :return: Protein sequences mapped to the given accession number or name.
     """
-    protein_ids_sequences = list(dict())
+    protein_ids_sequences = dict()
     prot_recs = read_protein_sequences_csv()
-    if accs is not None:
+    if accs is not None and accs != ['']:
         if isinstance(accs, str): accs = [accs]
-        protein_ids_sequences = [{acc: prot_recs.loc[(prot_recs.AC == acc)].iloc[0]['sequence']} for acc in accs]
-    if names is not None:
+        protein_ids_sequences = {acc: prot_recs.loc[(prot_recs.AC == acc)].iloc[0]['sequence'] for acc in accs}
+    if names is not None and names != ['']:
         if isinstance(names, str): names = [names]
-        protein_ids_sequences.extend([{name: prot_recs.loc[(prot_recs.name == name)].iloc[0]['sequence']}
-                                      for name in names])
+        for name in names:
+            protein_ids_sequences[name]=prot_recs.loc[(prot_recs.name == name)].iloc[0]['sequence']
+
     return protein_ids_sequences
 
 
