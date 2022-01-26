@@ -1,6 +1,6 @@
 import time
 from data.protein_sequences import read_seqs
-from src.salsa.Options import Props, DefaultBSC, DefaultLSC
+from src.salsa.Options import Props, DefaultBSC
 from src.salsa import execute
 
 start = time.time()
@@ -8,18 +8,18 @@ start = time.time()
 # accession_numbers = ['']
 # accession_numbers = ['P37840']
 accession_numbers = ['P37840', 'Q16143', 'P10636-8']
-protein_names = ['']
+# protein_names = ['']
 # protein_names = ['SYUA_HUMAN']
 protein_names = ['SYUA_HUMAN', 'PRIO_HUMAN', 'URE2_YEAST', 'E9P8Q3_YEASX', 'TADBP_HUMAN']
 prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(accs=accession_numbers, names=protein_names)
 
 # STEP 1 - Define property and corresponding parameters.
 # _property = Props.bSC.value
-_property = Props.LSC.value
-params = {'window_len_min': DefaultLSC.window_len_min.value,
-          'window_len_max': DefaultLSC.window_len_max.value,
-          'top_scoring_windows_num': DefaultLSC.top_scoring_windows_num.value,
-          'threshold': DefaultLSC.threshold.value}
+_property = Props.bSC.value
+params = {'window_len_min': DefaultBSC.window_len_min.value,
+          'window_len_max': DefaultBSC.window_len_max.value,
+          'top_scoring_windows_num': DefaultBSC.top_scoring_windows_num.value,
+          'threshold': DefaultBSC.threshold.value}
 
 # STEP 2 - salsa produces an array holding a single numbers for each residue.
 all_summed_scores = dict()
