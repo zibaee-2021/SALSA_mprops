@@ -14,21 +14,6 @@ def integrate_salsa_plot(summed_scores: dict) -> dict:
     return integrals
 
 
-# def _plot_summed_scores(summed_scores: np.array, _property: str, protein_name: str):
-#     # summed_scores = summed_scores.flatten()
-#     len_ = len(summed_scores)
-#     plt.plot(np.arange(1, len_ + 1), summed_scores)
-#     plt.xticks(np.arange(1, len_ + 1, 1))
-#     plt.xticks(fontsize=8, rotation=90)
-#     plt.title(protein_name)
-#     plt.ylabel(_property)
-#     plt.xlabel('amino acid sequence')
-#     len_ = len(summed_scores)
-#     plt.plot(np.arange(1, len_ + 1), summed_scores)
-#     return plt
-#     # plt.show()
-
-
 def _get_length_of_longest_prot_seq(summed_scores: dict) -> int:
     max_len, index_of_longest = 0, 0
     for prot_id_name, summed_scores_ in summed_scores.items():
