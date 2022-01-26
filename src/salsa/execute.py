@@ -1,3 +1,4 @@
+import math
 from typing import List, Tuple
 from src.mean_properties import calc_mean_betasheet_prop as mbp
 from src.mean_properties import calc_seq_complexity as lsc
@@ -41,23 +42,23 @@ def plot_summed_scores(summed_scores: dict, _property: str, protein_names):
         plt_title = protein_names
         len_xaxis = len(summed_scores)
         plt.plot(np.arange(1, len_xaxis + 1), summed_scores)
-        plt.xticks(np.arange(1, len_xaxis + 1, 1))
+        xtick_interval = math.ceil(len(summed_scores.values())/40)
+        plt.xticks(np.arange(1, len_xaxis + 1, xtick_interval))
         plt.xticks(fontsize=8, rotation=90)
-        plt.title(plt_title)
+        plt.title('SALSA')
         plt.ylabel(_property)
         plt.xlabel('amino acid sequence')
     elif isinstance(protein_names, List):
         assert(len(protein_names) == len(summed_scores))
         max_len_xaxis = _get_length_of_longest_prot_seq(summed_scores)
-        # _move_longest_seq_to_first_in_list(summed_scores, longest_prot)
-        # plt_title = ' vs '.join(protein_names)
+        xtick_interval = math.ceil(max_len_xaxis/40)
         fig, ax = plt.subplots()
         for prot_name, summed_scores_ in summed_scores.items():
             ax.plot(np.arange(1, len(summed_scores_) + 1), summed_scores_, label=prot_name)
         ax.legend(loc='upper right', fontsize='large', frameon=False)
-        plt.xticks(np.arange(1, max_len_xaxis + 1, 5))
+        plt.xticks(np.arange(1, max_len_xaxis + 1, xtick_interval))
         plt.xticks(fontsize=8, rotation=90)
-        # plt.title(plt_title)
+        plt.title('SALSA')
         plt.ylabel(_property)
         plt.xlabel('amino acid sequence')
         plt.show()
