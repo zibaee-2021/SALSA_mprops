@@ -49,14 +49,14 @@ def is_invalid_protein_sequence(aa_props: pDF, sequence: str) -> bool:
 
 
 def get_sequences_by_uniprot_accession_nums_or_names(accs=None, names=None,
-                                                     fragments_ids: dict[str:str] = None) -> dict[str:str]:
+                                                     frags_ids: dict[str:str] = None) -> dict[str:str]:
     """
     Retrieve protein sequence(s) of interest corresponding to the given identifier(s) and/or name(s).
     Uniprot "accession number". NOTE: It is not a number. It has an alphanumeric format, such as 'Q16143'.
     Uniprot protein name is a mnemonic that incorporates species information, e.g. 'SYUA_HUMAN'.
     :param accs: Uniprot accession number(s), as a string or list of strings. None by default.
     :param names: Uniprot protein name(s), as a string or list of strings. None by default.
-    :param fragments_ids: The fragment(s) of the protein(s) mapped to it.
+    :param frags_ids: The fragment(s) of the protein(s) mapped to it.
     For example {'672-713':'P05067', '672-711': 'P05067'}.
     :return: Protein sequences mapped to the given accession number or name.
     e.g. {'SYUA_HUMAN': 'MDVFMKGLS...', 'P10636-7': 'MAEPRQEF...', etc}
@@ -70,8 +70,8 @@ def get_sequences_by_uniprot_accession_nums_or_names(accs=None, names=None,
         if isinstance(names, str): names = [names]
         for name in names:
             protein_ids_sequences[name] = all_prot_recs.loc[(all_prot_recs.name == name)].iloc[0]['sequence']
-    if fragments_ids is not None and fragments_ids != {'': ''}:
-        for fragment, id_name in fragments_ids.items():
+    if frags_ids is not None and frags_ids != {'': ''}:
+        for fragment, id_name in frags_ids.items():
             prot_record = all_prot_recs.loc[(all_prot_recs.name == id_name) & (all_prot_recs.fragment == fragment)]
             if prot_record is not None and not prot_record.empty:
                 protein_ids_sequences[id_name + '(' + fragment + ')'] = prot_record.iloc[0]['sequence']
