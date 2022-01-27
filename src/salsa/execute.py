@@ -186,7 +186,7 @@ from src.salsa.Options import DefaultBSC
 if __name__ == '__main__':
     _acc = ['P37840']
     _names = ['']
-    _prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(accs=acc, names=names)
+    _prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids=_acc)
     # STEP 1 - Define property and corresponding parameters.
     _property = Props.bSC.value
     _params = {'window_len_min': DefaultBSC.window_len_min.value,

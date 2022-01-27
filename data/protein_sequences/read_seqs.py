@@ -1,8 +1,9 @@
 import os
+from typing import List, Tuple
 import pandas as pd
+import re
 from pandas import DataFrame as pDF
 from root_path import abspath_root
-from typing import List
 
 # abs_path = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
 rel_path_prot_seq = os.path.join('data', 'protein_sequences')
@@ -48,40 +49,88 @@ def is_invalid_protein_sequence(aa_props: pDF, sequence: str) -> bool:
     return False
 
 
-def get_sequences_by_uniprot_accession_nums_or_names(accs=None, names=None,
-                                                     frags_ids: dict[str:str] = None) -> dict[str:str]:
+def _has_expected_fragment_id_format(prot_id: str) -> bool:
+    """
+    For some proteins the Uniprot accession number and name do not uniquely identify the sequences of interest
+    because they are fragments of a larger protein. A typical example is for Abeta peptides which do not have their
+    own unique identifier, so they need to be identified by a combination of the accession number or name of the
+    protein of which they are fragments, e.g. APP, and the position within its sequence.
+
+    Detailed explanation of the regular expression: r'^\w+[(](\d+)[-](\d+)[)]$'
+
+    The order in the expression must be strictly observed for a pattern match to be made.
+
+        r indicates ..
+        ^ and $ frame the expression. It means that a match should have nothing before ^ and nothing after $.
+        \w matches alphanumeric or underscore. \w+ matches any size. Hence the input should start with any sized
+        alphanumeric or underscore.
+        [(] Literal match to open parenthesis ( and this does not need to be escaped by backslash because it is inside
+        square brackets.
+        (\d+) matches any numeric characters of any size and does not match to decimal points.
+        [-] Literal match to -
+        (\d+) As described above
+        [)] Literal match to closed parenthesis )
+
+    re.match(re.compile, input_string) returns None if the input_string does not match the regex pattern.
+
+    :return: False if the given protein id is not that of a protein fragment id.
+    """
+    return re.match(re.compile(r'^\w+[(](\d+)[-](\d+)[)]$'), prot_id) is not None
+
+
+def _separate_id_and_fragment(prot_frag_id: str) -> Tuple[str, str]:
+    """
+    Splits the protein id fragment string to protein id and the fragment string to match the column name format in
+    the protein_sequence csv.
+    Given 'P05067(672-713)', the function should return 'P05067', '672-713'.
+    :return: Protein id (acc or name) and fragment position, in this order.
+    """
+    prot_id = re.search(r'^\w+', prot_frag_id).group()
+    frag = re.search(r'[(](\d+)[-](\d+)[)]$', prot_frag_id).group()
+    assert(frag.startswith('(') and frag.endswith(')'))
+    return prot_id, frag[1:-1]
+
+
+def get_sequences_by_uniprot_accession_nums_or_names(prot_ids) -> dict[str:str]:
     """
     Retrieve protein sequence(s) of interest corresponding to the given identifier(s) and/or name(s).
     Uniprot "accession number". NOTE: It is not a number. It has an alphanumeric format, such as 'Q16143'.
     Uniprot protein name is a mnemonic that incorporates species information, e.g. 'SYUA_HUMAN'.
-    :param accs: Uniprot accession number(s), as a string or list of strings. None by default.
-    :param names: Uniprot protein name(s), as a string or list of strings. None by default.
-    :param frags_ids: The fragment(s) of the protein(s) mapped to it.
-    For example {'672-713':'P05067', '672-711': 'P05067'}.
+    :param prot_ids: Uniprot accession number(s) and/or protein name(s). If it is a fragment of the protein,
+    the expected format for this is `P05067(672-713)`. As a string or list of strings.
     :return: Protein sequences mapped to the given accession number or name.
     e.g. {'SYUA_HUMAN': 'MDVFMKGLS...', 'P10636-7': 'MAEPRQEF...', etc}
     """
-    protein_ids_sequences = dict()
+    protein_ids_seqs = dict()
     all_prot_recs = read_protein_sequences_csv()
-    if accs is not None and accs != ['']:
-        if isinstance(accs, str): accs = [accs]
-        protein_ids_sequences = {acc: all_prot_recs.loc[(all_prot_recs.AC == acc)].iloc[0]['sequence'] for acc in accs}
-    if names is not None and names != ['']:
-        if isinstance(names, str): names = [names]
-        for name in names:
-            protein_ids_sequences[name] = all_prot_recs.loc[(all_prot_recs.name == name)].iloc[0]['sequence']
-    if frags_ids is not None and frags_ids != {'': ''}:
-        for fragment, id_name in frags_ids.items():
-            prot_record = all_prot_recs.loc[(all_prot_recs.name == id_name) & (all_prot_recs.fragment == fragment)]
+    if isinstance(prot_ids, str): prot_ids = [prot_ids]
+    for prot_id in prot_ids:
+        if _has_expected_fragment_id_format(prot_id):
+            prot_id_sep, frag = _separate_id_and_fragment(prot_id)
+            prot_record = all_prot_recs.loc[(all_prot_recs.name == prot_id_sep) & (all_prot_recs.fragment == frag)]
             if prot_record is not None and not prot_record.empty:
-                protein_ids_sequences[id_name + '(' + fragment + ')'] = prot_record.iloc[0]['sequence']
+                protein_ids_seqs[prot_id] = prot_record.iloc[0]['sequence']
             else:
-                prot_record = all_prot_recs.loc[(all_prot_recs.AC == id_name) & (all_prot_recs.fragment == fragment)]
+                prot_record = all_prot_recs.loc[(all_prot_recs.AC == prot_id_sep) & (all_prot_recs.fragment == frag)]
                 if prot_record is not None and not prot_record.empty:
-                    protein_ids_sequences[id_name + '(' + fragment + ')'] = prot_record.iloc[0]['sequence']
-    return protein_ids_sequences
+                    protein_ids_seqs[prot_id] = prot_record.iloc[0]['sequence']
+        else:
+            prot_record = all_prot_recs.loc[(all_prot_recs.name == prot_id) & (all_prot_recs.fragment.isna())]
+            if prot_record is not None and not prot_record.empty:
+                protein_ids_seqs[prot_id] = prot_record.iloc[0]['sequence']
+            else:
+                prot_record = all_prot_recs.loc[(all_prot_recs.AC == prot_id) & (all_prot_recs.fragment.isna())]
+                if prot_record is not None and not prot_record.empty:
+                    prot_record = prot_record[pd.isna(prot_record['fragment'])]
+                    protein_ids_seqs[prot_id] = prot_record.iloc[0]['sequence']
+    return protein_ids_seqs
 
 
 if __name__ == '__main__':
-    seq = read_protein_sequence_txt('SYUA_HUMAN.txt')
-    print(f'type(sequence): {type(seq)}')
+    # seq = read_protein_sequence_txt('SYUA_HUMAN.txt')
+    # print(f'type(sequence): {type(seq)}')
+
+    prot_ids_not_in_csv_file = ['P05067']
+    # actual = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids=prot_ids)
+    actual = get_sequences_by_uniprot_accession_nums_or_names(prot_ids=prot_ids_not_in_csv_file)
+    print(actual)
