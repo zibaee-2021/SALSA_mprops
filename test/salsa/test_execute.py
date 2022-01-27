@@ -8,7 +8,7 @@ from src.salsa.Options import Props, DefaultBSC
 from root_path import abspath_root
 
 
-class Test(TestCase):
+class TestExecute(TestCase):
 
     def setUp(self) -> None:
         self.asyn = 'MDVFMKGLSKAKEGVVAAAEKTKQGVAEAAGKTKEGVLYVGSKTKEGVVHGVATVAEKTKEQVTNVGGAV' \
