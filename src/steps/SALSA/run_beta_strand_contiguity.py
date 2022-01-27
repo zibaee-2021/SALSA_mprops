@@ -5,12 +5,13 @@ from src.salsa import execute
 
 start = time.time()
 # STEP 0 - Which proteins are you interested in?
-# accession_numbers = ['']
+accession_numbers = ['']
 # accession_numbers = ['P37840']
-accession_numbers = ['P37840', 'Q16143', 'P10636-8']
+# accession_numbers = ['P37840', 'Q16143', 'P10636-8']
 # protein_names = ['']
 # protein_names = ['SYUA_HUMAN']
-protein_names = ['SYUA_HUMAN', 'PRIO_HUMAN', 'URE2_YEAST', 'E9P8Q3_YEASX', 'TADBP_HUMAN']
+protein_names = ['TADBP_HUMAN']
+# protein_names = ['SYUA_HUMAN', 'PRIO_HUMAN', 'URE2_YEAST', 'E9P8Q3_YEASX', 'TADBP_HUMAN']
 prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(accs=accession_numbers, names=protein_names)
 
 # STEP 1 - Define property and corresponding parameters.
@@ -34,5 +35,8 @@ execute.plot_summed_scores(all_summed_scores, _property, protein_names=list(all_
 
 # STEP 4 - Generate a single scalar representing the property of interest for the protein of interest.
 salsa_integrals = execute.integrate_salsa_plot(all_summed_scores)
+
+# STEP 5 - Write out all_summed_scores and salsa integrals
+# TODO
 
 print(f'{round(1000 * (time.time() - start), 1)} ms')

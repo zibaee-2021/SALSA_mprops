@@ -41,4 +41,7 @@ execute.plot_summed_scores(all_summed_scores, _property, protein_names=list(all_
 # STEP 4 - Generate a single scalar representing the property of interest for the protein of interest.
 salsa_integrals = execute.integrate_salsa_plot(all_summed_scores)
 
+# STEP 5 - Write out all_summed_scores and salsa integrals
+# TODO
+
 print(f'{round(1000 * (time.time() - start), 1)} ms')
