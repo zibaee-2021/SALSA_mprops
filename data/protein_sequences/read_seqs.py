@@ -53,14 +53,17 @@ def _has_expected_fragment_id_format(prot_id: str) -> bool:
     """
     For some proteins the Uniprot accession number and name do not uniquely identify the sequences of interest
     because they are fragments of a larger protein. A typical example is for Abeta peptides which do not have their
-    own unique identifier, so they need to be identified by a combination of the accession number or name of the
-    protein of which they are fragments, e.g. APP, and the position within its sequence.
+    own unique identifier. To address this I construct a unique identifier combining the id/name with the fragment
+    position using the same format as can be found in the 2nd column (called `fragment`) of protein_sequences.csv.
+    This is inside parentheses and the numbering is based on the main protein. e.g. The id for Abeta1-42 is the acc
+    id or the name of APP and its fragment position like so: P05067(672-713) or A4_HUMAN(672-713).
 
     Detailed explanation of the regular expression: r'^\w+[(](\d+)[-](\d+)[)]$'
 
     The order in the expression must be strictly observed for a pattern match to be made.
 
-        r indicates ..
+        r indicates that the characters within the following section inside single quote marks should be treated as
+        raw string. This means you don't need to escape special chars, e.g. you can use \w+ instead of \\w+.
         ^ and $ frame the expression. It means that a match should have nothing before ^ and nothing after $.
         \w matches alphanumeric or underscore. \w+ matches any size. Hence the input should start with any sized
         alphanumeric or underscore.
