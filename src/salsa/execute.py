@@ -30,30 +30,31 @@ def _get_length_of_longest_prot_seq(summed_scores: dict) -> int:
     return max_len
 
 
-def plot_summed_scores(summed_scores: dict, _property: str, protein_names):
+def plot_summed_scores(prot_id_summed_scores: dict, _property: str, protein_names):
     """
     Plot the given protein(s)' amino acid sequence (numerical position) against the calculated SALSA property from the
     given array of summed scores per residue. The amino acid sequence is on the x-axis.
-    :param summed_scores: SALSA scores (summed to one per residue), mapped to corresponding protein id/name key.
+    :param prot_id_summed_scores: SALSA scores (summed to one per residue), mapped to corresponding protein id/name key.
     :param _property: SALSA property, e.g. beta-strand contiguity.
-    :param protein_names: Protein name(s) to use as title of plot, string or list of strings for multiple proteins.
+    :param protein_names: Protein id(s)/name(s) for labelling plot in legend, string or list of strings for
+    multiple proteins.
     """
     if isinstance(protein_names, str):
         plt_title = protein_names
-        len_xaxis = len(summed_scores)
-        plt.plot(np.arange(1, len_xaxis + 1), summed_scores)
-        xtick_interval = math.ceil(len(summed_scores.values())/40)
+        len_xaxis = len(prot_id_summed_scores)
+        plt.plot(np.arange(1, len_xaxis + 1), prot_id_summed_scores)
+        xtick_interval = math.ceil(len(prot_id_summed_scores.values()) / 40)
         plt.xticks(np.arange(1, len_xaxis + 1, xtick_interval))
         plt.xticks(fontsize=8, rotation=90)
         plt.title('SALSA')
         plt.ylabel(_property)
         plt.xlabel('amino acid sequence')
     elif isinstance(protein_names, List):
-        assert(len(protein_names) == len(summed_scores))
-        max_len_xaxis = _get_length_of_longest_prot_seq(summed_scores)
+        assert(len(protein_names) == len(prot_id_summed_scores))
+        max_len_xaxis = _get_length_of_longest_prot_seq(prot_id_summed_scores)
         xtick_interval = math.ceil(max_len_xaxis/40)
         fig, ax = plt.subplots()
-        for prot_name, summed_scores_ in summed_scores.items():
+        for prot_name, summed_scores_ in prot_id_summed_scores.items():
             ax.plot(np.arange(1, len(summed_scores_) + 1), summed_scores_, label=prot_name)
         ax.legend(loc='upper right', fontsize='large', frameon=False)
         plt.xticks(np.arange(1, max_len_xaxis + 1, xtick_interval))
@@ -183,25 +184,25 @@ from src.salsa.Options import DefaultBSC
 
 
 if __name__ == '__main__':
-    acc = ['P37840']
-    names = ['']
-    prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(accs=acc, names=names)
+    _acc = ['P37840']
+    _names = ['']
+    _prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(accs=acc, names=names)
     # STEP 1 - Define property and corresponding parameters.
     _property = Props.bSC.value
-    params = {'window_len_min': DefaultBSC.window_len_min.value,
+    _params = {'window_len_min': DefaultBSC.window_len_min.value,
               'window_len_max': DefaultBSC.window_len_max.value,
               'top_scoring_windows_num': DefaultBSC.top_scoring_windows_num.value,
               'threshold': DefaultBSC.threshold.value}
     # STEP 2 - salsa produces an array holding a single numbers for each residue.
-    all_summed_scores = dict()
-    for prot_id, prot_seq in prot_id_seqs.items():
-        scored_windows_all = compute(sequence=prot_seq, _property=_property, params=params)
-        summed_scores = sum_scores_for_plot(scored_windows_all)
-        all_summed_scores[prot_id] = summed_scores
+    _all_summed_scores = dict()
+    for prot_id, prot_seq in _prot_id_seqs.items():
+        _scored_windows_all = compute(sequence=prot_seq, _property=_property, params=_params)
+        _summed_scores = sum_scores_for_plot(_scored_windows_all)
+        _all_summed_scores[prot_id] = _summed_scores
 
     # STEP 3
     # currently only able to plot one protein per plot.
-    plot_summed_scores(all_summed_scores, _property, protein_names=list(all_summed_scores.keys()))
+    plot_summed_scores(_all_summed_scores, _property, protein_names=list(_all_summed_scores.keys()))
 
     # summed_scores1 = np.ones((10,))
     # summed_scores0 = np.zeros((20,))
