@@ -3,7 +3,7 @@ from enum import Enum
 from data.aa_properties import read_props
 
 
-def compute_mean_helical_amphipathicity(sequence: str, periodicity=100):
+def compute_mean_helical_amphipathicity(sequence: str, periodicity: float):
     """
     Compute mean helical amphipathicity by calculating the mean of the hydrophobic moment for the given protein
     sequence according to the given periodicity, as described by:

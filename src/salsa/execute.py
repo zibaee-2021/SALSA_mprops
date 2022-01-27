@@ -82,7 +82,7 @@ def _filter_top_scoring_windows(scored_windows_all: np.array, top_scoring_window
     return top_scoring_windows
 
 
-def _compute(seq: str, prop: str, ws: int, thd: float) -> np.array:
+def _compute(seq: str, prop: str, ws: int, params: dict) -> np.array:
     """
     Calculate the salsa score for the given protein sequence, using the given option (e.g. mean beta sheet
     propensities), sliding aver the sequence with the given window size and step size, returning only those values
@@ -118,7 +118,8 @@ def _compute(seq: str, prop: str, ws: int, thd: float) -> np.array:
     :param prop: The option of which property to use for calculating salsa scores. E.g. mean beta-sheet propensity is
     used to compute salsa beta-strand contiguity.
     :param ws: Window size to use for sliding over the sequence.
-    :param thd: Threshold value of window scores. Any that score below this are discarded.
+    :param params: Parameters required for SALSA. Although this holds all 4 or 5 parameters, only `Threshold` and
+    `Periodicity` (for mean helical amphipathicity) are required here.
     :return: All salsa scores for given window size.
     """
     num_of_windows = len(seq) - ws + 1
@@ -132,8 +133,8 @@ def _compute(seq: str, prop: str, ws: int, thd: float) -> np.array:
         elif prop == Props.LSC.value:
             score = lsc.compute_low_sequence_complexity(window_seq)
         elif prop == Props.mHA.value:
-            score = mha.compute_mean_helical_amphipathicity(window_seq, periodicity=100)
-        if score >= thd:
+            score = mha.compute_mean_helical_amphipathicity(window_seq, periodicity=params['periodicity'])
+        if score >= params['threshold']:
             scored_windows[i, i:i + ws] = score
         else:
             continue
@@ -171,7 +172,7 @@ def compute(sequence: str, _property: str, params: dict) -> np.array:
         return scored_windows_all
     window_len_increments = 1
     for window_size in range(params['window_len_min'], params['window_len_max'] + 1, window_len_increments):
-        scored_windows_for_this_window_size = _compute(seq=sequence, prop=_property, ws=window_size, thd=params['threshold'])
+        scored_windows_for_this_window_size = _compute(seq=sequence, prop=_property, ws=window_size, params=params)
         scored_windows_all = np.concatenate((scored_windows_all, scored_windows_for_this_window_size), axis=0)
     scored_windows_all = _filter_top_scoring_windows(scored_windows_all, params['top_scoring_windows_num'])
     return scored_windows_all
