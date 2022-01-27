@@ -1,8 +1,4 @@
-import os
 from enum import Enum
-from root_path import abspath_root
-from data.aa_properties import read_props
-from data.protein_sequences import read_seqs
 import numpy as np
 
 
