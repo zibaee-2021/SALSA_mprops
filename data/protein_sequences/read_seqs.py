@@ -48,7 +48,7 @@ def is_invalid_protein_sequence(aa_props: pDF, sequence: str) -> bool:
     return False
 
 
-def get_sequences_by_uniprot_accession_nums_or_names(accs=None, names=None) -> dict:
+def get_sequences_by_uniprot_accession_nums_or_names(accs=None, names=None) -> dict[str: str]:
     """
     Retrieve protein sequence(s) of interest corresponding to the given identifier(s) and/or name(s).
     Uniprot "accession number". NOTE: It is not a number. It has an alphanumeric format, such as 'Q16143'.
@@ -56,6 +56,7 @@ def get_sequences_by_uniprot_accession_nums_or_names(accs=None, names=None) -> d
     :param accs: Uniprot accession number(s), as a string or list of strings. None by default.
     :param names: Uniprot protein name(s), as a string or list of strings. None by default.
     :return: Protein sequences mapped to the given accession number or name.
+    e.g. {'SYUA_HUMAN': 'MDVFMKGLS...', 'P10636-7': 'MAEPRQEF...', etc}
     """
     protein_ids_sequences = dict()
     prot_recs = read_protein_sequences_csv()
@@ -66,7 +67,6 @@ def get_sequences_by_uniprot_accession_nums_or_names(accs=None, names=None) -> d
         if isinstance(names, str): names = [names]
         for name in names:
             protein_ids_sequences[name]=prot_recs.loc[(prot_recs.name == name)].iloc[0]['sequence']
-
     return protein_ids_sequences
 
 
