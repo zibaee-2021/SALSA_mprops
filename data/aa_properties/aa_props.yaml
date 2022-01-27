@@ -1,25 +1,3 @@
-list_all_20_aa:
-  - A
-  - C
-  - D
-  - E
-  - F
-  - G
-  - H
-  - I
-  - K
-  - L
-  - M
-  - N
-  - P
-  - Q
-  - R
-  - S
-  - T
-  - V
-  - W
-  - Y
-
 # Pbeta
 Chou-Fasman_Beta-Strand_Preference:
   A: 0.72
