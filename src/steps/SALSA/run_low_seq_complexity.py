@@ -27,15 +27,14 @@ params = {'window_len_min': DefaultLSC.window_len_min.value,
           'threshold': DefaultLSC.threshold.value}
 
 
-# STEP 2 - salsa produces an array holding a single numbers for each residue.
+# STEP 2 - Run SALSA
 all_summed_scores = dict()
 for prot_id, prot_seq in prot_id_seqs.items():
     scored_windows_all = execute.compute(sequence=prot_seq, _property=_property, params=params)
     summed_scores = execute.sum_scores_for_plot(scored_windows_all)
     all_summed_scores[prot_id] = summed_scores
 
-# STEP 3
-# currently only able to plot one protein per plot.
+# STEP 3 - Plot SALSA scores
 execute.plot_summed_scores(all_summed_scores, _property, protein_names=list(all_summed_scores.keys()))
 
 # STEP 4 - Generate a single scalar representing the property of interest for the protein of interest.
