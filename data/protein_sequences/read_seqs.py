@@ -48,25 +48,37 @@ def is_invalid_protein_sequence(aa_props: pDF, sequence: str) -> bool:
     return False
 
 
-def get_sequences_by_uniprot_accession_nums_or_names(accs=None, names=None) -> dict[str: str]:
+def get_sequences_by_uniprot_accession_nums_or_names(accs=None, names=None,
+                                                     fragments_ids: dict[str:str] = None) -> dict[str:str]:
     """
     Retrieve protein sequence(s) of interest corresponding to the given identifier(s) and/or name(s).
     Uniprot "accession number". NOTE: It is not a number. It has an alphanumeric format, such as 'Q16143'.
     Uniprot protein name is a mnemonic that incorporates species information, e.g. 'SYUA_HUMAN'.
     :param accs: Uniprot accession number(s), as a string or list of strings. None by default.
     :param names: Uniprot protein name(s), as a string or list of strings. None by default.
+    :param fragments_ids: The fragment(s) of the protein(s) mapped to it.
+    For example {'672-713':'P05067', '672-711': 'P05067'}.
     :return: Protein sequences mapped to the given accession number or name.
     e.g. {'SYUA_HUMAN': 'MDVFMKGLS...', 'P10636-7': 'MAEPRQEF...', etc}
     """
     protein_ids_sequences = dict()
-    prot_recs = read_protein_sequences_csv()
+    all_prot_recs = read_protein_sequences_csv()
     if accs is not None and accs != ['']:
         if isinstance(accs, str): accs = [accs]
-        protein_ids_sequences = {acc: prot_recs.loc[(prot_recs.AC == acc)].iloc[0]['sequence'] for acc in accs}
+        protein_ids_sequences = {acc: all_prot_recs.loc[(all_prot_recs.AC == acc)].iloc[0]['sequence'] for acc in accs}
     if names is not None and names != ['']:
         if isinstance(names, str): names = [names]
         for name in names:
-            protein_ids_sequences[name]=prot_recs.loc[(prot_recs.name == name)].iloc[0]['sequence']
+            protein_ids_sequences[name] = all_prot_recs.loc[(all_prot_recs.name == name)].iloc[0]['sequence']
+    if fragments_ids is not None and fragments_ids != {'': ''}:
+        for fragment, id_name in fragments_ids.items():
+            prot_record = all_prot_recs.loc[(all_prot_recs.name == id_name) & (all_prot_recs.fragment == fragment)]
+            if prot_record is not None and not prot_record.empty:
+                protein_ids_sequences[id_name + '(' + fragment + ')'] = prot_record.iloc[0]['sequence']
+            else:
+                prot_record = all_prot_recs.loc[(all_prot_recs.AC == id_name) & (all_prot_recs.fragment == fragment)]
+                if prot_record is not None and not prot_record.empty:
+                    protein_ids_sequences[id_name + '(' + fragment + ')'] = prot_record.iloc[0]['sequence']
     return protein_ids_sequences
 
 
