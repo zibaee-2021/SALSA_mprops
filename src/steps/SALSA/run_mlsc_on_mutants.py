@@ -1,5 +1,5 @@
 import time
-from AminoAcids import AA
+from AA import AA
 from src.mutation import mutate
 from src.salsa.Options import Props, DefaultLSC
 from src.salsa import execute
@@ -18,7 +18,8 @@ _property = Props.LSC.value
 params = {'window_len_min': DefaultLSC.window_len_min.value,
           'window_len_max': DefaultLSC.window_len_max.value,
           'top_scoring_windows_num': DefaultLSC.top_scoring_windows_num.value,
-          'threshold': DefaultLSC.threshold.value}
+          'threshold': DefaultLSC.threshold.value,
+          'abs_threshold': DefaultLSC.abs_threshold.value}
 
 # STEP 3 - Run SALSA
 all_summed_scores = dict()
@@ -28,8 +29,9 @@ for prot_id, mutant_ids_seqs in prot_ids_seqs_mutant_ids_seqs.items():
         summed_scores = execute.sum_scores_for_plot(scored_windows_all)
         all_summed_scores[mutant_id] = summed_scores
 
-    # STEP 4 - Plot SALSA scores
-    execute.plot_summed_scores(all_summed_scores, _property, protein_names=list(all_summed_scores.keys()))
+    # STEP 4 - Plot SALSA summed scores
+    execute.plot_summed_scores(all_summed_scores, _property, prot_name_labels=list(all_summed_scores.keys()),
+                               params=params)
 
     # STEP 5 - Sum scores to a scalar
     salsa_integrals = execute.integrate_salsa_plot(all_summed_scores)

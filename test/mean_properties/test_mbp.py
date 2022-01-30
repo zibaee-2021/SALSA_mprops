@@ -1,9 +1,9 @@
 from unittest import TestCase
 from data.protein_sequences import read_seqs
-from src.mean_properties.calc_mean_betasheet_prop import compute_mean_beta_sheet_prop
+from src.mean_properties.mbp import compute_mean_beta_sheet_prop
 
 
-class TestComputeMBP(TestCase):
+class TestMBP(TestCase):
 
     def setUp(self) -> None:
         self.asyn = 'MDVFMKGLSKAKEGVVAAAEKTKQGVAEAAGKTKEGVLYVGSKTKEGVVHGVATVAEKTKEQVTNVGGAV' \
