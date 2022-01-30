@@ -54,6 +54,8 @@ def plot_summed_scores(prot_id_summed_scores: dict, _property: str, prot_name_la
     ax.spines['right'].set_visible(False)
     plt.xticks(np.arange(1, max_len_xaxis + 1, xtick_interval))
     plt.xticks(fontsize=8, rotation=90)
+    plt.xlim([1, max_len_xaxis])
+    plt.ylim(bottom=0)
     plt.suptitle(plt_title, fontsize=8)
     plt.ylabel(_property)
     plt.xlabel('amino acid sequence')
