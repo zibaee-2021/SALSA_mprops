@@ -1,8 +1,9 @@
 import math
 from typing import List, Tuple
-from src.mean_properties import calc_mean_betasheet_prop as mbp
-from src.mean_properties import calc_seq_complexity as lsc
-from src.mean_properties import calc_mean_helical_amphipath as mha
+from src.mean_properties import mbp as mbp
+from src.mean_properties import mlsc as lsc
+from src.mean_properties import mha as mha
+from src.mean_properties import medm as medm
 import numpy as np
 from matplotlib import pyplot as plt
 from src.salsa.Options import Props
@@ -30,39 +31,33 @@ def _get_length_of_longest_prot_seq(summed_scores: dict) -> int:
     return max_len
 
 
-def plot_summed_scores(prot_id_summed_scores: dict, _property: str, protein_names):
+def plot_summed_scores(prot_id_summed_scores: dict, _property: str, prot_name_labels: list, params: dict):
     """
     Plot the given protein(s)' amino acid sequence (numerical position) against the calculated SALSA property from the
     given array of summed scores per residue. The amino acid sequence is on the x-axis.
     :param prot_id_summed_scores: SALSA scores (summed to one per residue), mapped to corresponding protein id/name key.
     :param _property: SALSA property, e.g. beta-strand contiguity.
-    :param protein_names: Protein id(s)/name(s) for labelling plot in legend, string or list of strings for
-    multiple proteins.
+    :param prot_name_labels: Protein id(s)/name(s) for labelling plot in legend.
+    :param params: The SALSA parameters used for generating the scores.
     """
-    if isinstance(protein_names, str):
-        plt_title = protein_names
-        len_xaxis = len(prot_id_summed_scores)
-        plt.plot(np.arange(1, len_xaxis + 1), prot_id_summed_scores)
-        xtick_interval = math.ceil(len(prot_id_summed_scores.values()) / 40)
-        plt.xticks(np.arange(1, len_xaxis + 1, xtick_interval))
-        plt.xticks(fontsize=8, rotation=90)
-        plt.title('SALSA')
-        plt.ylabel(_property)
-        plt.xlabel('amino acid sequence')
-    elif isinstance(protein_names, List):
-        assert(len(protein_names) == len(prot_id_summed_scores))
-        max_len_xaxis = _get_length_of_longest_prot_seq(prot_id_summed_scores)
-        xtick_interval = math.ceil(max_len_xaxis/40)
-        fig, ax = plt.subplots()
-        for prot_name, summed_scores_ in prot_id_summed_scores.items():
-            ax.plot(np.arange(1, len(summed_scores_) + 1), summed_scores_, label=prot_name)
-        ax.legend(loc='upper right', fontsize='large', frameon=False)
-        plt.xticks(np.arange(1, max_len_xaxis + 1, xtick_interval))
-        plt.xticks(fontsize=8, rotation=90)
-        plt.title('SALSA')
-        plt.ylabel(_property)
-        plt.xlabel('amino acid sequence')
-        plt.show()
+    plt_title = f"{params['window_len_min']}-{params['window_len_max']} | {params['top_scoring_windows_num']} |" \
+                f" {'abs('+str(params['threshold'])+')' if params['abs_threshold'] else params['threshold']}" \
+                f"{' |'  + str(params['periodicity'])+'°' if params['periodicity'] else ''} "
+    assert(len(prot_name_labels) == len(prot_id_summed_scores))
+    max_len_xaxis = _get_length_of_longest_prot_seq(prot_id_summed_scores)
+    xtick_interval = math.ceil(max_len_xaxis/40)
+    fig, ax = plt.subplots()
+    for prot_name, summed_scores_ in prot_id_summed_scores.items():
+        ax.plot(np.arange(1, len(summed_scores_) + 1), summed_scores_, label=prot_name)
+    ax.legend(loc='upper right', fontsize='large', frameon=False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    plt.xticks(np.arange(1, max_len_xaxis + 1, xtick_interval))
+    plt.xticks(fontsize=8, rotation=90)
+    plt.suptitle(plt_title, fontsize=8)
+    plt.ylabel(_property)
+    plt.xlabel('amino acid sequence')
+    plt.show()
 
 
 def sum_scores_for_plot(scored_windows_all: np.array) -> np.array:
@@ -135,8 +130,11 @@ def _compute(seq: str, prop: str, ws: int, params: dict) -> np.array:
             score = lsc.compute_low_sequence_complexity(window_seq)
         elif prop == Props.mHA.value:
             score = mha.compute_mean_helical_amphipathicity(window_seq, periodicity=params['periodicity'])
-        if score >= params['threshold']:
-            scored_windows[i, i:i + ws] = score
+        elif prop == Props.mEDM.value:
+            score = medm.compute_mean_electric_dipole_moment(window_seq, periodicity=params['periodicity'])
+        score_ = np.abs(score) if params['abs_threshold'] else score
+        if score_ >= params['threshold']:
+            scored_windows[i, i:i + ws] = score_
         else:
             continue
     return scored_windows
@@ -202,7 +200,7 @@ if __name__ == '__main__':
 
     # STEP 3
     # currently only able to plot one protein per plot.
-    plot_summed_scores(_all_summed_scores, _property, protein_names=list(_all_summed_scores.keys()))
+    plot_summed_scores(_all_summed_scores, _property, prot_name_labels=list(_all_summed_scores.keys()))
 
     # summed_scores1 = np.ones((10,))
     # summed_scores0 = np.zeros((20,))
