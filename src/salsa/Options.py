@@ -4,10 +4,10 @@ from enum import Enum, unique
 @unique
 class Props(Enum):
 
-    bSC = 'beta_strand_contiguity'
-    mHA = 'mean_helical_amphipathicity'
+    bSC = 'beta-strand contiguity'
+    mHA = 'mean helical amphipathicity'
     LSC = 'low-sequence-complexity'
-    mEDM = 'mean_electric_dipole_moment'
+    mEDM = 'mean electric dipole moment'
 
 
 @unique
@@ -15,7 +15,7 @@ class DefaultBSC(Enum):
     window_len_min = 4
     window_len_max = 20
     top_scoring_windows_num = 400
-    threshold = 1.2
+    threshold = 1.15
     abs_threshold = False
     periodicity = ''
     all_params = {'window_len_min': window_len_min,
@@ -45,10 +45,10 @@ class DefaultMaHA(Enum):
 
 @unique
 class DefaultMpp2HA(Enum):
-    window_len_min = 4
-    window_len_max = 20
+    window_len_min = 11
+    window_len_max = 33
     top_scoring_windows_num = 10000
-    threshold = 0.8
+    threshold = 0.5
     abs_threshold = True
     periodicity = 120
 # 3-10-helix, Polyproline II helix and Polyglycine II helix all have 3 residues per turn, giving periodicity of 120°.
@@ -132,12 +132,12 @@ class DefaultMEDM(Enum):
 
 @unique
 class DefaultLSC(Enum):
-    window_len_min = 4
-    window_len_max = 20
-    top_scoring_windows_num = 1000
+    window_len_min = 2
+    window_len_max = 40
+    top_scoring_windows_num = 10000
     threshold = 0.8
     abs_threshold = False
-    periodicity = ''
+    periodicity = None
     all_params = {'window_len_min': window_len_min,
                   'window_len_max': window_len_max,
                   'top_scoring_windows_num': top_scoring_windows_num,
