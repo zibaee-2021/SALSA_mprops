@@ -1,34 +1,25 @@
 import time
 from data.protein_sequences import read_seqs
-from src.salsa.Options import Props, DefaultLSC
+from src.salsa import Options
 from src.salsa import execute
 
 start = time.time()
 # STEP 0 - Which proteins are you interested in?
-accession_numbers = ['']
+# accession_numbers = ['']
 # accession_numbers = ['P37840']
 # accession_numbers = ['P37840', 'Q16143', 'P10636-8']
-# protein_names = ['']
+accession_numbers = ['P10636-8']
+protein_names = ['']
 # protein_names = ['SYUA_HUMAN']
 # protein_names = ['TADBP_HUMAN']
-accession_numbers = ['']
-protein_names = ['PRIO_HUMAN']
+# protein_names = ['PRIO_HUMAN']
 # protein_names = ['SYUA_HUMAN', 'PRIO_HUMAN', 'URE2_YEAST', 'E9P8Q3_YEASX', 'TADBP_HUMAN']
 prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids=accession_numbers+protein_names)
 
 # STEP 1 - Define property and corresponding parameters.
 # _property = Props.bSC.value
-_property = Props.LSC.value
-# params = {'window_len_min': DefaultLSC.window_len_min.value,
-#           'window_len_max': DefaultLSC.window_len_max.value,
-#           'top_scoring_windows_num': DefaultLSC.top_scoring_windows_num.value,
-#           'threshold': DefaultLSC.threshold.value,
-#           'abs_threshold': DefaultLSC.abs_threshold.value}
-params = {'window_len_min': DefaultLSC.window_len_min.value,
-          'window_len_max': DefaultLSC.window_len_max.value,
-          'top_scoring_windows_num': DefaultLSC.top_scoring_windows_num.value,
-          'threshold': DefaultLSC.threshold.value,
-          'abs_threshold': DefaultLSC.abs_threshold.value}
+_property = Options.Props.LSC.value
+params = Options.DefaultLSC.all_params.value
 
 # STEP 2 - Run SALSA
 all_summed_scores = dict()
