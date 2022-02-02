@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 from typing import List, Tuple
 import pandas as pd
 import re
@@ -10,10 +11,17 @@ rel_path_prot_seq = os.path.join('data', 'protein_sequences')
 abs_path_prot_seq = os.path.join(abspath_root, rel_path_prot_seq)
 
 
+class TxtFiles(Enum):
+    ASYN = 'SYUA_HUMAN.txt'
+    TDP43 = 'TADBP_HUMAN_TDP43.txt'
+    TAU2N4R = 'TAU_HUMAN_2N4R.txt'
+    PRP = 'PRIO_HUMAN.txt'
+
+
 def read_protein_sequence_txt(txtfile: str) -> str:
     """
     Read protein sequence from given text file.
-    :param txtfile: Name of text file, including txt extension or with no extension
+    :param txtfile: Name of text file, with or without txt extension. E.g. `SYUA_HUMAN.txt`
     :return:
     """
     if txtfile[-4:] != '.txt':
