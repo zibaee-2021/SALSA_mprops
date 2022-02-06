@@ -155,7 +155,19 @@ def _extract_unique_pairs(adjacent, adjacent_outer):
 
 
 
-def get_conformations(anchor_pos: Tuple, occupied: Tuple) -> list:
+def _make_residue_pairs_table()
+
+
+# def compute_complementarity_score(conformation: Conformation) -> float:
+#     """
+#     Compute the mean of possible interactions from the given conformation.
+#     :param conformation: Current conformation of the protein.
+#     :return: Mean of possible interactions
+#     """
+#     return 4.4
+
+
+def _get_conformations(anchor_pos: Tuple, occupied) -> list:
     """
     Generate all possible conformations for a residue relative to its N-terminal neighbour, termed the `anchor`.
     This name is given because as far as the neighbour residue is concerned, the anchor remains fixed at its position
