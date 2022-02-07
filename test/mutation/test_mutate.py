@@ -20,19 +20,20 @@ class TestMutate(TestCase):
     def test__are_valid_positions_to_mutate_simple(self):
         # expected format for `prot_id_point_mutations_to_make` is:
         # {'SYUA_HUMAN': [{30: 'P'}], 'P10636-7': [{301: 'S'}, {301: 'L'}]}
-        self.assertTrue(mutate._are_valid_positions_to_mutate(prot_id_seqs={'simple': 'AAP'},
-                                                              prot_id_point_mutations_to_make={'simple': [{3: 'D'}]}))
-        self.assertTrue(mutate._are_valid_positions_to_mutate(prot_id_seqs={'simple': 'AAP'},
-                                                              prot_id_point_mutations_to_make={'simple': [{3: 'D'},
-                                                                                                          {2: 'E'}]}))
-        self.assertTrue(mutate._are_valid_positions_to_mutate(prot_id_seqs={'simple': 'AAP'},
-                                                              prot_id_point_mutations_to_make={'simple': {3: 'D'}}))
+        prot_id = 'test_peptide_AAP'
+        self.assertTrue(mutate._are_valid_positions_to_mutate(prot_id_seqs={prot_id: 'AAP'},
+                                                              prot_id_point_mutations_to_make={prot_id: [{3: 'D'}]}))
+        self.assertTrue(mutate._are_valid_positions_to_mutate(prot_id_seqs={prot_id: 'AAP'},
+                                                              prot_id_point_mutations_to_make={prot_id: [{3: 'D'},
+                                                                                                         {2: 'E'}]}))
+        self.assertTrue(mutate._are_valid_positions_to_mutate(prot_id_seqs={prot_id: 'AAP'},
+                                                              prot_id_point_mutations_to_make={prot_id: {3: 'D'}}))
 
-        self.assertFalse(mutate._are_valid_positions_to_mutate(prot_id_seqs={'simple': 'AAP'},
-                                                               prot_id_point_mutations_to_make={'simple': {4: 'D'}}))
+        self.assertFalse(mutate._are_valid_positions_to_mutate(prot_id_seqs={prot_id: 'AAP'},
+                                                               prot_id_point_mutations_to_make={prot_id: {4: 'D'}}))
 
-        self.assertFalse(mutate._are_valid_positions_to_mutate(prot_id_seqs={'simple': 'AAP'},
-                                                               prot_id_point_mutations_to_make={'simple': {0: 'D'}}))
+        self.assertFalse(mutate._are_valid_positions_to_mutate(prot_id_seqs={prot_id: 'AAP'},
+                                                               prot_id_point_mutations_to_make={prot_id: {0: 'D'}}))
 
     def test__make_point_mutant_simple(self):
         actual = mutate._make_point_mutants(prot_id_seq={'simple': 'AAP'}, point_mutants_to_make={3: ['D', 'T']})
