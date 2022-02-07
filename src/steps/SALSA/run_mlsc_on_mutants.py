@@ -1,7 +1,7 @@
 import time
 from AA import AA
 from src.mutation import mutate
-from src.salsa.Options import Props, DefaultLSC
+from src.salsa.Options import Props, DefaultMLSC
 from src.salsa import execute
 
 start = time.time()
@@ -14,12 +14,12 @@ point_mutants = {'P05067(672-713)': {1: [AA.Alanine.value], 5: [AA.Cysteine.valu
 prot_ids_seqs_mutant_ids_seqs = mutate.make_point_mutants(point_mutants)
 
 # STEP 2 - Define parameters for SALSA low-sequence-complexity on the sequences.
-_property = Props.LSC.value
-params = {'window_len_min': DefaultLSC.window_len_min.value,
-          'window_len_max': DefaultLSC.window_len_max.value,
-          'top_scoring_windows_num': DefaultLSC.top_scoring_windows_num.value,
-          'threshold': DefaultLSC.threshold.value,
-          'abs_threshold': DefaultLSC.abs_threshold.value}
+_property = Props.mLSC.value
+params = {'window_len_min': DefaultMLSC.window_len_min.value,
+          'window_len_max': DefaultMLSC.window_len_max.value,
+          'top_scoring_windows_num': DefaultMLSC.top_scoring_windows_num.value,
+          'threshold': DefaultMLSC.threshold.value,
+          'abs_threshold': DefaultMLSC.abs_threshold.value}
 
 # STEP 3 - Run SALSA
 all_summed_scores = dict()

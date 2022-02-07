@@ -6,7 +6,7 @@ class Props(Enum):
 
     bSC = 'beta-strand contiguity'
     mHA = 'mean helical amphipathicity'
-    LSC = 'low-sequence-complexity'
+    mLSC = 'mean low-sequence-complexity'
     mEDM = 'mean electric dipole moment'
 
 
@@ -131,11 +131,11 @@ class DefaultMEDM(Enum):
 
 
 @unique
-class DefaultLSC(Enum):
+class DefaultMLSC(Enum):
     window_len_min = 2
     window_len_max = 40
     top_scoring_windows_num = 10000
-    threshold = 0.8
+    threshold = .7
     abs_threshold = False
     periodicity = None
     all_params = {'window_len_min': window_len_min,

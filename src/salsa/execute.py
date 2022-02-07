@@ -129,7 +129,7 @@ def _compute(seq: str, prop: str, ws: int, params: dict) -> np.array:
         window_seq = seq[i: i + ws]
         if prop == Props.bSC.value:
             score = mbp.compute_mean_beta_sheet_prop(window_seq)
-        elif prop == Props.LSC.value:
+        elif prop == Props.mLSC.value:
             score = lsc.compute_low_sequence_complexity(window_seq)
         elif prop == Props.mHA.value:
             score = mha.compute_mean_helical_amphipathicity(window_seq, periodicity=params['periodicity'])

@@ -5,11 +5,12 @@ from src.salsa import execute
 
 start = time.time()
 # STEP 0 - Which proteins are you interested in?
-# accession_numbers = ['']
 # accession_numbers = ['P37840']
 # accession_numbers = ['P37840', 'Q16143', 'P10636-8']
-accession_numbers = ['P10636-8']
-protein_names = ['']
+# accession_numbers = ['P10636-8']
+# accession_numbers = ['P35637']
+accession_numbers = ['']
+protein_names = ['FUS_HUMAN', 'TADBP_HUMAN', 'URE2_YEAST', 'E9P8Q3_YEASX', 'ROA2_HUMAN']
 # protein_names = ['SYUA_HUMAN']
 # protein_names = ['TADBP_HUMAN']
 # protein_names = ['PRIO_HUMAN']
@@ -18,8 +19,8 @@ prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_i
 
 # STEP 1 - Define property and corresponding parameters.
 # _property = Props.bSC.value
-_property = Options.Props.LSC.value
-params = Options.DefaultLSC.all_params.value
+_property = Options.Props.mLSC.value
+params = Options.DefaultMLSC.all_params.value
 
 # STEP 2 - Run SALSA
 all_summed_scores = dict()
