@@ -54,3 +54,6 @@ if __name__ == '__main__':
 # 262.1 s
 # Number of possible conformations: 3349864
 
+# Aborted residue J at pos 10 of protein ABCDEFGHIJ
+# after about ~ 8 minutes as fan was running very high/
+
