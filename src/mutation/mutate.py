@@ -19,10 +19,11 @@ def _are_valid_positions_to_mutate(prot_id_seqs: dict, prot_id_point_mutations_t
         for requested_mutation in requested_mutations:
             position, = requested_mutation.keys()
             len_ = len(seq)
-            if 1 <= position <= len_:
+            if 1 <= position <= len(seq):
                 continue
             else:
-                print(f'You are trying to mutate {prot_id} at {position}.')
+                print(f"You can't mutate {prot_id} at {position}. "
+                      f'1 <= valid positions <= {len(seq)}')
                 return False
     return True
 
@@ -84,7 +85,6 @@ def make_point_mutants(prot_id_mutants_to_make: dict[str: dict[int: List[str]]])
                     {'P10636-7(P301L): 'MAEPRQEFEVMEDH...',}}
     """
     prot_ids_mutant_ids_seqs = dict()
-    fresh = dict()
     for prot_id, pos_residues in prot_id_mutants_to_make.items():
         prot_id_seq = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids=prot_id)
         mutant_ids_seqs = _make_point_mutants(prot_id_seq=prot_id_seq, point_mutants_to_make=pos_residues)
