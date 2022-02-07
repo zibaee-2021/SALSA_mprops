@@ -154,8 +154,8 @@ def _extract_unique_pairs(adjacent, adjacent_outer):
 
 
 
-
-def _make_residue_pairs_table()
+#
+# def _make_residue_pairs_table()
 
 
 # def compute_complementarity_score(conformation: Conformation) -> float:
@@ -186,6 +186,17 @@ def _get_conformations(anchor_pos: Tuple, occupied) -> list:
             conformations.append((anchor_pos, neighbour_pos))
     return conformations
 
+    # anchor_pos = conformation[-1]
+    # occupied = conformation
+    # occupied = (occupied, ) if occupied == (0, 0) else occupied
+    # new_confs = []
+    #
+    # for rel_pos in [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]:
+    #     neighbour_pos = (anchor_pos[0] + rel_pos[0], anchor_pos[1] + rel_pos[1])
+    #     if neighbour_pos not in occupied:
+    #         new_conf = conformation + (neighbour_pos,)
+    #         new_confs.append(new_conf)
+    # return new_confs
 
 def get_conformations(conformations: List[Tuple[Tuple[int, int]]]) -> list:
     """
@@ -209,19 +220,12 @@ def get_conformations(conformations: List[Tuple[Tuple[int, int]]]) -> list:
     return combined_confs
 
 
-def build_conformations(seq: str, starting_conformations:List[Tuple[Tuple]]=None):
-    if starting_conformations is None:
-        all_protein_confs = []
-    else:
-        all_protein_confs = starting_conformations
+def build_conformations(seq: str, starting_conformations:List[Tuple[Tuple]] = None):
+    all_protein_confs = [((0, 0),)] if starting_conformations is None else starting_conformations
     for i, aa in enumerate(seq):
         print(f'starting residue {aa} at pos {i + 1}')
-        print(f'{round(1000 * (time.time() - st), 1)} ms')
-        if i == 0:
-            conformations = [((0, 0),)]
-            all_protein_confs.extend(get_conformations(conformations))
-        else:
-            all_protein_confs.extend(get_conformations(all_protein_confs))
+        if i > 0:
+            all_protein_confs = get_conformations(all_protein_confs)
     return all_protein_confs
 
 
@@ -232,10 +236,16 @@ if __name__ == '__main__':
     # prot_id_seq = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_id)
     # seq = prot_id_seq[prot_id]
     seq = 'DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA'
-    res = build_conformations(seq[:8])
+    res = build_conformations('ABCDEFGHIJ')
 
     print(f'Number of possible conformations: {len(res)}')
-    # print(f'{round(1000 * (time.time() - st), 1)} ms')
+    print(f'{round((time.time() - st), 1)} s')
 
-# First 8 residues is about 1 second.
-# 9th takes
+
+# starting residue H at pos 8
+# Number of possible conformations: 550504
+# 1.0 s
+
+# starting residue J at pos 10
+# Number of possible conformations: 20290360
+# 72.1 s
