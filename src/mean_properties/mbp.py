@@ -1,6 +1,17 @@
 from enum import Enum
 import numpy as np
 
+"""
+Differences in the Chou-Fasman numbers used in the original Java implementation of mean beta-sheet propensity from
+the implementation here.
+Asparagine alpha-helical preference number of 0.76 was used. Here I use 0.99. 
+Asparagine reverse turn preference number of 1.24. Here I use 1.34.
+Glutamic acid beta-strand preference number of 0.59 was used. Here I use 0.52.
+The values assigned here in the CFP enum below are also in data/aa_properties/aa_props.csv. Ideally the values here 
+would be read from that file but for reasons of performance, I've opted to allow duplication for now, hardcoding the 
+values in this script as an enum.
+"""
+
 
 def compute_mean_beta_sheet_prop(sequence: str) -> float:
     """
@@ -41,12 +52,7 @@ class CFP(Enum):
 
 
 if __name__ == '__main__':
-
-    aa_mbp = dict()
-    for aa, prop in CFP.BETASTRAND.value.items():
-        aa_mbp[aa] = compute_mean_beta_sheet_prop(4*aa)
-
-    print(aa_mbp)
+    pass
     # import pandas as pd
     # from matplotlib import pyplot as plt
     # pdf = pd.DataFrame.from_dict(data=aa_mbp, orient='index', columns=['aa', 'MBP'])
@@ -62,14 +68,3 @@ if __name__ == '__main__':
     # )
     # plt.show()
 
-    # import time
-    # _aa_props = read_props.read_aa_props_csv()
-    # _seq = read_seqs.read_protein_sequence_txt('SYUA_HUMAN.txt')
-    # print(f'{_seq}')
-    # if read_seqs.is_invalid_protein_sequence(_aa_props, _seq):
-    #     print(f'Sequence is not valid 1-character amino acid sequence')
-    # else:
-    #     st = time.time()
-    #     mbp = compute_mean_beta_sheet_prop(_seq)
-    #     print(mbp)
-    #     print(f'{round(1000*(time.time() - st), 1)} ms')
