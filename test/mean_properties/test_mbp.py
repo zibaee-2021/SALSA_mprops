@@ -17,7 +17,7 @@ class TestMBP(TestCase):
 
     def test__compute_mean_beta_sheet_prop_2(self):
         actual = compute_mean_beta_sheet_prop(sequence=self.asyn)
-        expected = 0.9179316215065967
+        expected = 0.9067751636299309
         self.assertEqual(expected, actual)
 
 
