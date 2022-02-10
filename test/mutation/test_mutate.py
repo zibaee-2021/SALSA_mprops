@@ -49,3 +49,18 @@ class TestMutate(TestCase):
         expected = {'prot': {'prot': 'AAP', 'prot(A1H)': 'HAP', 'prot(P3D)': 'AAD', 'prot(P3F)': 'AAF'},
                     'prot2':  {'prot2': 'KRI', 'prot2(R2G)': 'KGI'}}
         self.assertDictEqual(expected, actual)
+
+    def test_mutate_protein(self):
+        actual = mutate.mutate_protein(protein_seq='ACDEFG', pos_aa={4: 'Y', 6: 'Q'})
+        expected = 'ACDYFQ'
+        self.assertEqual(expected, actual)
+
+    def test_mutate_protein_invalid(self):
+        actual = mutate.mutate_protein(protein_seq='ACDEFG', pos_aa={4: 'Y', 6: 'X'})
+        expected = 'ACDYFG'
+        self.assertEqual(expected, actual)
+
+    def test_mutate_protein_invalid2(self):
+        actual = mutate.mutate_protein(protein_seq='ACDEFG', pos_aa={4: 'Y', 7: 'Q'})
+        expected = 'ACDYFG'
+        self.assertEqual(expected, actual)
