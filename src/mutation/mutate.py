@@ -3,11 +3,13 @@ from enum import Enum
 from data.protein_sequences import read_seqs
 
 
+_20_AA = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+
 def _are_valid_positions_to_mutate(prot_id_seqs: dict, prot_id_point_mutations_to_make: dict[str: List[dict]]) -> bool:
     """
     Check whether the requested mutation is compatible with the protein sequence. i.e. Mutation to any residues at
     position 150 for protein that is 140 residues long is not possible.
-    :param prot_id_seqs: Protein ids/names mapped to protein sequence.
+    :param prot_id_seqs: Protein ids/names mapped to protein sequence. Protein sequence should be in 1-letter notation.
     :param prot_id_point_mutations_to_make: Protein ids/names mapped to amino acid substitution to make.
     Example of expected format is {'SYUA_HUMAN': [{30: 'P'}], 'P10636-7': [{301: 'S'}, {301: 'L'}]}.
     :return: True if all the requested mutations are possible.
@@ -31,7 +33,8 @@ def _are_valid_positions_to_mutate(prot_id_seqs: dict, prot_id_point_mutations_t
 def _make_mutant_name(prot_id_seq: dict[str: str], point_mutation_to_make: dict[int: str]) -> str:
     """
     Add suffix to given protein id to indicate the amino acid substitution.
-    :param prot_id_seq: Protein id mapped to its sequence, {'SYUA_HUMAN': 'MDVFMKGLS..'}
+    :param prot_id_seq: Protein id mapped to its sequence, {'SYUA_HUMAN': 'MDVFMKGLS..'}. Protein sequence should be
+    in 1-letter notation.
     :param point_mutation_to_make: Position mapped to amino acid to mutate into. {1: 'A'}
     :return: The given protein id/name with suffix indicating the amino acid substitution,
     e.g. {'SYUA_HUMAN': 'MDVFMKGLS..'} and {1: 'A'} returns 'SYUA_HUMAN(M1A)'
@@ -47,7 +50,7 @@ def _make_point_mutants(prot_id_seq: dict[str: str], point_mutants_to_make: dict
     """
     Generate new id suffix and mutated sequence for the given sequence according to the specified amino acid
     substitution. Include original protein name/id and its wild-type sequence.
-    :param prot_id_seq: Protein id/name mapped to its sequence,
+    :param prot_id_seq: Protein id/name mapped to its sequence. (Protein sequence should be in 1-letter notation.)
     e.g. {'A4_HUMAN(672-713)' :'DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA'}
     :param point_mutants_to_make: Amino acid substitution, e.g. {1: ['Y', 'T'], 2 ['A', 'C']}
     :return: Name of new mutant mapped to the mutated sequence, as well as wild-type.
@@ -72,10 +75,11 @@ def _make_point_mutants(prot_id_seq: dict[str: str], point_mutants_to_make: dict
 def make_point_mutants(prot_id_mutants_to_make: dict[str: dict[int: List[str]]]) -> dict[str: dict[str:str]]:
     """
     Generate collection of sequences with specified amino acid substitutions for the given protein.
+    (Protein sequences in 1-letter notation.)
     :param prot_id_mutants_to_make: Protein ids/names mapped to a collection of position-amino acid pairings.
     E.g. {'A4_HUMAN(672-713)': {1: ['Y', 'F']},
                    'P10636-7': {301: ['S', 'L']}}
-    :return: Protein ids each mapped to corresponding mutated sequences .
+    :return: Protein ids each mapped to corresponding mutated sequences. Protein sequence in 1-letter notation.
     e.g. {'A4_HUMAN(672-713)':
                             {'A4_HUMAN(672-713)' :'DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA',
                             'A4_HUMAN(672-713)(D1Y)' :'YAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA',
@@ -90,6 +94,29 @@ def make_point_mutants(prot_id_mutants_to_make: dict[str: dict[int: List[str]]])
         mutant_ids_seqs = _make_point_mutants(prot_id_seq=prot_id_seq, point_mutants_to_make=pos_residues)
         prot_ids_mutant_ids_seqs[prot_id] = mutant_ids_seqs
     return prot_ids_mutant_ids_seqs
+
+
+def mutate_protein(protein_seq: str, pos_aa: dict) -> str:
+    """
+    Mutate given protein sequence at the given position(s) to the given residue(s).
+    e.g. You want to mutate your sequence: ACDEFG to ACDYFG. Here pos_aa should be {4: 'Y'}. This will replace the 'E'
+    at array index position 3 to 'Y'.
+    :param protein_seq: Protein sequence in 1-letter notation.
+    :param pos_aa: The position(s) in the sequence (using 1 to indicate position 0 in a zero-based array) to mutate
+    mapped to the residue(s) to mutate to. E.g. To mutate a given protein sequence at positions 4, 30 and 101 to
+    Alanine, Glutamine and Tyrosine, respectively, the argument is {4: 'A', 30: 'Q', 101: 'Y'}.
+    :return: The mutated protein sequence. (Sequence in 1-letter notation).
+    """
+    for pos, aa in pos_aa.items():
+        if not 1 <= pos <= len(protein_seq):
+            print(f"Select position between 1 and {len(protein_seq)}"
+                  f"\nYou specified position: {pos}")
+        elif aa not in _20_AA:
+            print(f"Select one of 20 amino acids: {_20_AA} "
+                  f"\nYou specified unrecognised character: '{aa}'")
+        else:
+            protein_seq = protein_seq[:pos - 1] + aa + protein_seq[pos:]
+    return protein_seq
 
 
 def mutate_all_sequence(mut_option):
@@ -108,6 +135,7 @@ class Mutate(Enum):
     GivenAAsAtGivenPositions = 1
     All20AAsAtGivenPositions = 2
     All20AAsAtAllPossiblePositions = 2
+
 
     # @classmethod
     # def default(cls):
