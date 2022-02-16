@@ -1,6 +1,6 @@
 import time
 from AA import AA
-from src.mutation import mutate
+from src.mutation import mutator
 from src.salsa.Options import Props, DefaultMLSC
 from src.salsa import execute
 

@@ -4,18 +4,18 @@ from src.salsa.Options import Props, DefaultBSC
 from src.salsa import execute
 
 start = time.time()
+accession_numbers, protein_names = [''], ['']
 # STEP 0 - Which proteins are you interested in?
 # accession_numbers = ['']
 # accession_numbers = ['P37840']
 # accession_numbers = ['P37840', 'Q16143', 'P10636-8']
-accession_numbers = ['P10636-8']
 # accession_numbers = ['P05067(672-713)', 'P05067(672-711)']
 # accession_numbers = ['P10636-5', 'P10636-8']
 # protein_names = ['PRIO_HUMAN']
 # protein_names = ['SYUA_HUMAN']
 # protein_names = ['TADBP_HUMAN']
 # protein_names = ['SYUA_HUMAN', 'PRIO_HUMAN', 'URE2_YEAST', 'E9P8Q3_YEASX', 'TADBP_HUMAN']
-protein_names = ['']
+protein_names = ['SYUA_FUGU', 'SYUB_FUGU', 'SYUG1_FUGU', 'SYUG2_FUGU']
 prot_ids = accession_numbers + protein_names
 prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids=prot_ids)
 

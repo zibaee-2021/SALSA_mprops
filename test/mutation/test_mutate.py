@@ -1,6 +1,6 @@
 from unittest import TestCase
 from unittest.mock import patch, Mock
-from src.mutation import mutate
+from src.mutation import mutator
 from data.protein_sequences import read_seqs
 
 
@@ -51,16 +51,16 @@ class TestMutate(TestCase):
         self.assertDictEqual(expected, actual)
 
     def test_mutate_protein(self):
-        actual = mutate.mutate_protein(protein_seq='ACDEFG', pos_aa={4: 'Y', 6: 'Q'})
+        actual = mutate.mutate(prot_seq='ACDEFG', pos_aa={4: 'Y', 6: 'Q'})
         expected = 'ACDYFQ'
         self.assertEqual(expected, actual)
 
     def test_mutate_protein_invalid(self):
-        actual = mutate.mutate_protein(protein_seq='ACDEFG', pos_aa={4: 'Y', 6: 'X'})
+        actual = mutate.mutate(prot_seq='ACDEFG', pos_aa={4: 'Y', 6: 'X'})
         expected = 'ACDYFG'
         self.assertEqual(expected, actual)
 
     def test_mutate_protein_invalid2(self):
-        actual = mutate.mutate_protein(protein_seq='ACDEFG', pos_aa={4: 'Y', 7: 'Q'})
+        actual = mutate.mutate(prot_seq='ACDEFG', pos_aa={4: 'Y', 7: 'Q'})
         expected = 'ACDYFG'
         self.assertEqual(expected, actual)
