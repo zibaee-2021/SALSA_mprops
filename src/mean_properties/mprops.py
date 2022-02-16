@@ -8,7 +8,7 @@ from sklearn.linear_model import LinearRegression
 from src.salsa import execute
 from src.salsa.Options import DefaultBSC, Props
 from data.protein_sequences import read_seqs
-from src.mutation import mutate
+from src.mutation import mutator
 """
 The derivation of the coefficients for each of the 4 mean properties (mean beta-sheet propensity, mean hydrophilicity, 
 mean absolute net charge and mean total charge) is based on the kinetics of fibrillogenesis for 32 (although .. it 
@@ -38,6 +38,17 @@ each sample immediately after collection.
 Lag times were measured from each experiment, as time taken for ThT values to reach the square of their zero
 time emission readings at 480nm. The final value is the mean of the lag times for each constructs, rounded to the 
 nearest 0.25 hours.
+
+Another very important caveat is that for certain synuclein constructs for which lag time data was included, 
+which had longer lag times, those proteins did not begin to assemble within the 96 hours limit. Hence, 
+the data from these experiments was not included. As such their included data indicates these proteins to be more 
+fibrillogenic than there were observed to be. 
+
+I will see what result I get from replacing the absent data for those in which assembly was not observed with a dummy 
+value of 200 hours.
+
+I may also do this for the large number of other constructs for which assembly was not observed at all within the
+100 hour limit.
 """
 
 # Note: although namedtuple takes up twice the number of lines of code as a dict to create, this one uses about 300
@@ -59,40 +70,34 @@ lagtimes = lagtimes(asyn=5.5, asyn_11_140=27.5, asyn_21_140=10.75, asyn_31_140=2
                     fr_gsyn1=0.75, fr_gsyn2=0.25)
 
 
+
+
+coefs_4props = namedtuple('coefficients_4props', 'nmbp_cf nmh_cf nmnc_cf nmtc_cf', )
 # These are the original coefficients from Zibaee et al 2010 JBC.
-class CoeffOrig(Enum):
-    NMBP = -0.0741
-    NMH = 0.0662
-    NMNC = 0.0629
-    NMTC = 0.0601
+original_cfs_4props = coefs_4props(nmbp_cf=-0.0741, nmh_cf=0.0662, nmnc_cf=0.0629, nmtc_cf=0.0601)
 
-
-# These are the coefficients calculated here, using data from a few extra constructs and using scikit-learn to
-# perform linear regression and determine coefficients for the 4 mean properties.
-class Coefficient(Enum):
-    NMBP = 0
-    NMH = 0
-    NMNC = 0
-    NMTC = 0
+# New coefficients calculated here, using same datasets generated for Zibaee et al 2010 JBC, plus data from Zibaee et
+# al. 2007 JMB.
+# Here coefficients are determined from best fit line using scikit-learn linear regression model.
+cfs_4props = coefs_4props(nmbp_cf=-0.0, nmh_cf=0.0, nmnc_cf=0.0, nmtc_cf=0.0)
+intcpts_4props = namedtuple('intercepts_4props', 'nmbp_ic nmh_ic nmnc_ic nmtc_ic', )
+intcpts = intcpts_4props(nmbp_ic=-0.0, nmh_ic=0.0, nmnc_ic=0.0, nmtc_ic=0.0)
 
 
 def _compute_mprops(_4norm_props: NamedTuple) -> float:
-    return (Coefficient.NMBP.value * _4norm_props.nmbp) + \
-             (Coefficient.NMH * _4norm_props.mh) + \
-             (Coefficient.NMNC * _4norm_props.nmnc) + \
-             (Coefficient.NMTC * _4norm_props.nmtc)
+    return ((cfs_4props.nmbp_cf * _4norm_props.nmbp) + intcpts_4props.nmbp_ic) +\
+           ((cfs_4props.nmh_cf * _4norm_props.mh) + intcpts_4props.nmh_ic) +\
+           ((cfs_4props.nmnc_cf * _4norm_props.nmnc) + intcpts_4props.nmnc_ic) + \
+           ((cfs_4props.nmtc_cf * _4norm_props.nmtc) + intcpts_4props.nmtc_ic)
 
 
 def _build_syn_sequences(syn_names: list) -> dict:
     asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_HUMAN')['SYUA_HUMAN']
     bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_HUMAN')['SYUB_HUMAN']
-    # fr_asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_FUGU')['SYUA_FUGU']
-    # fr_gsyn1 = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG_FUGU')['SYUG_FUGU']
-    # fr_gsyn2 = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG_FUGU')['SYUG_FUGU']
-    fr_asyn = asyn
-    fr_gsyn1 = asyn
-    fr_gsyn2 = asyn
-    bsyn_5V = mutate.mutate_protein(protein_seq=bsyn, pos_aa={80: 'V', 81: 'V', 82: 'V',  83: 'V', 84: 'V'})
+    fr_asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_FUGU')['SYUA_FUGU']
+    fr_gsyn1 = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG1_FUGU')['SYUG1_FUGU']
+    fr_gsyn2 = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG2_FUGU')['SYUG2_FUGU']
+    bsyn_5V = mutator.mutate(prot_seq=bsyn, pos_aa={11: 'V', 19: 'V', 63: 'V', 78: 'V', 102: 'V'})
     syn_seqs = {'asyn': asyn, 'fr_asyn': fr_asyn, 'fr_gsyn1': fr_gsyn1, 'fr_gsyn2': fr_gsyn2, 'bsyn_5V': bsyn_5V}
     for syn_name in syn_names:
         syn_seqs_keys = list(syn_seqs)
@@ -130,36 +135,35 @@ def _build_syn_sequences(syn_names: list) -> dict:
             elif syn_name == 'bsyn_5V':
                 syn_seqs[syn_name] = bsyn_5V
             elif syn_name == 'bsyn_5V2Q':
-                syn_seqs[syn_name] = mutate.mutate_protein(protein_seq=bsyn_5V, pos_aa={80: 'Q', 81: 'Q'})
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn_5V, pos_aa={125: 'Q', 126: 'Q'})
             elif syn_name == 'bsyn_5V4Q':
-                syn_seqs[syn_name] = mutate.mutate_protein(protein_seq=bsyn_5V, pos_aa={80: 'Q', 81: 'Q', 82: 'Q', 84: 'Q'})
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn_5V, pos_aa={104: 'Q', 105: 'Q', 125: 'Q', 126: 'Q'})
             elif syn_name == 'bsyn_5V6Q':
-                syn_seqs[syn_name] = mutate.mutate_protein(protein_seq=bsyn_5V, pos_aa={80: 'Q', 81: 'Q', 82: 'Q',
-                                                                                       84: 'Q', 85: 'Q', 86: 'Q'})
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn_5V, pos_aa={96: 'Q', 97: 'Q', 104: 'Q', 105: 'Q',
+                                                                              125: 'Q', 126: 'Q'})
             elif syn_name == 'bsyn_5V8Q':
-                syn_seqs[syn_name] = mutate.mutate_protein(protein_seq=bsyn_5V, pos_aa={80: 'Q', 81: 'Q', 82: 'Q',
-                                                                                       84: 'Q', 85: 'Q', 86: 'Q',
-                                                                                       87: 'Q', 88: 'Q'})
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn_5V, pos_aa={87: 'Q', 88: 'Q', 96: 'Q', 97: 'Q',
+                                                                              104: 'Q', 105: 'Q', 125: 'Q', 126: 'Q'})
             elif syn_name == 'asyn_45V46V':
-                syn_seqs[syn_name] = mutate.mutate_protein(protein_seq=asyn, pos_aa={45: 'V', 46: 'V'})
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={45: 'V', 46: 'V'})
             elif syn_name == 'asyn_45V46V71E72E':
-                syn_seqs[syn_name] = mutate.mutate_protein(protein_seq=asyn, pos_aa={45: 'V', 46: 'V', 71: 'E', 72: 'E'})
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={45: 'V', 46: 'V', 71: 'E', 72: 'E'})
             # elif syn_name == 'asyn71E72E': ?? Did it assemble within 96 hours??
-            #     _32_syns_seqs[syn_name] = mutate.mutate_protein(protein_seq=asyn, pos_aa={71: 'E', 72: 'E'})
+            #     _32_syns_seqs[syn_name] = mutator.mutate_protein(protein_seq=asyn, pos_aa={71: 'E', 72: 'E'})
             elif syn_name == 'asyn_T72V':
-                syn_seqs[syn_name] = mutate.mutate_protein(protein_seq=asyn, pos_aa={72: 'V'})
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={72: 'V'})
             elif syn_name == 'asyn_V71E_T72E':
-                syn_seqs[syn_name] = mutate.mutate_protein(protein_seq=asyn, pos_aa={71: 'E', 72: 'E'})
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={71: 'E', 72: 'E'})
             elif syn_name == 'asyn_A30P':
-                syn_seqs[syn_name] = mutate.mutate_protein(protein_seq=asyn, pos_aa={30: 'P'})
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={30: 'P'})
             elif syn_name == 'asyn_E46K':
-                syn_seqs[syn_name] = mutate.mutate_protein(protein_seq=asyn, pos_aa={46: 'K'})
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={46: 'K'})
             elif syn_name == 'asyn_A53T':
-                syn_seqs[syn_name] = mutate.mutate_protein(protein_seq=asyn, pos_aa={53: 'T'})
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={53: 'T'})
             elif syn_name == 'asyn_S87E':
-                syn_seqs[syn_name] = mutate.mutate_protein(protein_seq=asyn, pos_aa={87: 'E'})
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={87: 'E'})
             elif syn_name == 'asyn_S129E':
-                syn_seqs[syn_name] = mutate.mutate_protein(protein_seq=asyn, pos_aa={129: 'E'})
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={129: 'E'})
             elif syn_name == 'bsyn_1_73':
                 syn_seqs[syn_name] = bsyn[:73]
             elif syn_name == 'fr_asyn':
@@ -195,10 +199,12 @@ def _normalise_mbp_mh_mnc_mtc(mbp: float, mh: float, mnc: float, mtc: float) -> 
     return _4norm_props(nmbp=nmbp, nmh=nmh, nmnc=nmnc, nmtc=nmtc)
 
 
-def calculate_weights_for_each_4_props():
+def calculate_relative_weights_for_each_4_props() -> Tuple[NamedTuple, NamedTuple, NamedTuple]:
     """
+    The function should only need to be run once to generate the necessary models for predictions.
+
     The coefficients of each of following 4 plots were used for combining the 4 properties into one equation.
-    The 4 plots were of nmbp, nmh, nmnc, nmtc against natural log of the lag-times data of 32
+    The 4 plots were of nmbp, nmh, nmnc, nmtc against natural log of the lag-times data of 32 **TODO more than 32**
     recombinant synuclein constructs.
 
     The lag-times were the time taken for the ThT value to become the squared of its value at time = 0. The 32
@@ -222,32 +228,37 @@ def calculate_weights_for_each_4_props():
                                                                               mtc=mnc_mtc.compute_mean_total_charge(seq))
         y[i] = syns_ln_lagtimes[syn_name]
 
+    x_nmbp, x_nmh, x_nmnc, x_nmtc = x_nmbp.reshape((-1, 1)), x_nmh.reshape((-1, 1)),\
+                                    x_nmnc.reshape((-1, 1)), x_nmtc.reshape((-1, 1))
+
     model = LinearRegression()
-
-    x_nmbp, x_nmh, x_nmnc, x_nmtc = x_nmbp.reshape((-1, 1)), x_nmh.reshape((-1, 1)), x_nmnc.reshape((-1, 1)), \
-                                    x_nmtc.reshape((-1, 1))
-
     model.fit(x_nmbp, y)
     mbp_rsq = model.score(x_nmbp, y)
     mbp_cf = float(model.coef_)
+    mbp_ic = float(model.intercept_)
 
     model.fit(x_nmh, y)
     mh_rsq = model.score(x_nmh, y)
     mh_cf = float(model.coef_)
+    mh_ic = float(model.intercept_)
 
     model.fit(x_nmnc, y)
     mnc_rsq = model.score(x_nmnc, y)
     mnc_cf = float(model.coef_)
+    mnc_ic = float(model.intercept_)
 
     model.fit(x_nmtc, y)
     mtc_rsq = model.score(x_nmtc, y)
     mtc_cf = float(model.coef_)
+    mtc_ic = float(model.intercept_)
 
     _4coefs = namedtuple('_4coefs', 'mbp_cf mh_cf mnc_cf mtc_cf')
-    _4rsq = namedtuple('_4rsq', 'mbp_rsq mh_rsq mnc_rsq mtc_rsq')
     _4coefs = _4coefs(mbp_cf=mbp_cf, mh_cf=mh_cf, mnc_cf=mnc_cf, mtc_cf=mtc_cf)
+    _4intcpts = namedtuple('_4intcpts', 'mbp_ic mh_ic mnc_ic mtc_ic')
+    _4intcpts = _4intcpts(mbp_ic=mbp_ic, mh_ic=mh_ic, mnc_ic=mnc_ic, mtc_ic=mtc_ic)
+    _4rsq = namedtuple('_4rsq', 'mbp_rsq mh_rsq mnc_rsq mtc_rsq')
     _4rsq = _4rsq(mbp_rsq=mbp_rsq, mh_rsq=mh_rsq, mnc_rsq=mnc_rsq, mtc_rsq=mtc_rsq)
-    return _4coefs, _4rsq
+    return _4coefs, _4intcpts, _4rsq
 
 
 def _normalise_mprops(mprops):
@@ -260,7 +271,7 @@ def compute_normalised_mprops(syn_seqs: NamedTuple):
     :param syn_seqs: Synuclein name and its amino acid sequence
     :return:
     """
-    _4coefs, _4rsq = calculate_weights_for_each_4_props() # only needs to be done once
+    _4coefs, _4intcpts, _4rsq = calculate_relative_weights_for_each_4_props() # only needs to be done once
     syn_nmprops = {}
 
     for syn_name, seq in zip(syn_seqs, syn_seqs._fields):
@@ -289,16 +300,20 @@ def compute_normalised_salsa_bsc_integrals(seq: str):
     return _normalise_bsc_integral(bsc_integral)
 
 
-def predict_lag_time_with_combined_algo(syn_seqs):
+
+def calculate_relative_weights_for_nmprops_and_nbsc_intgrl(syn_seqs):
     nmprops = compute_normalised_mprops(syn_seqs)
     nbsc_integral = compute_normalised_salsa_bsc_integrals(seq)
     # calculate combined_algo TODO
 
 
+def predict_lag_time_with_combined_algo(syn_seqs):
+    # TODO
+    pass
 
-from test.profiler_ import basics
+
 if __name__ == '__main__':
-    calculate_weights_for_each_4_props()
+    calculate_relative_weights_for_each_4_props()
 
     # print(f' dict {basics.get_size_of(lagtimes)}')
     # print(f'namedtuple {basics.get_size_of(lagtimes)}')
