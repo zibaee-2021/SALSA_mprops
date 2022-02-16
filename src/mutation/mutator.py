@@ -96,27 +96,27 @@ def make_point_mutants(prot_id_mutants_to_make: dict[str: dict[int: List[str]]])
     return prot_ids_mutant_ids_seqs
 
 
-def mutate_protein(protein_seq: str, pos_aa: dict) -> str:
+def mutate(prot_seq: str, pos_aa: dict) -> str:
     """
     Mutate given protein sequence at the given position(s) to the given residue(s).
     e.g. You want to mutate your sequence: ACDEFG to ACDYFG. Here pos_aa should be {4: 'Y'}. This will replace the 'E'
     at array index position 3 to 'Y'.
-    :param protein_seq: Protein sequence in 1-letter notation.
+    :param prot_seq: Protein sequence in 1-letter notation.
     :param pos_aa: The position(s) in the sequence (using 1 to indicate position 0 in a zero-based array) to mutate
     mapped to the residue(s) to mutate to. E.g. To mutate a given protein sequence at positions 4, 30 and 101 to
     Alanine, Glutamine and Tyrosine, respectively, the argument is {4: 'A', 30: 'Q', 101: 'Y'}.
     :return: The mutated protein sequence. (Sequence in 1-letter notation).
     """
     for pos, aa in pos_aa.items():
-        if not 1 <= pos <= len(protein_seq):
-            print(f"Select position between 1 and {len(protein_seq)}"
+        if not 1 <= pos <= len(prot_seq):
+            print(f"Select position between 1 and {len(prot_seq)}"
                   f"\nYou specified position: {pos}")
         elif aa not in _20_AA:
             print(f"Select one of 20 amino acids: {_20_AA} "
                   f"\nYou specified unrecognised character: '{aa}'")
         else:
-            protein_seq = protein_seq[:pos - 1] + aa + protein_seq[pos:]
-    return protein_seq
+            prot_seq = prot_seq[:pos - 1] + aa + prot_seq[pos:]
+    return prot_seq
 
 
 def mutate_all_sequence(mut_option):
