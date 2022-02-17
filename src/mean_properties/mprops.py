@@ -55,26 +55,36 @@ I may also do this for the large number of other constructs for which assembly w
 # bytes, while the dict equivalent uses about 1200 bytes. Hence namedtuple uses about 1/4 the memory of dict.
 # while the dict equivalent. An enum cannot be used as it does not allow duplicate values (i.e. it will not store
 # two syns that have the same lag times).
-lagtimes = namedtuple('lagtimes', 'asyn asyn_11_140, asyn_21_140, asyn_31_140, asyn_41_140, asyn_51_140, asyn_61_140, '
-                                  'asyn_1_80, asyn_del68_71, asyn_del71_72, asyn_del71_74, asyn_del71_78, '
-                                  'asyn_del71_81, asyn_del73_83, bsyn_asyn_1, bsyn_asyn_12, bsyn_5V, bsyn_5V2Q, '
-                                  'bsyn_5V4Q, bsyn_5V6Q, bsyn_5V8Q, asyn_T72V, asyn_V71E_T72E, asyn_A30P, asyn_E46K, '
-                                  'asyn_A53T, asyn_S87E, asyn_S129E, bsyn_1_73, fr_asyn, fr_gsyn1, fr_gsyn2')
+# lagtimes = namedtuple('lagtimes', 'asyn asyn_11_140, asyn_21_140, asyn_31_140, asyn_41_140, asyn_51_140, asyn_61_140, '
+#                                   'asyn_1_80, asyn_del68_71, asyn_del71_72, asyn_del71_74, asyn_del71_78, '
+#                                   'asyn_del71_81, asyn_del73_83, bsyn_asyn_1, bsyn_asyn_12, bsyn_5V, bsyn_5V2Q, '
+#                                   'bsyn_5V4Q, bsyn_5V6Q, bsyn_5V8Q, asyn_T72V, asyn_V71E_T72E, asyn_A30P, asyn_E46K, '
+#                                   'asyn_A53T, asyn_S87E, asyn_S129E, bsyn_1_73, fr_asyn, fr_gsyn1, fr_gsyn2')
 
-lagtimes = lagtimes(asyn=5.5, asyn_11_140=27.5, asyn_21_140=10.75, asyn_31_140=27.5, asyn_41_140=54.0,
-                    asyn_51_140=86.5, asyn_61_140=96.5, asyn_1_80=4.75, asyn_del68_71=41.5, asyn_del71_72=8.25,
-                    asyn_del71_74=9.5, asyn_del71_78=52.75, asyn_del71_81=44.25, asyn_del73_83=19.75,
-                    bsyn_asyn_1=81.25, bsyn_asyn_12=25.0, bsyn_5V=81.5, bsyn_5V2Q=20.25, bsyn_5V4Q=20.0,
-                    bsyn_5V6Q=13.5, bsyn_5V8Q=6.75, asyn_T72V=1.0, asyn_V71E_T72E=84.0, asyn_A30P=6.25,
-                    asyn_E46K=4.5, asyn_A53T=4.25, asyn_S87E=17.0, asyn_S129E=5.75, bsyn_1_73=8.0, fr_asyn=0.75,
-                    fr_gsyn1=0.75, fr_gsyn2=0.25)
+# orig_lagtimes = lagtimes(asyn=5.5, asyn_11_140=27.5, asyn_21_140=10.75, asyn_31_140=27.5, asyn_41_140=54.0,
+#                     asyn_51_140=86.5, asyn_61_140=96.5, asyn_1_80=4.75, asyn_del68_71=41.5, asyn_del71_72=8.25,
+#                     asyn_del71_74=9.5, asyn_del71_78=52.75, asyn_del71_81=44.25, asyn_del73_83=19.75,
+#                     bsyn_asyn_1=81.25, bsyn_asyn_12=25.0, bsyn_5V=81.5, bsyn_5V2Q=20.25, bsyn_5V4Q=20.0,
+#                     bsyn_5V6Q=13.5, bsyn_5V8Q=6.75, asyn_T72V=1.0, asyn_V71E_T72E=84.0, asyn_A30P=6.25,
+#                     asyn_E46K=4.5, asyn_A53T=4.25, asyn_S87E=17.0, asyn_S129E=5.75, bsyn_1_73=8.0, fr_asyn=0.75,
+#                     fr_gsyn1=0.75, fr_gsyn2=0.25)
 
 
-
+lagtimes = namedtuple('lagtimes', 'asyn, a11_140, a21_140, a31_140, a41_140, a51_140, a61_140, a1-75, a1_80, '
+                                  'aDel68_71, aDel71_72, aDel71_74, aDel71_78, aDel71_81, aDel73_83, aDel74-84, '
+                                  'ba1, ba12, b5V, b5V2Q, b5V4Q, b5V6Q, b5V8Q, '
+                                  'aT72V, a71E72E, a45V46V, a45V46V71E72E, aA30P, aE46K, aA53T, aS87E, aS129E, '
+                                  'aK45V, aE46V, bE46V, b45V46V,'
+                                  'b1_73, fr_asyn, fr_gsyn1, fr_gsyn2, gsyn, ga')
+new_lags_deg2 = lagtimes()
+new_lags_deg3 = lagtimes()
+new_lags_deg4 = lagtimes()
+new_lags_deg5 = lagtimes()
+new_lags_deg6 = lagtimes()
 
 coefs_4props = namedtuple('coefficients_4props', 'nmbp_cf nmh_cf nmnc_cf nmtc_cf', )
 # These are the original coefficients from Zibaee et al 2010 JBC.
-original_cfs_4props = coefs_4props(nmbp_cf=-0.0741, nmh_cf=0.0662, nmnc_cf=0.0629, nmtc_cf=0.0601)
+# original_cfs_4props = coefs_4props(nmbp_cf=-0.0741, nmh_cf=0.0662, nmnc_cf=0.0629, nmtc_cf=0.0601)
 
 # New coefficients calculated here, using same datasets generated for Zibaee et al 2010 JBC, plus data from Zibaee et
 # al. 2007 JMB.
@@ -298,7 +308,6 @@ def _compute_salsa_bsc_integrals(seq):
 def compute_normalised_salsa_bsc_integrals(seq: str):
     bsc_integral = _compute_salsa_bsc_integrals(seq)
     return _normalise_bsc_integral(bsc_integral)
-
 
 
 def calculate_relative_weights_for_nmprops_and_nbsc_intgrl(syn_seqs):
