@@ -66,7 +66,7 @@ def _calculate_lag_times(name: str, time: list, tht: list, lagtimes: dict, plot:
     else:
         x = np.array([num for i, num in enumerate(time) if i == 0 or num != 0.0]).reshape((-1, 1))
         y = np.array(tht[0: len(x)])
-        poly_reg = PolynomialFeatures(degree=2)
+        poly_reg = PolynomialFeatures(degree=degree)
         X_poly = poly_reg.fit_transform(x)
         lin_reg = LinearRegression()
         lin_reg.fit(X_poly, y)
