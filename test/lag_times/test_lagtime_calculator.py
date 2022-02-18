@@ -36,7 +36,7 @@ class TestLagTimeCalculator(TestCase):
 
     def test_calc_mean_of_lagtimes(self):
         lagtimes = {'syn': [20, 30, 40, 10]}
-        actual = lagcalc._calc_mean_of_lagtimes(lagtimes)
+        actual = lagcalc._calc_mean_of_lag_times(lagtimes)
         expected = {'syn': 25}
         self.assertEqual(expected, actual)
 
