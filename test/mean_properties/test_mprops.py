@@ -5,6 +5,10 @@ from collections import namedtuple
 
 class TestMprops(TestCase):
 
+    def setUp(self) -> None:
+        self.asyn = 'MDVFMKGLSK AKEGVVAAAE KTKQGVAEAA GKTKEGVLYV GSKTKEGVVH GVATVAEKTK EQVTNVGGAV' \
+                    'VTGVTAVAQK TVEGAGSIAA ATGFVKKDQL GKNEEGAPQE GILEDMPVDP DNEAYEMPSE EGYQDYEPEA'
+
     def test__normalise_mbp_mh_mnc_mtc_asyn(self):
         actual = mprops._normalise_mbp_mh_mnc_mtc(mbp=0.9067751636299309, mh=-5.713357142857143,
                                                   mnc=0.06428571428571428, mtc=0.2785714285714286)
@@ -21,3 +25,25 @@ class TestMprops(TestCase):
         expected_4rsq = 0.14157907636054157, 0.13181468959476017, 0.28654265816715596, 0.06469494011742483
         self.assertEqual(expected_4coeffs, _4coefs)
         self.assertEqual(expected_4rsq, _4rsq)
+
+    def test__make_fragments1(self):
+        a68_71Del = 'MDVFMKGLSK AKEGVVAAAE KTKQGVAEAA GKTKEGVLYV GSKTKEGVVH GVATVAEKTK' \
+                    'EQVTNVG     TGVTAVAQK TVEGAGSIAA ATGFVKKDQL GKNEEGAPQE GILEDMPVDP' \
+                    'DNEAYEMPSE EGYQDYEPEA'
+        syn_name = 'a68_71Del'
+        actual = mprops._make_fragment(syn_name)
+        self.assertEqual(a68_71Del.replace(' ', ''), actual)
+
+    def test__make_fragments2(self):
+        syn_name = 'a11_140'
+        actual = mprops._make_fragment(syn_name)
+        a11_140 =            'AKEGVVAAAE KTKQGVAEAA GKTKEGVLYV GSKTKEGVVH GVATVAEKTK EQVTNVGGAV ' \
+                  'VTGVTAVAQK TVEGAGSIAA ATGFVKKDQL GKNEEGAPQE GILEDMPVDP DNEAYEMPSE EGYQDYEPEA'
+        self.assertEqual(a11_140.replace(' ', ''), actual)
+
+    def test__make_fragments3(self):
+        a1_80 = 'MDVFMKGLSK AKEGVVAAAE KTKQGVAEAA GKTKEGVLYV ' \
+                'GSKTKEGVVH GVATVAEKTK EQVTNVGGAV VTGVTAVAQK'
+        syn_name = 'a1_80'
+        actual = mprops._make_fragment(syn_name)
+        self.assertEqual(a1_80.replace(' ', ''), actual)

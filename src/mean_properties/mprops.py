@@ -69,20 +69,50 @@ I may also do this for the large number of other constructs for which assembly w
 #                     asyn_E46K=4.5, asyn_A53T=4.25, asyn_S87E=17.0, asyn_S129E=5.75, bsyn_1_73=8.0, fr_asyn=0.75,
 #                     fr_gsyn1=0.75, fr_gsyn2=0.25)
 
+# Note: You cannot use hyphens in namedtuples, so I replaced all hyphens with underscores.
+lagtimes = namedtuple('lagtimes', 'asyn, aS87E, aS129E, a1_80, b1_73, gsyn, ga, a11_140, a21_140, ba1, a73_83Del, '
+                                  'a31_140, a41_140, a51_140, a68_71Del, a74_84Del, a61_140, fr_asyn, b5V, fr_gsyn2, '
+                                  'fr_gsyn1, b5V4Q, b5V6Q, b5V8Q, aE46K, aA30P, aA53T, ba12, a1_75, a71_72Del, aT72V, '
+                                  'a71_74Del, a71E72E, a71_81Del, a45V46V71E72E, fr_bsyn, a45V46V, bE46V, b45V46V, '
+                                  'aK45V, aE46V')
 
-lagtimes = namedtuple('lagtimes', 'asyn, a11_140, a21_140, a31_140, a41_140, a51_140, a61_140, a1-75, a1_80, '
-                                  'aDel68_71, aDel71_72, aDel71_74, aDel71_78, aDel71_81, aDel73_83, aDel74-84, '
-                                  'ba1, ba12, b5V, b5V2Q, b5V4Q, b5V6Q, b5V8Q, '
-                                  'aT72V, a71E72E, a45V46V, a45V46V71E72E, aA30P, aE46K, aA53T, aS87E, aS129E, '
-                                  'aK45V, aE46V, bE46V, b45V46V,'
-                                  'b1_73, fr_asyn, fr_gsyn1, fr_gsyn2, gsyn, ga')
-new_lags_deg2 = lagtimes()
-new_lags_deg3 = lagtimes()
-new_lags_deg4 = lagtimes()
-new_lags_deg5 = lagtimes()
-new_lags_deg6 = lagtimes()
+lagtimes_deg2 = lagtimes(asyn=11.3, aS87E=19.8, aS129E=8.1, a1_80=51.8, b1_73=14.6, gsyn=14.6, ga=14.4, a11_140=23.5,
+                         a21_140=12.0, ba1=98.7, a73_83Del=20.4, a31_140=29.1, a41_140=37.7,  a51_140=58.4,
+                         a68_71Del=43.7, a74_84Del=23.1, a61_140=37.8, fr_asyn=1.4, b5V=88.9, fr_gsyn2=1.4,
+                         fr_gsyn1=1.6, b5V4Q=30.5, b5V6Q=17.2, b5V8Q=20.6, aE46K=4.2, aA30P=9.0, aA53T=7.8,
+                         ba12=18.8, a1_75=7.4, a71_72Del=4.1, aT72V=2.4, a71_74Del=7.4, a71E72E=77.2, a71_81Del=43.0,
+                         a45V46V71E72E=22.4, fr_bsyn=63.6, a45V46V=5.4, bE46V=39.3, b45V46V=37.5, aK45V=4.8, aE46V=3.0)
 
-coefs_4props = namedtuple('coefficients_4props', 'nmbp_cf nmh_cf nmnc_cf nmtc_cf', )
+lagtimes_deg3 = lagtimes(asyn=7.2, aS87E=12.2, aS129E=5.3, a1_80=23.9, b1_73=9.2, gsyn=10.8, ga=10.2, a11_140=16.7,
+                         a21_140=8.5, ba1=56.0, a73_83Del=12.1, a31_140=17.3, a41_140=24.0,  a51_140=33.9,
+                         a68_71Del=28.1, a74_84Del=13.9, a61_140=18.3, fr_asyn=1.0, b5V=46.6, fr_gsyn2=1.0,
+                         fr_gsyn1=1.0, b5V4Q=16.6, b5V6Q=11.2, b5V8Q=13.3, aE46K=3.3, aA30P=5.7, aA53T=4.7,
+                         ba12=15.0, a1_75=4.0, a71_72Del=3.7, aT72V=1.5, a71_74Del=5.6, a71E72E=41.8, a71_81Del=27.0,
+                         a45V46V71E72E=14.4, fr_bsyn=30.3, a45V46V=2.8, bE46V=21.2, b45V46V=21.1, aK45V=3.4, aE46V=1.8)
+
+lagtimes_deg4 = lagtimes(asyn=16.1, aS87E=26.4, aS129E=12.0, a1_80=45.1, b1_73=20.3, gsyn=26.0, ga=24.0, a11_140=39.4,
+                         a21_140=19.9, ba1=117.9, a73_83Del=26.0, a31_140=37.1, a41_140=53.9, a51_140=72.3,
+                         a68_71Del=62.6, a74_84Del=30.0, a61_140=35.4, fr_asyn=2.2, b5V=94.5, fr_gsyn2=2.1,
+                         fr_gsyn1=2.2, b5V4Q=34.0, b5V6Q=25.3, b5V8Q=29.8, aE46K=8.1, aA30P=12.7, aA53T=10.4,
+                         ba12=37.1, a1_75=8.2, a71_72Del=9.8, aT72V=3.2, a71_74Del=13.8, a71E72E=85.0, a71_81Del=59.4,
+                         a45V46V71E72E=32.2, fr_bsyn=58.2, a45V46V=5.7, bE46V=43.3, b45V46V=44.1, aK45V=7.8, aE46V=4.0)
+
+lagtimes_deg5 = lagtimes(asyn=13.9, aS87E=22.3, aS129E=10.4, a1_80=35.1, b1_73=17.4, gsyn=23.4, ga=21.4, a11_140=35.0,
+                         a21_140=17.7, ba1=98.0, a73_83Del=21.9, a31_140=31.1, a41_140=46.8, a51_140=60.6,
+                         a68_71Del=53.6, a74_84Del=25.4, a61_140=28.0, fr_asyn=1.9, b5V=77.0, fr_gsyn2=1.9,
+                         fr_gsyn1=1.9, b5V4Q=27.8, b5V6Q=22.0, b5V8Q=25.7, aE46K=7.4, aA30P=10.9, aA53T=8.9,
+                         ba12=34.0, a1_75=6.7, a71_72Del=9.4, aT72V=2.7, a71_74Del=12.5, a71E72E=69.0, a71_81Del=50.6,
+                         a45V46V71E72E=27.7, fr_bsyn=45.8, a45V46V=4.5, bE46V=35.3, b45V46V=36.4, aK45V=6.9, aE46V=3.3)
+
+lagtimes_deg6 = lagtimes(asyn=17.9, aS87E=28.4, aS129E=13.4, a1_80=42.2, b1_73=22.2, gsyn=31.1, ga=28.3,
+                         a11_140=45.9, a21_140=23.2, ba1=123.2, a73_83Del=27.8, a31_140=39.3, a41_140=60.5,
+                         a51_140=76.8, a68_71Del=68.7, a74_84Del=32.3, a61_140=34.0, fr_asyn=2.5, b5V=95.5,
+                         fr_gsyn2=2.4, fr_gsyn1=2.5, b5V4Q=34.6, b5V6Q=28.5, b5V8Q=33.2, aE46K=10.0, aA30P=14.1,
+                         aA53T=11.4, ba12=45.7, a1_75=8.3, a71_72Del=13.0, aT72V=3.4, a71_74Del=16.7, a71E72E=85.3,
+                         a71_81Del=64.6, a45V46V71E72E=35.6, fr_bsyn=55.4, a45V46V=5.7, bE46V=43.7, b45V46V=45.6,
+                         aK45V=9.1, aE46V=4.2)
+
+coefs_4props = namedtuple('coefficients_4props', 'nmbp_cf, nmh_cf, nmnc_cf, nmtc_cf')
 # These are the original coefficients from Zibaee et al 2010 JBC.
 # original_cfs_4props = coefs_4props(nmbp_cf=-0.0741, nmh_cf=0.0662, nmnc_cf=0.0629, nmtc_cf=0.0601)
 
@@ -101,83 +131,103 @@ def _compute_mprops(_4norm_props: NamedTuple) -> float:
            ((cfs_4props.nmtc_cf * _4norm_props.nmtc) + intcpts_4props.nmtc_ic)
 
 
+def _make_fragment(syn_name: str) -> str:
+    prot = ''
+    asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_HUMAN')['SYUA_HUMAN']
+    bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_HUMAN')['SYUB_HUMAN']
+    gsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG_HUMAN')['SYUG_HUMAN']
+    if syn_name[0] == 'a':
+        prot = asyn
+    elif syn_name[0] == 'b':
+        prot = bsyn
+    elif syn_name[0] == 'g':
+        prot = gsyn
+    else:
+        print(f'Character should be a, b or g. Character passed was {syn_name[0]}')
+    if 'Del' in syn_name:
+        start_end = syn_name[1:-3].split('_')
+        fragment = prot[: int(start_end[0]) - 1] + prot[int(start_end[1]):]
+    else:
+        start_end = syn_name[1:].split('_')
+        fragment = prot[int(start_end[0]) - 1: int(start_end[1])]
+    return fragment
+
+
 def _build_syn_sequences(syn_names: list) -> dict:
     asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_HUMAN')['SYUA_HUMAN']
     bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_HUMAN')['SYUB_HUMAN']
+    gsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG_HUMAN')['SYUG_HUMAN']
     fr_asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_FUGU')['SYUA_FUGU']
+    fr_bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_FUGU')['SYUB_FUGU']
     fr_gsyn1 = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG1_FUGU')['SYUG1_FUGU']
     fr_gsyn2 = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG2_FUGU')['SYUG2_FUGU']
-    bsyn_5V = mutator.mutate(prot_seq=bsyn, pos_aa={11: 'V', 19: 'V', 63: 'V', 78: 'V', 102: 'V'})
-    syn_seqs = {'asyn': asyn, 'fr_asyn': fr_asyn, 'fr_gsyn1': fr_gsyn1, 'fr_gsyn2': fr_gsyn2, 'bsyn_5V': bsyn_5V}
+    b5V = mutator.mutate(prot_seq=bsyn, pos_aa={11: 'V', 19: 'V', 63: 'V', 78: 'V', 102: 'V'})
+    syn_seqs = {'asyn': asyn, 'bsyn': bsyn, 'gsyn': gsyn, 'fr_asyn': fr_asyn, 'fr_gsyn1': fr_gsyn1,
+                'fr_gsyn2': fr_gsyn2, 'b5V': b5V}
     for syn_name in syn_names:
         syn_seqs_keys = list(syn_seqs)
         if syn_name not in syn_seqs_keys:
-            if syn_name == 'asyn_11_140':
-                syn_seqs[syn_name] = asyn[10:]
-            elif syn_name == 'asyn_21_140':
-                syn_seqs[syn_name] = asyn[20:]
-            elif syn_name == 'asyn_31_140':
-                syn_seqs[syn_name] = asyn[30:]
-            elif syn_name == 'asyn_41_140':
-                syn_seqs[syn_name] = asyn[40:]
-            elif syn_name == 'asyn_51_140':
-                syn_seqs[syn_name] = asyn[50:]
-            elif syn_name == 'asyn_61_140':
-                syn_seqs[syn_name] = asyn[60:]
-            elif syn_name == 'asyn_1_80':
-                syn_seqs[syn_name] = asyn[:80]
-            elif syn_name == 'asyn_del68_71':
-                syn_seqs[syn_name] = asyn[:68] + asyn[70:]
-            elif syn_name == 'asyn_del71_72':
-                syn_seqs[syn_name] = asyn[:71] + asyn[71:]
-            elif syn_name == 'asyn_del71_74':
-                syn_seqs[syn_name] = asyn[:71] + asyn[73:]
-            elif syn_name == 'asyn_del71_78':
-                syn_seqs[syn_name] = asyn[:71] + asyn[77:]
-            elif syn_name == 'asyn_del71_81':
-                syn_seqs[syn_name] = asyn[:71] + asyn[80:]
-            elif syn_name == 'asyn_del73_83':
-                syn_seqs[syn_name] = asyn[:73] + asyn[82:]
-            elif syn_name == 'bsyn_asyn_1': # bsyn1-72, asyn73-83, bsyn73-134??
+            if syn_name in ['a11_140', 'a21_140', 'a31_140', 'a41_140', 'a51_140', 'a61_140', 'a71_140', 'a1_75',
+                            'a1_80', 'b1_73', 'a68_71Del', 'a71_72Del', 'a71_72Del', 'a71_74Del', 'a71_78Del',
+                            'a71_81Del', 'a73_83Del', 'a74_84Del']
+                syn_seqs[syn_name] = _make_fragment(syn_name)
+            elif syn_name == 'ba1': # bsyn1-72, asyn73-83, bsyn73-134 ..??
                 syn_seqs[syn_name] = bsyn[:72] + asyn[72:83] + bsyn[72:]
-            elif syn_name == 'bsyn_asyn_12':
+            elif syn_name == 'ba12': # asyn1-96, bsyn49 c-terminal residues...??
                 syn_seqs[syn_name] = asyn[:96] + bsyn[85:]
-            elif syn_name == 'bsyn_5V':
-                syn_seqs[syn_name] = bsyn_5V
-            elif syn_name == 'bsyn_5V2Q':
-                syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn_5V, pos_aa={125: 'Q', 126: 'Q'})
-            elif syn_name == 'bsyn_5V4Q':
-                syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn_5V, pos_aa={104: 'Q', 105: 'Q', 125: 'Q', 126: 'Q'})
-            elif syn_name == 'bsyn_5V6Q':
-                syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn_5V, pos_aa={96: 'Q', 97: 'Q', 104: 'Q', 105: 'Q',
-                                                                              125: 'Q', 126: 'Q'})
-            elif syn_name == 'bsyn_5V8Q':
-                syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn_5V, pos_aa={87: 'Q', 88: 'Q', 96: 'Q', 97: 'Q',
-                                                                              104: 'Q', 105: 'Q', 125: 'Q', 126: 'Q'})
-            elif syn_name == 'asyn_45V46V':
-                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={45: 'V', 46: 'V'})
-            elif syn_name == 'asyn_45V46V71E72E':
-                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={45: 'V', 46: 'V', 71: 'E', 72: 'E'})
-            # elif syn_name == 'asyn71E72E': ?? Did it assemble within 96 hours??
-            #     _32_syns_seqs[syn_name] = mutator.mutate_protein(protein_seq=asyn, pos_aa={71: 'E', 72: 'E'})
-            elif syn_name == 'asyn_T72V':
-                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={72: 'V'})
-            elif syn_name == 'asyn_V71E_T72E':
-                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={71: 'E', 72: 'E'})
-            elif syn_name == 'asyn_A30P':
+
+            elif syn_name == 'ga':  # THIS ONE NEEDS TO BE CHECKED - IN MPROPS FILE
+                syn_seqs[syn_name] = gsyn[:72] + asyn[72:83] + gsyn[72:]
+
+            elif syn_name == 'b5V':
+                syn_seqs[syn_name] = b5V
+            elif syn_name == 'b5V2Q':
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=b5V, pos_aa={125: 'Q', 126: 'Q'})
+            elif syn_name == 'b5V4Q':
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=b5V, pos_aa={104: 'Q', 105: 'Q', 125: 'Q', 126: 'Q'})
+            elif syn_name == 'b5V6Q':
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=b5V, pos_aa={96: 'Q', 97: 'Q', 104: 'Q', 105: 'Q',
+                                                                          125: 'Q', 126: 'Q'})
+            elif syn_name == 'b5V8Q':
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=b5V, pos_aa={87: 'Q', 88: 'Q', 96: 'Q', 97: 'Q',
+                                                                          104: 'Q', 105: 'Q', 125: 'Q', 126: 'Q'})
+
+            elif syn_name == 'aA30P':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={30: 'P'})
-            elif syn_name == 'asyn_E46K':
+            elif syn_name == 'aE46K':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={46: 'K'})
-            elif syn_name == 'asyn_A53T':
+            elif syn_name == 'aA53T':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={53: 'T'})
-            elif syn_name == 'asyn_S87E':
+
+            elif syn_name == 'aK45V':
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={45: 'V'})
+            elif syn_name == 'aE46V':
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={46: 'V'})
+            elif syn_name == 'a45V46V':
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={45: 'V', 46: 'V'})
+            elif syn_name == 'a45V46V71E72E':
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={45: 'V', 46: 'V', 71: 'E', 72: 'E'})
+            elif syn_name == 'a71E72E':
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={71: 'E', 72: 'E'})
+
+            elif syn_name == 'bR45V':
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn, pos_aa={45: 'V'})
+            elif syn_name == 'b45V46V':
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn, pos_aa={45: 'V', 46: 'V'})
+            elif syn_name == 'bE46V':
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn, pos_aa={46: 'V'})
+
+            elif syn_name == 'aT72V':
+                syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={72: 'V'})
+            elif syn_name == 'aS87E':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={87: 'E'})
-            elif syn_name == 'asyn_S129E':
+            elif syn_name == 'aS129E':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={129: 'E'})
-            elif syn_name == 'bsyn_1_73':
-                syn_seqs[syn_name] = bsyn[:73]
+
             elif syn_name == 'fr_asyn':
                 syn_seqs[syn_name] = fr_asyn
+            elif syn_name == 'fr_bsyn':
+                syn_seqs[syn_name] = fr_bsyn
             elif syn_name == 'fr_gsyn1':
                 syn_seqs[syn_name] = fr_gsyn1
             elif syn_name == 'fr_gsyn2':
@@ -312,7 +362,7 @@ def compute_normalised_salsa_bsc_integrals(seq: str):
 
 def calculate_relative_weights_for_nmprops_and_nbsc_intgrl(syn_seqs):
     nmprops = compute_normalised_mprops(syn_seqs)
-    nbsc_integral = compute_normalised_salsa_bsc_integrals(seq)
+    nbsc_integral = compute_normalised_salsa_bsc_integrals(syn_seqs)
     # calculate combined_algo TODO
 
 
