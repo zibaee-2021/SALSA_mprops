@@ -29,6 +29,7 @@ def _process_na(lag_times: dict[str: List]) -> dict[str: List]:
     """
     Remove `NA` from the 'lag times' of each synuclein. Remove the synuclein entirely if it is then left with less
     than the minimum number of 'lag times' deemed sufficient for including in the 'lag times' dataset, currently 3.
+    Replace all hyphens with underscores in synuclein names, necessary for mprops module.
     :param lag_times: 'Lag times' for each synuclein including `NA` (indicating no filament assembly within 100 h).
     :return: 'Lag times' of synucleins that have the minimum number of 'lag times', 3 or more.
     """
@@ -36,7 +37,9 @@ def _process_na(lag_times: dict[str: List]) -> dict[str: List]:
     for syn, lags in lag_times.items():
         lags_ = [lag for lag in lags if lag != 'NA']
         processed_lag_times[syn] = lags_
-    return {syn: lags for syn, lags in processed_lag_times.items() if len(lags) >= MIN_NUM_OF_LAG_TIMES_NEEDED}
+
+    return {syn.replace('-', '_'): lags for syn, lags in processed_lag_times.items() if len(lags) >=
+            MIN_NUM_OF_LAG_TIMES_NEEDED}
 
 
 def clean_and_mean(lag_times: dict[str: List]) -> dict[str: float]:
@@ -232,12 +235,12 @@ def write_lag_time_means(lag_time_means: dict[str: float], degree_used: int):
     # degree = 1
     # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
     # degree = 2
-    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=True, degree_to_use=degree)), degree_used=degree)
+    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
     # degree = 3
-    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=True, degree_to_use=degree)), degree_used=degree)
+    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
     # degree = 4
-    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=True, degree_to_use=degree)), degree_used=degree)
+    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
     # degree = 5
-    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=True, degree_to_use=degree)), degree_used=degree)
+    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
     # degree = 6
-    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=True, degree_to_use=degree)), degree_used=degree)
+    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
