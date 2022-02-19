@@ -34,6 +34,12 @@ class TestLagTimeCalculator(TestCase):
         expected = {'asyn': [80, 60, 80]}
         self.assertCountEqual(expected['asyn'], actual['asyn'])
 
+    def test_process_na2(self):
+        lagtimes = {'11-140': [80, 60, 40]}
+        actual = lagcalc._process_na(lagtimes)
+        expected = {'11_140': [80, 60, 40]}
+        self.assertDictEqual(expected, actual)
+
     def test_calc_mean_of_lagtimes(self):
         lagtimes = {'syn': [20, 30, 40, 10]}
         actual = lagcalc._calc_mean_of_lag_times(lagtimes)
