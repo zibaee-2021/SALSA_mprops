@@ -41,6 +41,68 @@ fibrillogenic than they actually were taking in to account the non-inclusion of 
 """
 
 
+def _train_combo_model(syns_lags_seqs_props) -> Tuple[LinearRegression, float]:
+    x_combo = np.array(syns_lags_seqs_props.combo)
+    x_combo = x_combo.reshape((-1, 1))
+    y = np.array(syns_lags_seqs_props.ln_lags)
+    model = LinearRegression()
+    model.fit(x_combo, y)
+    rsq = round(float(model.score(x_combo, y)), 3)
+    return model, rsq
+
+
+def _calc_relative_weights_for_nmprops_and_nbsc(syns_lags_seqs_props: pDF) -> Tuple[dict, dict, dict]:
+    x_nbsc, x_nmprops = np.array(syns_lags_seqs_props.nbsc), np.array(syns_lags_seqs_props.nmprops)
+    x_nbsc, x_nmprops = x_nbsc.reshape((-1, 1)), x_nmprops.reshape((-1, 1))
+    y = np.array(syns_lags_seqs_props.ln_lags)
+    _2coefs, _2intcpts, _2rsq = {}, {}, {}
+    # NOTE: Pycharm bug `TypeError: 'NoneType' object is not callable` in debugger mode.
+    for prop_name, prop_values in zip(['nbsc', 'nmprops'], [x_nbsc, x_nmprops]):
+        model = LinearRegression()
+        model.fit(prop_values, y)
+        _2coefs[prop_name] = round(float(model.coef_), 3)
+        _2intcpts[prop_name] = round(float(model.intercept_), 3)
+        _2rsq[prop_name] = round(float(model.score(prop_values, y)), 3)
+    print(f'_2rsq {_2rsq}')
+    return _2coefs, _2intcpts, _2rsq
+
+
+def _compute_salsa_bsc_integrals(seq: str) -> float:
+    scored_windows_all = execute.compute(sequence=seq, _property=Props.bSC.value, params=DefaultBSC.all_params.value)
+    summed_scores = execute.sum_scores_for_plot(scored_windows_all)
+    return execute.integrate_salsa_plot({'seq': summed_scores})['seq']
+
+
+def _calc_relative_weights_per_prop(syns_lags_seqs_props: pDF) -> Tuple[dict, dict, dict]:
+    """
+    The function should only need to be run once to generate the necessary models for predictions.
+
+    The coefficients of each of following 4 plots were used for combining the 4 properties into one equation.
+    The 4 plots were of nmbp, nmh, nmnc, nmtc against natural log of the lag-times data of 41 recombinant synuclein
+    constructs.
+
+    The lag-times were the time taken for the ThT value to become the squared of its value at time = 0. The 41
+    synuclein constructs that were included satisfied the following two requirements:
+    1. They assembled with a detectable lag-time within 96 hours;
+    2. They had been assayed ≥ 3 times (each from a different protein preparation batch).
+    :return:
+    """
+    x_nmbp, x_nmh, x_nmnc, x_nmtc = np.array(syns_lags_seqs_props.nmbp), np.array(syns_lags_seqs_props.nmh), \
+                                    np.array(syns_lags_seqs_props.nmnc), np.array(syns_lags_seqs_props.nmtc)
+    x_nmbp, x_nmh, x_nmnc, x_nmtc = x_nmbp.reshape((-1, 1)), x_nmh.reshape((-1, 1)),\
+                                    x_nmnc.reshape((-1, 1)), x_nmtc.reshape((-1, 1))
+    y = np.array(syns_lags_seqs_props.ln_lags)
+    _4coefs, _4intcpts, _4rsq = {}, {}, {}
+    # NOTE: Pycharm bug `TypeError: 'NoneType' object is not callable` in debugger mode.
+    for prop_name, prop_values in zip(['nmbp', 'nmh', 'nmnc', 'nmtc'], [x_nmbp, x_nmh, x_nmnc, x_nmtc]):
+        model = LinearRegression()
+        model.fit(prop_values, y)
+        _4coefs[prop_name] = round(float(model.coef_), 3)
+        _4intcpts[prop_name] = round(float(model.intercept_), 3)
+        _4rsq[prop_name] = round(float(model.score(prop_values, y)), 3)
+    return _4coefs, _4intcpts, _4rsq
+
+
 def _compute_4_normalised_props(syns_lags_seqs: pDF) -> pDF:
     syns_lags_seqs['mbp'] = syns_lags_seqs['seqs'].apply(mbp.compute_mean_beta_sheet_prop)
     syns_lags_seqs['mh'] = syns_lags_seqs['seqs'].apply(mh.compute_mean_hydrophilicity)
@@ -134,106 +196,51 @@ def _build_syn_sequences(syns_lags: list) -> dict:
     return syn_seqs
 
 
-def calculate_relative_weights_per_prop(syns_lags_seqs_props: pDF) -> Tuple[dict, dict, dict]:
-    """
-    The function should only need to be run once to generate the necessary models for predictions.
-
-    The coefficients of each of following 4 plots were used for combining the 4 properties into one equation.
-    The 4 plots were of nmbp, nmh, nmnc, nmtc against natural log of the lag-times data of 41 recombinant synuclein
-    constructs.
-
-    The lag-times were the time taken for the ThT value to become the squared of its value at time = 0. The 41
-    synuclein constructs that were included satisfied the following two requirements:
-    1. They assembled with a detectable lag-time within 96 hours;
-    2. They had been assayed ≥ 3 times (each from a different protein preparation batch).
-    :return:
-    """
-    x_nmbp, x_nmh, x_nmnc, x_nmtc = np.array(syns_lags_seqs_props.nmbp), np.array(syns_lags_seqs_props.nmh), \
-                                    np.array(syns_lags_seqs_props.nmnc), np.array(syns_lags_seqs_props.nmtc)
-    x_nmbp, x_nmh, x_nmnc, x_nmtc = x_nmbp.reshape((-1, 1)), x_nmh.reshape((-1, 1)),\
-                                    x_nmnc.reshape((-1, 1)), x_nmtc.reshape((-1, 1))
-    y = np.array(syns_lags_seqs_props.ln_lags)
-    _4coefs, _4intcpts, _4rsq = {}, {}, {}
-    # NOTE: Pycharm bug `TypeError: 'NoneType' object is not callable` in debugger mode.
-    for prop_name, prop_values in zip(['nmbp', 'nmh', 'nmnc', 'nmtc'], [x_nmbp, x_nmh, x_nmnc, x_nmtc]):
-        model = LinearRegression()
-        model.fit(prop_values, y)
-        _4coefs[prop_name] = round(float(model.coef_), 3)
-        _4intcpts[prop_name] = round(float(model.intercept_), 3)
-        _4rsq[prop_name] = round(float(model.score(prop_values, y)), 3)
-    return _4coefs, _4intcpts, _4rsq
-
-
 def _get_ln_lags_and_4norm_props() -> pDF:
     syns_lags = pd.read_csv(os.path.join(abspath_root, 'data', 'tht_data', 'lag_time_degree_4.csv'), index_col=[0])
     syns_lags['ln_lags'] = syns_lags.apply(lambda row: math.log(row['lag_time_means']), axis=1)
-    syn_seqs = _build_syn_sequences(syns_lags)
-    syn_seqs_df = pDF.from_dict(syn_seqs, orient='index', columns=['seqs'])
-    syns_lags_seqs = syns_lags.join(syn_seqs_df)
+    syn_seqs_dict = _build_syn_sequences(syns_lags)
+    syn_seqs = pDF.from_dict(syn_seqs_dict, orient='index', columns=['seqs'])
+    syns_lags_seqs = syns_lags.join(syn_seqs)
     return _compute_4_normalised_props(syns_lags_seqs)
 
 
-def compute_norm_mprops() -> pDF:
+def _compute_norm_mprops() -> pDF:
     syns_lags_seqs_props = _get_ln_lags_and_4norm_props()
-    _4coefs, _4intcpts, _4rsq = calculate_relative_weights_per_prop(syns_lags_seqs_props)
+    _4coefs, _4intcpts, _4rsq = _calc_relative_weights_per_prop(syns_lags_seqs_props)
     syns_lags_seqs_props['mprops'] = syns_lags_seqs_props.apply(lambda row: row.nmbp * _4coefs['nmbp'] +
                                                                             row.nmh * _4coefs['nmh'] +
                                                                             row.nmnc * _4coefs['nmnc'] +
-                                                                            row.nmtc * _4coefs['nmtc'], axis=0)
+                                                                            row.nmtc * _4coefs['nmtc'], axis=1)
     max_ = np.max(list(syns_lags_seqs_props['mprops']))
     min_ = np.min(list(syns_lags_seqs_props['mprops']))
     syns_lags_seqs_props['nmprops'] = syns_lags_seqs_props['mprops'].apply(lambda row: (row - min_) / (max_ - min_))
+    print(f'_4rsq {_4rsq}')
     return syns_lags_seqs_props
 
 
-def _compute_salsa_bsc_integrals(seq: str) -> float:
-    scored_windows_all = execute.compute(sequence=seq, _property=Props.bSC.value, params=DefaultBSC.all_params.value)
-    summed_scores = execute.sum_scores_for_plot(scored_windows_all)
-    return execute.integrate_salsa_plot({'seq': summed_scores})['seq']
-
-
-def _calc_relative_weights_for_nmprops_and_nbsc(syns_lags_seqs_props: pDF) -> Tuple[dict, dict, dict]:
-    x_nbsc, x_nmprops = np.array(syns_lags_seqs_props.nbsc), np.array(syns_lags_seqs_props.nmprops)
-    x_nbsc, x_nmprops = x_nbsc.reshape((-1, 1)), x_nmprops.reshape((-1, 1))
-    y = np.array(syns_lags_seqs_props.ln_lags)
-    _2coefs, _2intcpts, _2rsq = {}, {}, {}
-    # NOTE: Pycharm bug `TypeError: 'NoneType' object is not callable` in debugger mode.
-    for prop_name, prop_values in zip(['nbsc', 'nnmprops'], [x_nbsc, x_nmprops]):
-        model = LinearRegression()
-        model.fit(prop_values, y)
-        _2coefs[prop_name] = round(float(model.coef_), 3)
-        _2intcpts[prop_name] = round(float(model.intercept_), 3)
-        _2rsq[prop_name] = round(float(model.score(prop_values, y)), 3)
-    return _2coefs, _2intcpts, _2rsq
-
-
-def _build_combo_model(syns_lags_seqs_props) -> Tuple[LinearRegression, float]:
-    x_combo = np.array(syns_lags_seqs_props.combo)
-    x_combo = x_combo.reshape((-1, 1))
-    y = np.array(syns_lags_seqs_props.ln_lags)
-    model = LinearRegression()
-    model.fit(x_combo, y)
-    rsq = round(float(model.score(x_combo, y)), 3)
-    return model, rsq
-
-
 def predict_lag_times() -> pDF:
-    syns_lags_seqs_props = compute_norm_mprops()
+    syns_lags_seqs_props = _compute_norm_mprops()
     syns_lags_seqs_props['bsc'] = syns_lags_seqs_props['seqs'].apply(_compute_salsa_bsc_integrals)
     max_ = np.max(list(syns_lags_seqs_props['bsc']))
     min_ = np.min(list(syns_lags_seqs_props['bsc']))
     syns_lags_seqs_props['nbsc'] = syns_lags_seqs_props['bsc'].apply(lambda row: (row - min_) / (max_ - min_))
     _2coefs, _2intcpts, _2rsq = _calc_relative_weights_for_nmprops_and_nbsc(syns_lags_seqs_props)
     syns_lags_seqs_props['combo'] = syns_lags_seqs_props.apply(lambda row: row.nbsc * _2coefs['nbsc'] +
-                                                                           row.nmprops * _2coefs['nmprops'], axis=0)
-    model, rsq = _build_combo_model(syns_lags_seqs_props)
+                                                                           row.nmprops * _2coefs['nmprops'], axis=1)
+    model, rsq = _train_combo_model(syns_lags_seqs_props)
     coef = round(float(model.coef_), 3)
     intcpt = round(float(model.intercept_), 3)
     print(f'rsq {rsq}')
-    syns_lags_seqs_props['pred'] = syns_lags_seqs_props['combo'].apply(model.predict)
+    preds = model.predict(np.array(syns_lags_seqs_props['combo']).reshape(-1, 1))
+    syns_lags_seqs_props['pred'] = np.exp(model.predict(np.array(syns_lags_seqs_props['combo']).reshape(-1, 1)))
     return syns_lags_seqs_props
 
 
+import time
 if __name__ == '__main__':
+    st = time.time()
     df = predict_lag_times()
-    df.head()
+    print(f'time {time.time() - st} secs')
+    print(f'columns {df.columns}')
+    print(df.head(41))
