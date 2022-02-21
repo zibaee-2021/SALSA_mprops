@@ -96,6 +96,29 @@ def make_point_mutants(prot_id_mutants_to_make: dict[str: dict[int: List[str]]])
     return prot_ids_mutant_ids_seqs
 
 
+def make_fragment(syn_name: str) -> str:
+    prot = ''
+    asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_HUMAN')['SYUA_HUMAN']
+    bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_HUMAN')['SYUB_HUMAN']
+    gsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG_HUMAN')['SYUG_HUMAN']
+    if syn_name[0] == 'a':
+        prot = asyn
+    elif syn_name[0] == 'b':
+        prot = bsyn
+    elif syn_name[0] == 'g':
+        prot = gsyn
+    else:
+        print(f'Character should be a, b or g. Character passed was {syn_name[0]}')
+    if 'Del' in syn_name:
+        start_end = syn_name[1:-3].split('_')
+        fragment = prot[: int(start_end[0]) - 1] + prot[int(start_end[1]):]
+    else:
+        start_end = syn_name[1:].split('_')
+        fragment = prot[int(start_end[0]) - 1: int(start_end[1])]
+    return fragment
+
+
+
 def mutate(prot_seq: str, pos_aa: dict) -> str:
     """
     Mutate given protein sequence at the given position(s) to the given residue(s).
