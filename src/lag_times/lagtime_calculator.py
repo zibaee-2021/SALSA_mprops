@@ -223,23 +223,23 @@ def write_lag_time_means(lag_time_means: dict[str: float], degree_used: int):
 
     col_names = ['Synucleins', 'lag_time_means']
     df = pd.DataFrame.from_dict(data=lag_time_means, orient='index', columns=[col_names[1]])
-    df[col_names[0]] = df.index
-    df = df[col_names]
-    df.reset_index(drop=True, inplace=True)
+    # df[col_names[0]] = df.index
+    # df = df[col_names]
+    # df.reset_index(drop=True, inplace=True)
     lag_time_filename = f'lag_time_degree_{degree_used}.csv'
     lag_time_csv = os.path.join(abspath_root, 'data', 'tht_data', lag_time_filename)
-    df.to_csv(lag_time_csv, index=False)
+    df.to_csv(lag_time_csv, index=True)
 
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
     # degree = 1
     # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
     # degree = 2
     # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
     # degree = 3
     # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
-    # degree = 4
-    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
+    degree = 4
+    write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
     # degree = 5
     # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
     # degree = 6
