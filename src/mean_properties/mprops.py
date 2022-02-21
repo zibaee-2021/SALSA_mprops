@@ -1,6 +1,7 @@
 import os
 from typing import Tuple, NamedTuple
 import pandas as pd
+from pandas import DataFrame as pDF
 from src.mean_properties import mbp, mh, mnc_mtc
 from collections import namedtuple
 import math
@@ -13,107 +14,47 @@ from src.mutation import mutator
 from root_path import abspath_root
 """
 The derivation of the coefficients for each of the 4 mean properties (mean beta-sheet propensity, mean hydrophilicity, 
-mean absolute net charge and mean total charge) is based on the kinetics of fibrillogenesis for 39 recombinant 
-synuclein constructs measured in vitro. The calculations are as described in Zibaee et al 2010 JBC (and in the 
-docstrings of the relevant functions below). 
+mean absolute net charge and mean total charge) is based on the kinetics of fibrillogenesis for recombinant 
+synuclein constructs measured in vitro. The calculations are similar to those described in Zibaee et al 2010 JBC
+but differ in some important details. 
+
 The combination of the 4 weighted properties into one is referred to as `mprops`. 
 The combination of normalised mprops and normalised SALSA b-strand contiguity integrals into one calculation is just 
 referred to as the `combined algorithm`. The use of the combined algorithm produces a fit to the lag times with an 
 Rsquared ("coefficient of determination") of ... (Rsquared of 1.0 is a perfect fit).
 
-It is noted here too though that another ... synuclein constructs were assayed and found to not assemble within the 
-duration of the experiment of 96 hours. The predicted lag times for these is also calculated here and for all of the 
-constructs the values range from 100 hours to .. hours.  
-
-Given the nature of these calculations and the stochasticity of the process of fibrillogenesis, values are likely to be 
-specific, not only for natively unfolded proteins, or even for synucleins only but for the specific conditions of the 
-experiments as well. Hence I specify them here alongside the code and mathematical derivations: 
-
+Given the stochastic nature of fibrillogenesis, values are likely to be specific, not only to proteins that are 
+natively unfolded, and not only to synuclein-sized proteins, but also for the specific experimental conditions of the 
+assays as well. Hence I specify these conditions alongside the code and mathematical derivations: 
 Lag times of fibrillogensis of synuclein constructs was based on experiments under the following conditions: 
 - Protein concentration at 400 microMolars in 30 mM MOPs buffer pH 7.2 and 10 microMolar ThT. 
 - Incubation at 37degC, shaken at 450 rpm. 
 - 10 microlitre samples collect at 5 subsequent time points 4h, 8h, 24h, 48h, 96h. All measurements were performed on 
 each sample immediately after collection.
-
 Lag times were measured from each experiment, as time taken for ThT values to reach the square of their zero
-time emission readings at 480nm. The final value is the mean of the lag times for each constructs, rounded to the 
-nearest 0.25 hours.
+time emission readings at 480nm. The final value is the mean of the lag times for each constructs.
 
-Another very important caveat is that for certain synuclein constructs for which lag time data was included, 
-which had longer lag times, those proteins did not begin to assemble within the 96 hours limit. Hence, 
+A very important caveat is that for certain synuclein constructs for which lag time data was included, 
+which had longer lag times, those proteins did not begin to assemble within the 100 hours limit. Hence, 
 the data from these experiments was not included. As such their included data indicates these proteins to be more 
-fibrillogenic than there were observed to be. 
-
-I will see what result I get from replacing the absent data for those in which assembly was not observed with a dummy 
-value of 200 hours.
-
-I may also do this for the large number of other constructs for which assembly was not observed at all within the
-100 hour limit.
+fibrillogenic than they actually were taking in to account the non-inclusion of the aforementioned experiments. 
 """
 
-# Note: although namedtuple takes up twice the number of lines of code as a dict to create, this one uses about 300
-# bytes, while the dict equivalent uses about 1200 bytes. Hence namedtuple uses about 1/4 the memory of dict.
-# while the dict equivalent. An enum cannot be used as it does not allow duplicate values (i.e. it will not store
-# two syns that have the same lag times).
-# lag_times = namedtuple('lag_times', 'asyn asyn_11_140, asyn_21_140, asyn_31_140, asyn_41_140, asyn_51_140,
-# asyn_61_140, '
-#                                   'asyn_1_80, asyn_del68_71, asyn_del71_72, asyn_del71_74, asyn_del71_78, '
-#                                   'asyn_del71_81, asyn_del73_83, bsyn_asyn_1, bsyn_asyn_12, bsyn_5V, bsyn_5V2Q, '
-#                                   'bsyn_5V4Q, bsyn_5V6Q, bsyn_5V8Q, asyn_T72V, asyn_V71E_T72E, asyn_A30P, asyn_E46K, '
-#                                   'asyn_A53T, asyn_S87E, asyn_S129E, bsyn_1_73, fr_asyn, fr_gsyn1, fr_gsyn2')
 
-# orig_lag_times = lag_times(asyn=5.5, asyn_11_140=27.5, asyn_21_140=10.75, asyn_31_140=27.5, asyn_41_140=54.0,
-#                     asyn_51_140=86.5, asyn_61_140=96.5, asyn_1_80=4.75, asyn_del68_71=41.5, asyn_del71_72=8.25,
-#                     asyn_del71_74=9.5, asyn_del71_78=52.75, asyn_del71_81=44.25, asyn_del73_83=19.75,
-#                     bsyn_asyn_1=81.25, bsyn_asyn_12=25.0, bsyn_5V=81.5, bsyn_5V2Q=20.25, bsyn_5V4Q=20.0,
-#                     bsyn_5V6Q=13.5, bsyn_5V8Q=6.75, asyn_T72V=1.0, asyn_V71E_T72E=84.0, asyn_A30P=6.25,
-#                     asyn_E46K=4.5, asyn_A53T=4.25, asyn_S87E=17.0, asyn_S129E=5.75, bsyn_1_73=8.0, fr_asyn=0.75,
-#                     fr_gsyn1=0.75, fr_gsyn2=0.25)
-
-# Note: You cannot use hyphens in namedtuples, so I replaced all hyphens with underscores.
-
-coefs_4props = namedtuple('coefficients_4props', 'nmbp_cf, nmh_cf, nmnc_cf, nmtc_cf')
-# These are the original coefficients from Zibaee et al 2010 JBC.
-# original_cfs_4props = coefs_4props(nmbp_cf=-0.0741, nmh_cf=0.0662, nmnc_cf=0.0629, nmtc_cf=0.0601)
-
-# New coefficients calculated here, using same datasets generated for Zibaee et al 2010 JBC, plus data from Zibaee et
-# al. 2007 JMB.
-# Here coefficients are determined from best fit line using scikit-learn linear regression model.
-cfs_4props = coefs_4props(nmbp_cf=-0.0, nmh_cf=0.0, nmnc_cf=0.0, nmtc_cf=0.0)
-intcpts_4props = namedtuple('intercepts_4props', 'nmbp_ic nmh_ic nmnc_ic nmtc_ic', )
-intcpts = intcpts_4props(nmbp_ic=-0.0, nmh_ic=0.0, nmnc_ic=0.0, nmtc_ic=0.0)
+def _compute_4_normalised_props(syns_lags_seqs: pDF) -> pDF:
+    syns_lags_seqs['mbp'] = syns_lags_seqs['seqs'].apply(mbp.compute_mean_beta_sheet_prop)
+    syns_lags_seqs['mh'] = syns_lags_seqs['seqs'].apply(mh.compute_mean_hydrophilicity)
+    syns_lags_seqs['mnc'] = syns_lags_seqs['seqs'].apply(mnc_mtc.compute_mean_net_charge)
+    syns_lags_seqs['mtc'] = syns_lags_seqs['seqs'].apply(mnc_mtc.compute_mean_total_charge)
+    for prop_name in ['mbp', 'mh', 'mnc', 'mtc']:
+        max_ = np.max(list(syns_lags_seqs[prop_name]))
+        min_ = np.min(list(syns_lags_seqs[prop_name]))
+        syns_lags_seqs[f'n{prop_name}'] = syns_lags_seqs[prop_name].apply(lambda row: (row - min_) / (max_ - min_))
+    return syns_lags_seqs
 
 
-def _compute_mprops(_4norm_props: NamedTuple) -> float:
-    return ((cfs_4props.nmbp_cf * _4norm_props.nmbp) + intcpts_4props.nmbp_ic) +\
-           ((cfs_4props.nmh_cf * _4norm_props.mh) + intcpts_4props.nmh_ic) +\
-           ((cfs_4props.nmnc_cf * _4norm_props.nmnc) + intcpts_4props.nmnc_ic) + \
-           ((cfs_4props.nmtc_cf * _4norm_props.nmtc) + intcpts_4props.nmtc_ic)
-
-
-def _make_fragment(syn_name: str) -> str:
-    prot = ''
-    asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_HUMAN')['SYUA_HUMAN']
-    bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_HUMAN')['SYUB_HUMAN']
-    gsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG_HUMAN')['SYUG_HUMAN']
-    if syn_name[0] == 'a':
-        prot = asyn
-    elif syn_name[0] == 'b':
-        prot = bsyn
-    elif syn_name[0] == 'g':
-        prot = gsyn
-    else:
-        print(f'Character should be a, b or g. Character passed was {syn_name[0]}')
-    if 'Del' in syn_name:
-        start_end = syn_name[1:-3].split('_')
-        fragment = prot[: int(start_end[0]) - 1] + prot[int(start_end[1]):]
-    else:
-        start_end = syn_name[1:].split('_')
-        fragment = prot[int(start_end[0]) - 1: int(start_end[1])]
-    return fragment
-
-
-def _build_syn_sequences(syn_names: list) -> dict:
+def _build_syn_sequences(syns_lags: list) -> dict:
+    syn_names = list(syns_lags.index)
     asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_HUMAN')['SYUA_HUMAN']
     bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_HUMAN')['SYUB_HUMAN']
     gsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG_HUMAN')['SYUG_HUMAN']
@@ -130,7 +71,7 @@ def _build_syn_sequences(syn_names: list) -> dict:
             if syn_name in ['a11_140', 'a21_140', 'a31_140', 'a41_140', 'a51_140', 'a61_140', 'a71_140', 'a1_75',
                             'a1_80', 'b1_73', 'a68_71Del', 'a71_72Del', 'a71_72Del', 'a71_74Del', 'a71_78Del',
                             'a71_81Del', 'a73_83Del', 'a74_84Del']:
-                syn_seqs[syn_name] = _make_fragment(syn_name)
+                syn_seqs[syn_name] = mutator.make_fragment(syn_name)
             elif syn_name == 'bsyn':
                 syn_seqs[syn_name] = bsyn
             elif syn_name == 'ba1':  # bsyn1-72, asyn73-83, bsyn73-134 ..??
@@ -193,28 +134,7 @@ def _build_syn_sequences(syn_names: list) -> dict:
     return syn_seqs
 
 
-def _normalise_mbp_mh_mnc_mtc(mbp: float, mh: float, mnc: float, mtc: float) -> NamedTuple:
-    """
-    Based on calculations from Zibaee et al 2007 JBC, each of the 4 values were normalised to spread to an approx
-    range of 0-100. The calculations were based on the lowest and highest of each of these scores of the sequences of
-    the 41 Synuclein constructs included. They were included if they began to assemble into filaments in vitro
-    within 96 hours if the
-    experiments had been repeated 3 or more times (from different recombinant protein preparations).
-    :param mbp: Non-normalised mean beta-sheet propensity.
-    :param mh: Non-normalised mean hydrophobicity.
-    :param mnc: Non-normalised mean absolute net charge.
-    :param mtc: Non-normalised mean total charge.
-    :return: Normalised mean beta-sheet propensity, mean hydrophobicity, mean absolute net charge and mean total charge.
-    """
-    nmbp = ((mbp * 1000) - 800) / 3
-    nmh = ((mh * -100) - 500) / 1.6
-    nmnc = abs(mnc) * 500
-    nmtc = ((mtc * 1000) - 200) / 1.2
-    _4norm_props = namedtuple('_4norm_props', 'nmbp, nmh, nmnc, nmtc')
-    return _4norm_props(nmbp=nmbp, nmh=nmh, nmnc=nmnc, nmtc=nmtc)
-
-
-def calculate_relative_weights_for_each_4_props() -> Tuple[NamedTuple, NamedTuple, NamedTuple]:
+def calculate_relative_weights_per_prop(syns_lags_seqs_props: pDF) -> Tuple[dict, dict, dict]:
     """
     The function should only need to be run once to generate the necessary models for predictions.
 
@@ -228,141 +148,92 @@ def calculate_relative_weights_for_each_4_props() -> Tuple[NamedTuple, NamedTupl
     2. They had been assayed ≥ 3 times (each from a different protein preparation batch).
     :return:
     """
-    lag_times = pd.read_csv(os.path.join(abspath_root, 'data', 'tht_data', 'lag_time_degree_4.csv'))
-    lag_times['ln_lags'] = lag_times.apply(lambda row: math.log(row['lag_time_means']), axis=1)
-    syns = list(lag_times.Synucleins)
-    syn_seqs = _build_syn_sequences(syns)
-    x_nmbp, x_nmh, x_nmnc, x_nmtc, y = np.zeros(len(syn_seqs)), np.zeros(len(syn_seqs)), np.zeros(len(syn_seqs)), \
-                                       np.zeros(len(syn_seqs)), np.zeros(len(syn_seqs))
-
-    for i, (syn_name, seq) in enumerate(syn_seqs.items()):
-        x_nmbp[i], x_nmh[i], x_nmnc[i], x_nmtc[i] = _normalise_mbp_mh_mnc_mtc(
-            mbp=mbp.compute_mean_beta_sheet_prop(seq), mh=mh.compute_mean_hydrophilicity(seq),
-            mnc=mnc_mtc.compute_mean_net_charge(seq), mtc=mnc_mtc.compute_mean_total_charge(seq))
-        y[i] = float(lag_times.loc[syn_name == lag_times.Synucleins]['ln_lags'])
-
-    x_nmbp, x_nmh, x_nmnc, x_nmtc = x_nmbp.reshape((-1, 1)), x_nmh.reshape((-1, 1)), \
+    x_nmbp, x_nmh, x_nmnc, x_nmtc = np.array(syns_lags_seqs_props.nmbp), np.array(syns_lags_seqs_props.nmh), \
+                                    np.array(syns_lags_seqs_props.nmnc), np.array(syns_lags_seqs_props.nmtc)
+    x_nmbp, x_nmh, x_nmnc, x_nmtc = x_nmbp.reshape((-1, 1)), x_nmh.reshape((-1, 1)),\
                                     x_nmnc.reshape((-1, 1)), x_nmtc.reshape((-1, 1))
-
-    model = LinearRegression()
-    model.fit(x_nmbp, y)
-    # BEWARE PYCHARM IS CURRENTLY GIVING NONETYPES ERROR WHEN IN DEBUGGER MODE. APPARENTLY THIS
-    # IS A PYCHARM BUG SPECIFIC TO LATEST PYTHON 3.10. (SIMILAR PYCHARM BUG WITH MATPLOTLIB.)
-    mbp_rsq = model.score(x_nmbp, y)
-    mbp_cf = float(model.coef_)
-    mbp_ic = float(model.intercept_)
-
-    model.fit(x_nmh, y)
-    mh_rsq = model.score(x_nmh, y)
-    mh_cf = float(model.coef_)
-    mh_ic = float(model.intercept_)
-
-    model.fit(x_nmnc, y)
-    mnc_rsq = model.score(x_nmnc, y)
-    mnc_cf = float(model.coef_)
-    mnc_ic = float(model.intercept_)
-
-    model.fit(x_nmtc, y)
-    mtc_rsq = model.score(x_nmtc, y)
-    mtc_cf = float(model.coef_)
-    mtc_ic = float(model.intercept_)
-
-    _4coefs = namedtuple('_4coefs', 'mbp_cf mh_cf mnc_cf mtc_cf')
-    _4coefs = _4coefs(mbp_cf=mbp_cf, mh_cf=mh_cf, mnc_cf=mnc_cf, mtc_cf=mtc_cf)
-    _4intcpts = namedtuple('_4intcpts', 'mbp_ic mh_ic mnc_ic mtc_ic')
-    _4intcpts = _4intcpts(mbp_ic=mbp_ic, mh_ic=mh_ic, mnc_ic=mnc_ic, mtc_ic=mtc_ic)
-    _4rsq = namedtuple('_4rsq', 'mbp_rsq mh_rsq mnc_rsq mtc_rsq')
-    _4rsq = _4rsq(mbp_rsq=mbp_rsq, mh_rsq=mh_rsq, mnc_rsq=mnc_rsq, mtc_rsq=mtc_rsq)
+    y = np.array(syns_lags_seqs_props.ln_lags)
+    _4coefs, _4intcpts, _4rsq = {}, {}, {}
+    # NOTE: Pycharm bug `TypeError: 'NoneType' object is not callable` in debugger mode.
+    for prop_name, prop_values in zip(['nmbp', 'nmh', 'nmnc', 'nmtc'], [x_nmbp, x_nmh, x_nmnc, x_nmtc]):
+        model = LinearRegression()
+        model.fit(prop_values, y)
+        _4coefs[prop_name] = round(float(model.coef_), 3)
+        _4intcpts[prop_name] = round(float(model.intercept_), 3)
+        _4rsq[prop_name] = round(float(model.score(prop_values, y)), 3)
     return _4coefs, _4intcpts, _4rsq
 
 
-def _normalise_mprops(mprops):
-    return 0
+def _get_ln_lags_and_4norm_props() -> pDF:
+    syns_lags = pd.read_csv(os.path.join(abspath_root, 'data', 'tht_data', 'lag_time_degree_4.csv'), index_col=[0])
+    syns_lags['ln_lags'] = syns_lags.apply(lambda row: math.log(row['lag_time_means']), axis=1)
+    syn_seqs = _build_syn_sequences(syns_lags)
+    syn_seqs_df = pDF.from_dict(syn_seqs, orient='index', columns=['seqs'])
+    syns_lags_seqs = syns_lags.join(syn_seqs_df)
+    return _compute_4_normalised_props(syns_lags_seqs)
 
 
-def compute_normalised_mprops(syn_seqs: NamedTuple):
-    """
-
-    :param syn_seqs: Synuclein name and its amino acid sequence
-    :return:
-    """
-    _4coefs, _4intcpts, _4rsq = calculate_relative_weights_for_each_4_props() # only needs to be done once
-    syn_nmprops = {}
-
-    for syn_name, seq in zip(syn_seqs, syn_seqs._fields):
-        _4norm_props = _normalise_mbp_mh_mnc_mtc(mbp=mbp.compute_mean_beta_sheet_prop(seq),
-                                                 mh=mh.compute_mean_hydrophilicity(seq),
-                                                 mnc=mnc_mtc.compute_mean_net_charge(seq),
-                                                 mtc=mnc_mtc.compute_mean_total_charge(seq))
-        mprops = _compute_mprops(_4norm_props)
-        nmprops = _normalise_mprops(mprops)
-        syn_nmprops[syn_name] = nmprops
-    return syn_nmprops
+def compute_norm_mprops() -> pDF:
+    syns_lags_seqs_props = _get_ln_lags_and_4norm_props()
+    _4coefs, _4intcpts, _4rsq = calculate_relative_weights_per_prop(syns_lags_seqs_props)
+    syns_lags_seqs_props['mprops'] = syns_lags_seqs_props.apply(lambda row: row.nmbp * _4coefs['nmbp'] +
+                                                                            row.nmh * _4coefs['nmh'] +
+                                                                            row.nmnc * _4coefs['nmnc'] +
+                                                                            row.nmtc * _4coefs['nmtc'], axis=0)
+    max_ = np.max(list(syns_lags_seqs_props['mprops']))
+    min_ = np.min(list(syns_lags_seqs_props['mprops']))
+    syns_lags_seqs_props['nmprops'] = syns_lags_seqs_props['mprops'].apply(lambda row: (row - min_) / (max_ - min_))
+    return syns_lags_seqs_props
 
 
-def _normalise_bsc_integral(bsc_integral: float):
-    return 0
-
-
-def _compute_salsa_bsc_integrals(seq):
+def _compute_salsa_bsc_integrals(seq: str) -> float:
     scored_windows_all = execute.compute(sequence=seq, _property=Props.bSC.value, params=DefaultBSC.all_params.value)
     summed_scores = execute.sum_scores_for_plot(scored_windows_all)
     return execute.integrate_salsa_plot({'seq': summed_scores})['seq']
 
 
-def compute_normalised_salsa_bsc_integrals(seq: str):
-    bsc_integral = _compute_salsa_bsc_integrals(seq)
-    return _normalise_bsc_integral(bsc_integral)
+def _calc_relative_weights_for_nmprops_and_nbsc(syns_lags_seqs_props: pDF) -> Tuple[dict, dict, dict]:
+    x_nbsc, x_nmprops = np.array(syns_lags_seqs_props.nbsc), np.array(syns_lags_seqs_props.nmprops)
+    x_nbsc, x_nmprops = x_nbsc.reshape((-1, 1)), x_nmprops.reshape((-1, 1))
+    y = np.array(syns_lags_seqs_props.ln_lags)
+    _2coefs, _2intcpts, _2rsq = {}, {}, {}
+    # NOTE: Pycharm bug `TypeError: 'NoneType' object is not callable` in debugger mode.
+    for prop_name, prop_values in zip(['nbsc', 'nnmprops'], [x_nbsc, x_nmprops]):
+        model = LinearRegression()
+        model.fit(prop_values, y)
+        _2coefs[prop_name] = round(float(model.coef_), 3)
+        _2intcpts[prop_name] = round(float(model.intercept_), 3)
+        _2rsq[prop_name] = round(float(model.score(prop_values, y)), 3)
+    return _2coefs, _2intcpts, _2rsq
 
 
-def calculate_relative_weights_for_nmprops_and_nbsc_intgrl(syn_seqs):
-    nmprops = compute_normalised_mprops(syn_seqs)
-    nbsc_integral = compute_normalised_salsa_bsc_integrals(syn_seqs)
-    # calculate combined_algo TODO
+def _build_combo_model(syns_lags_seqs_props) -> Tuple[LinearRegression, float]:
+    x_combo = np.array(syns_lags_seqs_props.combo)
+    x_combo = x_combo.reshape((-1, 1))
+    y = np.array(syns_lags_seqs_props.ln_lags)
+    model = LinearRegression()
+    model.fit(x_combo, y)
+    rsq = round(float(model.score(x_combo, y)), 3)
+    return model, rsq
 
 
-def predict_lag_time_with_combined_algo(syn_seqs):
-    # TODO
-    pass
+def predict_lag_times() -> pDF:
+    syns_lags_seqs_props = compute_norm_mprops()
+    syns_lags_seqs_props['bsc'] = syns_lags_seqs_props['seqs'].apply(_compute_salsa_bsc_integrals)
+    max_ = np.max(list(syns_lags_seqs_props['bsc']))
+    min_ = np.min(list(syns_lags_seqs_props['bsc']))
+    syns_lags_seqs_props['nbsc'] = syns_lags_seqs_props['bsc'].apply(lambda row: (row - min_) / (max_ - min_))
+    _2coefs, _2intcpts, _2rsq = _calc_relative_weights_for_nmprops_and_nbsc(syns_lags_seqs_props)
+    syns_lags_seqs_props['combo'] = syns_lags_seqs_props.apply(lambda row: row.nbsc * _2coefs['nbsc'] +
+                                                                           row.nmprops * _2coefs['nmprops'], axis=0)
+    model, rsq = _build_combo_model(syns_lags_seqs_props)
+    coef = round(float(model.coef_), 3)
+    intcpt = round(float(model.intercept_), 3)
+    print(f'rsq {rsq}')
+    syns_lags_seqs_props['pred'] = syns_lags_seqs_props['combo'].apply(model.predict)
+    return syns_lags_seqs_props
 
 
 if __name__ == '__main__':
-    _4coefs_, _4intcpts_, _4rsq_ = calculate_relative_weights_for_each_4_props()
-    print(f' _4coefs_ {_4coefs_}, _4intcpts_ {_4intcpts_}, _4rsq_ {_4rsq_}')
-    # print(f' dict {basics.get_size_of(lagtimes)}')
-    # print(f'namedtuple {basics.get_size_of(lagtimes)}')
-
-
-# SynsProps = namedtuple():
-#     asyn = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_11_140 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_21_140 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_31_140 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_41_140 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_51_140 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_61_140 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_1_80 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_del68_71 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_del71_72 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_del71_74 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_del71_78 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_del71_81 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_del73_83 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     bsyn_asyn_1 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     bsyn_asyn_12 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     bsyn_5V = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     bsyn_5V2Q = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     bsyn_5V4Q = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     bsyn_5V6Q = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     bsyn_5V8Q = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_T72V = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_V71E_T72E = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_A30P = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_E46K = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_A53T = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_S87E = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     asyn_S129E = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     bsyn_1_73 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     fr_asyn = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     fr_gsyn1 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
-#     fr_gsyn2 = {'mbp': , 'mh': , 'mnc': , 'mtc': }
+    df = predict_lag_times()
+    df.head()
