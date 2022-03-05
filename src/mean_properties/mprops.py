@@ -151,6 +151,7 @@ def _build_syn_sequences(syns_lags: list) -> dict:
     fr_gsyn1 = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG1_FUGU')['SYUG1_FUGU']
     fr_gsyn2 = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG2_FUGU')['SYUG2_FUGU']
     b5v = mutator.mutate(prot_seq=bsyn, pos_aa={11: 'V', 19: 'V', 63: 'V', 78: 'V', 102: 'V'})
+    assert (len(b5v) == 134)
     syn_seqs = {'asyn': asyn, 'gsyn': gsyn, 'fr_asyn': fr_asyn, 'fr_gsyn1': fr_gsyn1,
                 'fr_gsyn2': fr_gsyn2, 'b5V': b5v}
     for syn_name in syn_names:
@@ -162,60 +163,87 @@ def _build_syn_sequences(syns_lags: list) -> dict:
                 syn_seqs[syn_name] = mutator.make_fragment(syn_name)
             elif syn_name == 'bsyn':
                 syn_seqs[syn_name] = bsyn
-            elif syn_name == 'ba1':  # bsyn1-72, asyn73-83, bsyn73-134 ..??
+                assert (len(syn_seqs[syn_name]) == 134)
+            elif syn_name == 'ba1':  # bsyn1-72, asyn73-83, bsyn73-134. Hence this should be 145 aa long
                 syn_seqs[syn_name] = bsyn[:72] + asyn[72:83] + bsyn[72:]
-            elif syn_name == 'ba12':  # asyn1-96, bsyn49 c-terminal residues...??
+                assert (len(syn_seqs[syn_name]) == 145)
+            elif syn_name == 'ba12':  # asyn1-96, bsyn86-134. Hence this should be 145 aa long.
                 syn_seqs[syn_name] = asyn[:96] + bsyn[85:]
-            elif syn_name == 'ga':  # THIS ONE NEEDS TO BE CHECKED - IN MPROPS FILE
-                syn_seqs[syn_name] = gsyn[:72] + asyn[72:83] + gsyn[72:]
+                assert (len(syn_seqs[syn_name]) == 145)
+            elif syn_name == 'ga':  # gsyn1-72, asyn73-83, gsyn84-127. Hence this should be 127 aa long
+                syn_seqs[syn_name] = gsyn[:72] + asyn[72:83] + gsyn[83:]
+                assert(len(syn_seqs[syn_name]) == 127)
             elif syn_name == 'b5V':
                 syn_seqs[syn_name] = b5v
+                assert (len(syn_seqs[syn_name]) == 134)
             elif syn_name == 'b5V2Q':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=b5v, pos_aa={125: 'Q', 126: 'Q'})
+                assert (len(syn_seqs[syn_name]) == 134)
             elif syn_name == 'b5V4Q':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=b5v, pos_aa={104: 'Q', 105: 'Q', 125: 'Q', 126: 'Q'})
+                assert (len(syn_seqs[syn_name]) == 134)
             elif syn_name == 'b5V6Q':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=b5v, pos_aa={96: 'Q', 97: 'Q', 104: 'Q', 105: 'Q',
                                                                           125: 'Q', 126: 'Q'})
+                assert (len(syn_seqs[syn_name]) == 134)
             elif syn_name == 'b5V8Q':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=b5v, pos_aa={87: 'Q', 88: 'Q', 96: 'Q', 97: 'Q',
                                                                           104: 'Q', 105: 'Q', 125: 'Q', 126: 'Q'})
+                assert (len(syn_seqs[syn_name]) == 134)
             elif syn_name == 'aA30P':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={30: 'P'})
+                assert (len(syn_seqs[syn_name]) == 140)
             elif syn_name == 'aE46K':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={46: 'K'})
+                assert (len(syn_seqs[syn_name]) == 140)
             elif syn_name == 'aA53T':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={53: 'T'})
+                assert (len(syn_seqs[syn_name]) == 140)
             elif syn_name == 'aK45V':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={45: 'V'})
+                assert (len(syn_seqs[syn_name]) == 140)
             elif syn_name == 'aE46V':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={46: 'V'})
+                assert (len(syn_seqs[syn_name]) == 140)
             elif syn_name == 'a45V46V':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={45: 'V', 46: 'V'})
+                assert (len(syn_seqs[syn_name]) == 140)
             elif syn_name == 'a45V46V71E72E':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={45: 'V', 46: 'V', 71: 'E', 72: 'E'})
+                assert (len(syn_seqs[syn_name]) == 140)
             elif syn_name == 'a71E72E':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={71: 'E', 72: 'E'})
+                assert (len(syn_seqs[syn_name]) == 140)
             elif syn_name == 'bR45V':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn, pos_aa={45: 'V'})
+                assert (len(syn_seqs[syn_name]) == 134)
             elif syn_name == 'b45V46V':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn, pos_aa={45: 'V', 46: 'V'})
+                assert (len(syn_seqs[syn_name]) == 134)
             elif syn_name == 'bE46V':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn, pos_aa={46: 'V'})
+                assert (len(syn_seqs[syn_name]) == 134)
             elif syn_name == 'aT72V':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={72: 'V'})
+                assert (len(syn_seqs[syn_name]) == 140)
             elif syn_name == 'aS87E':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={87: 'E'})
+                assert (len(syn_seqs[syn_name]) == 140)
             elif syn_name == 'aS129E':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={129: 'E'})
+                assert (len(syn_seqs[syn_name]) == 140)
             elif syn_name == 'fr_asyn':
                 syn_seqs[syn_name] = fr_asyn
+                assert (len(syn_seqs[syn_name]) == 127)
             elif syn_name == 'fr_bsyn':
                 syn_seqs[syn_name] = fr_bsyn
+                assert (len(syn_seqs[syn_name]) == 117)
             elif syn_name == 'fr_gsyn1':
                 syn_seqs[syn_name] = fr_gsyn1
+                assert (len(syn_seqs[syn_name]) == 113)
             elif syn_name == 'fr_gsyn2':
                 syn_seqs[syn_name] = fr_gsyn2
+                assert (len(syn_seqs[syn_name]) == 124)
             else:
                 print(f'{syn_name} is not recognised.. there must be a typo in one of the conditions or I need to add '
                       f'this one')
