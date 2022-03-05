@@ -74,8 +74,6 @@ You can generate all possible conformations without needing to know the sequence
 In fact you can generate them in advance for any size of protein and then just fill it in
 with the sequence later!
 """
-from __future__ import annotations
-# `annotations` because dataclass cannot recognise Node type self-reference.
 from typing import List, Tuple
 from data.protein_sequences import read_seqs
 import time
@@ -83,6 +81,7 @@ import math
 import pandas as pd
 
 # def _print(conformation):
+
 
 def _get_euclidean_dist(res_pos1, res_pos2):
     return math.sqrt((res_pos1[0] - res_pos2[0]) ** 2 + (res_pos1[1] - res_pos2[1]) ** 2)
@@ -149,11 +148,6 @@ def _extract_unique_pairs(adjacent, adjacent_outer):
             if pair not in pairs_outer:
                 pairs_outer += (pair, )
     return pairs, pairs_outer
-
-
-
-
-
 #
 # def _make_residue_pairs_table()
 
@@ -198,6 +192,7 @@ def _get_conformations(anchor_pos: Tuple, occupied) -> list:
     #         new_confs.append(new_conf)
     # return new_confs
 
+
 def get_conformations(conformations: List[Tuple[Tuple[int, int]]]) -> list:
     """
     Generate all possible conformations for a residue relative to its N-terminal neighbour, termed the `anchor`.
@@ -220,7 +215,15 @@ def get_conformations(conformations: List[Tuple[Tuple[int, int]]]) -> list:
     return combined_confs
 
 
-def build_conformations(seq: str, starting_conformations:List[Tuple[Tuple]] = None):
+def build_conformations(seq: str, starting_conformations: List[Tuple[Tuple]] = None):
+    """
+    Generate all possible 'protein conformations' for the given sequence from the 'starting conformation'. The
+    default starting conformation has just one residue, the N-terminal residue, fixed at position 0, 0.
+    Alternatively, the default can be overridden by a given starting conformation.
+    :param seq:
+    :param starting_conformations:
+    :return:
+    """
     all_protein_confs = [((0, 0),)] if starting_conformations is None else starting_conformations
     for i, aa in enumerate(seq):
         print(f'starting residue {aa} at pos {i + 1}')
@@ -235,10 +238,10 @@ if __name__ == '__main__':
     # prot_id = 'P05067(672-711)'
     # prot_id_seq = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_id)
     # seq = prot_id_seq[prot_id]
-    seq = 'DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA'
-    res = build_conformations('ABCDEFGHIJ')
+    abeta = 'DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA'
+    res_ = build_conformations('ABCDEFGHIJ')
 
-    print(f'Number of possible conformations: {len(res)}')
+    print(f'Number of possible conformations: {len(res_)}')
     print(f'{round((time.time() - st), 1)} s')
 
 
