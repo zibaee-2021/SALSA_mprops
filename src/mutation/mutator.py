@@ -118,7 +118,6 @@ def make_fragment(syn_name: str) -> str:
     return fragment
 
 
-
 def mutate(prot_seq: str, pos_aa: dict) -> str:
     """
     Mutate given protein sequence at the given position(s) to the given residue(s).
@@ -130,16 +129,18 @@ def mutate(prot_seq: str, pos_aa: dict) -> str:
     Alanine, Glutamine and Tyrosine, respectively, the argument is {4: 'A', 30: 'Q', 101: 'Y'}.
     :return: The mutated protein sequence. (Sequence in 1-letter notation).
     """
+    mutated_seq = ''
     for pos, aa in pos_aa.items():
         if not 1 <= pos <= len(prot_seq):
-            print(f"Select position between 1 and {len(prot_seq)}"
+            print(f"Error: select position between 1 and {len(prot_seq)}"
                   f"\nYou specified position: {pos}")
         elif aa not in _20_AA:
-            print(f"Select one of 20 amino acids: {_20_AA} "
+            print(f"Error: select one of 20 amino acids: {_20_AA} "
                   f"\nYou specified unrecognised character: '{aa}'")
         else:
-            prot_seq = prot_seq[:pos - 1] + aa + prot_seq[pos:]
-    return prot_seq
+            mutated_seq = prot_seq[:pos - 1] + aa + prot_seq[pos:]
+        prot_seq = mutated_seq
+    return mutated_seq
 
 
 def mutate_all_sequence(mut_option):
