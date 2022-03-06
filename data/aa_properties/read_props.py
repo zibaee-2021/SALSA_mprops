@@ -1,13 +1,14 @@
 import os
 from typing import Tuple
 from enum import Enum
-from root_path import abspath_root
 import pandas as pd
 from pandas import DataFrame as pDF
 
+from root_path import abspath_root
 rel_path_aa_props = os.path.join('data', 'aa_properties')
 abs_path_aa_props = os.path.join(abspath_root, rel_path_aa_props)
-hydroph_scales_csv = 'hydrophobicity_scales.csv'
+hydroph_scales_csv = os.path.join(abs_path_aa_props, 'hydrophobicity_scales.csv')
+
 
 class Scales(Enum):
     KD = 'Kyte-Doolittle'
@@ -21,21 +22,20 @@ class Scales(Enum):
 
 
 def read_all_hydrophobicity_scales_csv() -> pDF:
-    return pd.read_csv(os.path.join(abs_path_aa_props, hydroph_scales_csv))
+    return pd.read_csv(hydroph_scales_csv)
 
 
-def read_hydrophobicity_scale(hydrophobicity_scale: str = None) -> dict:
+def read_hydrophobicity_scale(scale: str = None) -> dict:
     """
     Read and map given hydrophobicity scale to amino acid as key and hydrophobicity number as value. (Note the scales
     includes the Radzicka & Woldenden hydrophilicity scale).
-    :param hydrophobicity_scale: Hydrophobicity scale name, specified by column name.
+    :param scale: Hydrophobicity scale name, specified by column name.
     'Kyte-Doolittle' by default if no argument is passed.
     :return:
     """
-    if hydrophobicity_scale is None:
-        hydrophobicity_scale = Scales.KD.value
-    df_col = pd.read_csv(hydroph_scales_csv, skipinitialspace=True, usecols=[hydrophobicity_scale, 'aa'])
-    return dict(zip(df_col['aa'], df_col[hydrophobicity_scale]))
+    if scale is None: scale = Scales.KD.value
+    df_col = pd.read_csv(hydroph_scales_csv, skipinitialspace=True, usecols=[scale, 'aa'])
+    return dict(zip(df_col['aa'], df_col[scale]))
 
 
 def read_aa_props_csv() -> pDF:
