@@ -10,6 +10,7 @@ from sklearn.linear_model import LinearRegression
 from src.salsa import execute
 from src.salsa.Options import DefaultBSC, Props
 from data.protein_sequences import read_seqs
+from data.aa_properties.read_props import Scales
 from src.mutation import mutator
 from root_path import abspath_root
 import matplotlib.pyplot as plt
@@ -43,6 +44,16 @@ fibrillogenic than they actually were taking in to account the non-inclusion of 
 
 
 def _plot(model, x: np.array, y: np.array, data_labels: list, title: str, x_label: str, y_label: str = 'ln(lag-time)'):
+    """
+    Generate and display 2D plot of the given data points, as well as the line of the model-predicted values.
+    :param model: Trained model, expected to be that of linear regression.
+    :param x: Independent variables.
+    :param y: Dependent variables.
+    :param data_labels: Labels for each data point, expected to be synuclein names.
+    :param title: Title of plot.
+    :param x_label: Label of independent variables.
+    :param y_label: Label of dependent variables.
+    """
     plt.scatter(x, y, color='g')
     plt.plot(x, model.predict(x), color='k')
     plt.title(title)
@@ -56,11 +67,11 @@ def _plot(model, x: np.array, y: np.array, data_labels: list, title: str, x_labe
 
 def _train_combo_model(syns_lags_seqs_props, make_plot: bool) -> Tuple[LinearRegression, float]:
     """
-
-    :param syns_lags_seqs_props:
+    Fit linear regression of given log of lag times to the given combination of physicochemical properties.    :param syns_lags_seqs_props:
     :param make_plot: True to display 4 plots of the linear regression for each of the 4 mean properties
     against the natural log of 'lag times'.
-    :return:
+    :return: Trained linear regression model of log of lag times against combined properties. Corresponding
+    coefficient of determination,
     """
     x_combo = np.array(syns_lags_seqs_props.combo)
     x_combo = x_combo.reshape((-1, 1))
@@ -74,6 +85,14 @@ def _train_combo_model(syns_lags_seqs_props, make_plot: bool) -> Tuple[LinearReg
 
 
 def _calc_relative_weights_for_nmprops_and_nbsc(syns_lags_seqs_props: pDF, make_plot: bool) -> Tuple[dict, dict, dict]:
+    """
+    Calculate the weights for the two given properties for the synucleins: normalised mprops (nmprops) and normalised
+    integrals of beta-strand contiguity (nbSC).
+    :param syns_lags_seqs_props:
+    :param make_plot: True to display plot.
+    :return: The weights for the nmprops and nbSC, as well as the intercepts and coefficients of determination for the
+    two linear regressions.
+    """
     x_nbsc, x_nmprops = np.array(syns_lags_seqs_props.nbsc), np.array(syns_lags_seqs_props.nmprops)
     x_nbsc, x_nmprops = x_nbsc.reshape((-1, 1)), x_nmprops.reshape((-1, 1))
     y = np.array(syns_lags_seqs_props.ln_lags)
@@ -92,12 +111,17 @@ def _calc_relative_weights_for_nmprops_and_nbsc(syns_lags_seqs_props: pDF, make_
 
 
 def _compute_salsa_bsc_integrals(seq: str) -> float:
+    """
+    Compute SALSA beta-strand contiguity integral for the given sequence.
+    :param seq: Protein sequence in 1-letter notation.
+    :return: SALSA beta-strand contiguity integral.
+    """
     scored_windows_all = execute.compute(sequence=seq, _property=Props.bSC.value, params=DefaultBSC.all_params.value)
     summed_scores = execute.sum_scores_for_plot(scored_windows_all)
     return execute.integrate_salsa_plot({'seq': summed_scores})['seq']
 
 
-def _calc_relative_weights_per_prop(syns_lags_seqs_props: pDF) -> Tuple[dict, dict, dict]:
+def _calc_relative_weights_per_prop(syns_lags_seqs_props: pDF, make_plot: bool) -> Tuple[dict, dict, dict]:
     """
     The function should only need to be run once to generate the necessary models for predictions.
 
@@ -109,7 +133,10 @@ def _calc_relative_weights_per_prop(syns_lags_seqs_props: pDF) -> Tuple[dict, di
     synuclein constructs that were included satisfied the following two requirements:
     1. They assembled with a detectable lag-time within 96 hours;
     2. They had been assayed ≥ 3 times (each from a different protein preparation batch).
-    :return:
+    :param syns_lags_seqs_props: Synuclein names, lag times, amino acid sequences and the 4 calculated nean properties.
+    :param make_plot: True to display 4 plots of the linear regression for each of the 4 mean properties
+    against the natural log of 'lag times'.
+    :return: The 4 coefficients, 4 y-intercepts and 4 R-squared values of the 4 mean properties: mbp, mh, mnc, mtc.
     """
     x_nmbp, x_nmh, x_nmnc, x_nmtc = np.array(syns_lags_seqs_props.nmbp), np.array(syns_lags_seqs_props.nmh), \
                                     np.array(syns_lags_seqs_props.nmnc), np.array(syns_lags_seqs_props.nmtc)
@@ -130,8 +157,15 @@ def _calc_relative_weights_per_prop(syns_lags_seqs_props: pDF) -> Tuple[dict, di
 
 
 def _compute_4_normalised_props(syns_lags_seqs: pDF) -> pDF:
+    """
+    Compute normalised values of the 4 properties for given sequences, (mapped to log of lag times).
+    :param syns_lags_seqs: Synucleins, their log of lag times and sequences.
+    :return: Synucleins, their log of lag times, sequences and the 4 normalised mean properties.
+    ['lag_time_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc']
+    """
     syns_lags_seqs['mbp'] = syns_lags_seqs['seqs'].apply(mbp.compute_mean_beta_sheet_prop)
-    syns_lags_seqs['mh'] = syns_lags_seqs['seqs'].apply(mh.compute_mean_hydrophilicity)
+    syns_lags_seqs['mh'] = syns_lags_seqs['seqs'].apply(lambda row:
+                                                        mh.compute_mean_hydrophobicity(row, Scales.RW.value))
     syns_lags_seqs['mnc'] = syns_lags_seqs['seqs'].apply(mnc_mtc.compute_mean_net_charge)
     syns_lags_seqs['mtc'] = syns_lags_seqs['seqs'].apply(mnc_mtc.compute_mean_total_charge)
     for prop_name in ['mbp', 'mh', 'mnc', 'mtc']:
@@ -142,6 +176,12 @@ def _compute_4_normalised_props(syns_lags_seqs: pDF) -> pDF:
 
 
 def _build_syn_sequences(syns_lags: list) -> dict:
+    """
+    Generate the amino acid sequences of the given synucleins, mapped to log of their lag times.
+    :param syns_lags: Synucleins mapped to their log of lag times.
+    :return: Synucleins mapped to their sequences.
+    """
+    print(f'syns_lags: {syns_lags}')
     syn_names = list(syns_lags.index)
     asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_HUMAN')['SYUA_HUMAN']
     bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_HUMAN')['SYUB_HUMAN']
@@ -251,17 +291,34 @@ def _build_syn_sequences(syns_lags: list) -> dict:
 
 
 def _get_ln_lags_and_4norm_props() -> pDF:
+    """
+    Read all lag times from 4-degree polynomial linear regressions for synucleins.
+    Generate the amino acid sequences.
+    Compute normalised values of the 4 mean properties.
+    :return: Synucleins, log of lag times, sequences and the 4 normalised mean properties.
+    ['lag_time_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc']
+    """
     syns_lags = pd.read_csv(os.path.join(abspath_root, 'data', 'tht_data', 'lag_time_degree_4.csv'), index_col=[0])
     syns_lags['ln_lags'] = syns_lags.apply(lambda row: math.log(row['lag_time_means']), axis=1)
     syn_seqs_dict = _build_syn_sequences(syns_lags)
     syn_seqs = pDF.from_dict(syn_seqs_dict, orient='index', columns=['seqs'])
     syns_lags_seqs = syns_lags.join(syn_seqs)
-    return _compute_4_normalised_props(syns_lags_seqs)
+    syns_lags_seqs_4props = _compute_4_normalised_props(syns_lags_seqs)
+    return syns_lags_seqs_4props
 
 
-def _compute_norm_mprops() -> pDF:
+def _compute_norm_mprops(make_plot: bool) -> pDF:
+    """
+    Compute normalised mprops.
+    :param make_plot: True to display 4 plots of the linear regression for each of the 4 mean properties
+    against the natural log of 'lag times'.
+    :return: Synucleins and normalised mprops.
+    ['lag_time_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc', 'mprops', 'nmprops']
+    """
     syns_lags_seqs_props = _get_ln_lags_and_4norm_props()
-    _4coefs, _4intcpts, _4rsq = _calc_relative_weights_per_prop(syns_lags_seqs_props)
+    # syns_lags_seqs_props = syns_lags_seqs_props.drop(['a1_80', 'fr_asyn', 'fr_bsyn', 'fr_gsyn1', 'fr_gsyn2', 'gsyn',
+    #                                                   'ga'], axis=0)
+    _4coefs, _4intcpts, _4rsq = _calc_relative_weights_per_prop(syns_lags_seqs_props, make_plot=True)
     syns_lags_seqs_props['mprops'] = syns_lags_seqs_props.apply(lambda row: row.nmbp * _4coefs['nmbp'] +
                                                                             row.nmh * _4coefs['nmh'] +
                                                                             row.nmnc * _4coefs['nmnc'] +
@@ -281,16 +338,18 @@ def predict_lag_times(make_plot: bool) -> pDF:
     of mprops, a plot for beta-strand contiguity integrals and finally a plot of the combination of mprops and bSC.
     All of the plots are against the natural log of 'lag times' on the y-axes.
     :return: Synucleins mapped to predicted lag times in hours.
+    ['lag_time_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc', 'mprops',
+    'nmprops', 'bsc', 'nbsc', 'combo', 'pred']
     """
-    syns_lags_seqs_props = _compute_norm_mprops(make_plot=True)
+    syns_lags_seqs_props = _compute_norm_mprops(make_plot=make_plot)
     syns_lags_seqs_props['bsc'] = syns_lags_seqs_props['seqs'].apply(_compute_salsa_bsc_integrals)
     max_ = np.max(list(syns_lags_seqs_props['bsc']))
     min_ = np.min(list(syns_lags_seqs_props['bsc']))
     syns_lags_seqs_props['nbsc'] = syns_lags_seqs_props['bsc'].apply(lambda row: (row - min_) / (max_ - min_))
-    _2coefs, _2intcpts, _2rsq = _calc_relative_weights_for_nmprops_and_nbsc(syns_lags_seqs_props, make_plot=True)
+    _2coefs, _2intcpts, _2rsq = _calc_relative_weights_for_nmprops_and_nbsc(syns_lags_seqs_props, make_plot=make_plot)
     syns_lags_seqs_props['combo'] = syns_lags_seqs_props.apply(lambda row: row.nbsc * _2coefs['nbsc'] +
                                                                            row.nmprops * _2coefs['nmprops'], axis=1)
-    model, rsq = _train_combo_model(syns_lags_seqs_props, make_plot=True)
+    model, rsq = _train_combo_model(syns_lags_seqs_props, make_plot=make_plot)
     coef = round(float(model.coef_), 3)
     intcpt = round(float(model.intercept_), 3)
     print(f'rsq {rsq}')
@@ -303,6 +362,6 @@ import time
 if __name__ == '__main__':
     st = time.time()
     df = predict_lag_times(True)
-    print(f'time {time.time() - st} secs')
+    print(f'time {round(time.time() - st, 2)} secs')
     print(f'columns {df.columns}')
     print(df.head(41))
