@@ -1,5 +1,7 @@
 from enum import Enum
 import numpy as np
+from data.aa_properties import read_props
+from data.aa_properties.read_props import Scales
 
 
 def compute_mean_hydrophilicity(sequence: str):
@@ -10,16 +12,22 @@ def compute_mean_hydrophilicity(sequence: str):
     :param sequence: Protein sequence in 1-letter notation.
     :return: Mean hydrophilicity of given protein.
     """
-    return np.mean([RWS.HYDROPHILICTY.value[aa] for aa in sequence])
+    hl_scale = read_props.read_hydrophobicity_scale(Scales.RW.value)
+    return np.mean([hl_scale[aa] for aa in sequence])
 
 
-# Radzicka_Wolfenden_Scale
-class RWS(Enum):
-
-    HYDROPHILICTY = {'A': -0.45, 'C': -3.63, 'D': -13.34, 'E': -12.63, 'F': -3.15,
-                     'G': 0, 'H': -12.66, 'I': -0.24, 'K': -11.91, 'L': -0.11,
-                     'M': -3.87, 'N': -12.07, 'P': -3.8, 'Q': -11.77, 'R': -22.31,
-                     'S': -7.45, 'T': -7.27, 'V': -0.40, 'W': -8.27, 'Y': -8.50}
+def compute_mean_hydrophobicity(sequence: str, scale: str = None):
+    """
+    Calculate the mean hydrophobicity of the given protein sequence, using the given hydrophobicity scale,
+    `Eisenberg` by default.
+    Other available scales are `Kyte-Doolittle, Hopp-Woods, Cornette, Rose, Janin, and Engelman_(GES)`.
+    :param sequence: Protein sequence in 1-letter notation.
+    :param scale: Hydrophobicity scale to use for computing mean hydrophobicity.
+    :return: Mean hydrophobicity of given protein.
+    """
+    if scale is None: scale = Scales.EBERG.value
+    hb_scale = read_props.read_hydrophobicity_scale(scale)
+    return np.mean([hb_scale[aa] for aa in sequence])
 
 
 if __name__ == '__main__':
