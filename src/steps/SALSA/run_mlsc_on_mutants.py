@@ -12,8 +12,8 @@ point_mutants = {'P05067(672-713)': {1: [AA.Alanine.value], 5: [AA.Cysteine.valu
                                      20: [AA.Histidine.value, AA.Valine.value]}}
 
 # STEP 1 - Make the mutations you want.
-prot_ids_seqs_mutant_ids_seqs = mutate.make_point_mutants(point_mutants)
-
+prot_ids_seqs_mutant_ids_seqs = mutator.make_point_mutants(point_mutants)
+prot_id_seqs = prot_ids_seqs_mutant_ids_seqs
 # STEP 2 - Define parameters for SALSA low-sequence-complexity on the sequences.
 _property = Props.mLSC.value
 params = {'window_len_min': DefaultMLSC.window_len_min.value,
