@@ -1,6 +1,7 @@
 import time
 from AA import AA
 from src.mutation import mutator
+from data import write_outputs
 from src.salsa.Options import Props, DefaultMLSC
 from src.salsa import execute
 
@@ -29,14 +30,19 @@ for prot_id, mutant_ids_seqs in prot_ids_seqs_mutant_ids_seqs.items():
         summed_scores = execute.sum_scores_for_plot(scored_windows_all)
         all_summed_scores[mutant_id] = summed_scores
 
-    # STEP 4 - Plot SALSA summed scores
-    execute.plot_summed_scores(all_summed_scores, _property, prot_name_labels=list(all_summed_scores.keys()),
-                               params=params)
+# STEP 4 - Plot SALSA summed scores
+execute.plot_summed_scores(all_summed_scores, _property, prot_name_labels=list(all_summed_scores.keys()),
+                           params=params)
 
-    # STEP 5 - Sum scores to a scalar
-    salsa_integrals = execute.integrate_salsa_plot(all_summed_scores)
+# STEP 5 - Sum scores to a scalar
+salsa_integrals = execute.integrate_salsa_plot(all_summed_scores)
 
-    # STEP 6 - Write out all_summed_scores and salsa integrals
-    # TODO
+# STEP 6 - Write out all_summed_scores and salsa integrals
+params_ = dict()
+params_['prot_id'] = None
+params_['prop'] = _property
+params_.update(params)
+prop_dirname = '_'.join(_property.split(' '))
+write_outputs.write_csv(params_, prop_dirname, prot_id_seqs, all_summed_scores, salsa_integrals)
 
 print(f'{round(1000 * (time.time() - start), 1)} ms')

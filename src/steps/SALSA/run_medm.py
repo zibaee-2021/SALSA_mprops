@@ -2,6 +2,7 @@ import time
 from data.protein_sequences import read_seqs
 from src.salsa.Options import Props, DefaultMEDM
 from src.salsa import execute
+from data import write_outputs
 
 start = time.time()
 # STEP 0 - Which proteins are you interested in?
@@ -43,6 +44,11 @@ execute.plot_summed_scores(all_summed_scores, _property, prot_name_labels=list(a
 salsa_integrals = execute.integrate_salsa_plot(all_summed_scores)
 
 # STEP 5 - Write out all_summed_scores and salsa integrals
-# TODO
+params_ = dict()
+params_['prot_id'] = None
+params_['prop'] = _property
+params_.update(params)
+prop_dirname = '_'.join(_property.split(' '))
+write_outputs.write_csv(params_, prop_dirname, prot_id_seqs, all_summed_scores, salsa_integrals)
 
 print(f'{round(1000 * (time.time() - start), 1)} ms')
