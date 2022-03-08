@@ -40,6 +40,11 @@ class TestMutator(TestCase):
         expected = {'simple': 'AAP', 'simple(P3D)': 'AAD', 'simple(P3T)': 'AAT'}
         self.assertEqual(expected, actual)
 
+    def test__make_point_mutant_simple2(self):
+        actual = mutator._make_point_mutants(prot_id_seq={'simple': 'AAP'}, point_mutants_to_make={3: ['P']})
+        expected = {'simple': 'AAP'}
+        self.assertEqual(expected, actual)
+
     @patch.object(read_seqs, 'get_sequences_by_uniprot_accession_nums_or_names')
     def test_make_point_mutants(self, mock_get_sequences_by_uniprot_accession_nums_or_names):
         # mock_get_sequences_by_uniprot_accession_nums_or_names.return_value =

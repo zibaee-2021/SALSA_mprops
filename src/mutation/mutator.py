@@ -65,6 +65,9 @@ def _make_point_mutants(prot_id_seq: dict[str: str], point_mutants_to_make: dict
     for position in list(point_mutants_to_make.keys()):
         for mutant_aa in point_mutants_to_make[position]:
             seq_ = list(seq)
+            if seq_[position - 1] == mutant_aa:
+                print(f'{prot_id} already has {mutant_aa} at position {position}')
+                continue
             seq_[position - 1] = mutant_aa
             mutant_seq = ''.join(seq_)
             mutant_name = _make_mutant_name(prot_id_seq, {position: mutant_aa})
