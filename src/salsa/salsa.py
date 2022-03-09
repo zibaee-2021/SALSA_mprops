@@ -1,12 +1,12 @@
 import math
-from typing import List, Tuple
+from pandas import DataFrame as pDF
 from src.mean_properties import mbp as mbp
 from src.mean_properties import mlsc as lsc
 from src.mean_properties import mha as mha
 from src.mean_properties import medm as medm
 import numpy as np
 from matplotlib import pyplot as plt
-from src.salsa.Options import Props
+from src.salsa.Options import Props, DefaultBSC
 
 
 def integrate_salsa_plot(summed_scores: dict) -> dict:
@@ -180,30 +180,58 @@ def compute(sequence: str, _property: str, params: dict) -> np.array:
     return scored_windows_all
 
 
-from data.protein_sequences import read_seqs
-from src.salsa.Options import DefaultBSC
+def _compute_bsc_integrals(seq: str) -> float:
+    """
+    Compute SALSA beta-strand contiguity integral for the given sequence.
+    :param seq: Protein sequence in 1-letter notation.
+    :return: SALSA beta-strand contiguity integral.
+    """
+    scored_windows_all = compute(sequence=seq, _property=Props.bSC.value, params=DefaultBSC.all_params.value)
+    summed_scores = sum_scores_for_plot(scored_windows_all)
+    return integrate_salsa_plot({'seq': summed_scores})['seq']
 
 
-if __name__ == '__main__':
-    _acc = ['P37840']
-    _names = ['']
-    _prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids=_acc)
-    # STEP 1 - Define property and corresponding parameters.
-    _property = Props.bSC.value
-    _params = {'window_len_min': DefaultBSC.window_len_min.value,
-              'window_len_max': DefaultBSC.window_len_max.value,
-              'top_scoring_windows_num': DefaultBSC.top_scoring_windows_num.value,
-              'threshold': DefaultBSC.threshold.value}
-    # STEP 2 - salsa produces an array holding a single numbers for each residue.
-    _all_summed_scores = dict()
-    for prot_id, prot_seq in _prot_id_seqs.items():
-        _scored_windows_all = compute(sequence=prot_seq, _property=_property, params=_params)
-        _summed_scores = sum_scores_for_plot(_scored_windows_all)
-        _all_summed_scores[prot_id] = _summed_scores
+def compute_norm_bsc_integrals(df: pDF) -> pDF:
+    """
 
-    # STEP 3
-    # currently only able to plot one protein per plot.
-    plot_summed_scores(_all_summed_scores, _property, prot_name_labels=list(_all_summed_scores.keys()))
+    :param df:
+    :return:
+    ['lag_time_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc', 'mprops',
+    'nmprops', 'pred']
+    """
+    # df['bsc'] = df['seqs'].apply(_compute_bsc_integrals)
+    df_ = df.copy()
+    df_.loc[:, 'bsc'] = df['seqs'].apply(_compute_bsc_integrals)
+    max_ = np.max(list(df_['bsc']))
+    min_ = np.min(list(df_['bsc']))
+    # df['nbsc'] = df['bsc'].apply(lambda row: (row - min_) / (max_ - min_))
+    df__ = df_.copy()
+    df__.loc[:, 'nbsc'] = df_['bsc'].apply(lambda row: (row - min_) / (max_ - min_))
+    return df__
+
+
+# if __name__ == '__main__':
+    # from data.protein_sequences import read_seqs
+    # from src.salsa.Options import DefaultBSC
+    # _acc = ['P37840']
+    # _names = ['']
+    # _prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids=_acc)
+    # # STEP 1 - Define property and corresponding parameters.
+    # _property = Props.bSC.value
+    # _params = {'window_len_min': DefaultBSC.window_len_min.value,
+    #            'window_len_max': DefaultBSC.window_len_max.value,
+    #            'top_scoring_windows_num': DefaultBSC.top_scoring_windows_num.value,
+    #            'threshold': DefaultBSC.threshold.value}
+    # # STEP 2 - salsa produces an array holding a single numbers for each residue.
+    # _all_summed_scores = dict()
+    # for prot_id, prot_seq in _prot_id_seqs.items():
+    #     _scored_windows_all = compute(sequence=prot_seq, _property=_property, params=_params)
+    #     _summed_scores = sum_scores_for_plot(_scored_windows_all)
+    #     _all_summed_scores[prot_id] = _summed_scores
+    #
+    # # STEP 3
+    # # currently only able to plot one protein per plot.
+    # plot_summed_scores(_all_summed_scores, _property, prot_name_labels=list(_all_summed_scores.keys()))
 
     # summed_scores1 = np.ones((10,))
     # summed_scores0 = np.zeros((20,))
