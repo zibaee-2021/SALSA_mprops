@@ -3,7 +3,7 @@ from AA import AA
 from src.mutation import mutator
 from data import write_outputs
 from src.salsa.Options import Props, DefaultMLSC
-from src.salsa import execute
+from src.salsa import salsa
 
 start = time.time()
 
@@ -26,16 +26,16 @@ params = {'window_len_min': DefaultMLSC.window_len_min.value,
 all_summed_scores = dict()
 for prot_id, mutant_ids_seqs in prot_ids_seqs_mutant_ids_seqs.items():
     for mutant_id, mutant_seq in mutant_ids_seqs.items():
-        scored_windows_all = execute.compute(sequence=mutant_seq, _property=_property, params=params)
-        summed_scores = execute.sum_scores_for_plot(scored_windows_all)
+        scored_windows_all = salsa.compute(sequence=mutant_seq, _property=_property, params=params)
+        summed_scores = salsa.sum_scores_for_plot(scored_windows_all)
         all_summed_scores[mutant_id] = summed_scores
 
 # STEP 4 - Plot SALSA summed scores
-execute.plot_summed_scores(all_summed_scores, _property, prot_name_labels=list(all_summed_scores.keys()),
+salsa.plot_summed_scores(all_summed_scores, _property, prot_name_labels=list(all_summed_scores.keys()),
                            params=params)
 
 # STEP 5 - Sum scores to a scalar
-salsa_integrals = execute.integrate_salsa_plot(all_summed_scores)
+salsa_integrals = salsa.integrate_salsa_plot(all_summed_scores)
 
 # STEP 6 - Write out all_summed_scores and salsa integrals
 params_ = dict()

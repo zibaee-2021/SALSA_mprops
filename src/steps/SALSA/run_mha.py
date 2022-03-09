@@ -6,7 +6,7 @@ from data.protein_sequences import read_seqs
 from data import write_outputs
 from src.salsa import Options
 from src.salsa.Options import Props
-from src.salsa import execute
+from src.salsa import salsa
 
 
 start = time.time()

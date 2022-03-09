@@ -2,7 +2,7 @@ import os
 from unittest import TestCase
 import numpy as np
 from numpy import savetxt, genfromtxt
-from src.salsa import execute
+from src.salsa import salsa
 from numpy import testing as npt
 from src.salsa.Options import Props, DefaultBSC
 from root_path import abspath_root

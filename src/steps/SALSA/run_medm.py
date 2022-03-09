@@ -1,7 +1,7 @@
 import time
 from data.protein_sequences import read_seqs
 from src.salsa.Options import Props, DefaultMEDM
-from src.salsa import execute
+from src.salsa import salsa
 from data import write_outputs
 
 start = time.time()

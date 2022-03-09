@@ -1,8 +1,8 @@
 from typing import Tuple
 import numpy as np
 
-from execute import compute
-import execute
+from salsa import compute
+import salsa
 from data.protein_sequences import read_seqs
 from Options import Props, DefaultBSC
 """

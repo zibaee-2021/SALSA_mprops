@@ -2,7 +2,7 @@ import time
 from data.protein_sequences import read_seqs
 from data import write_outputs
 from src.salsa.Options import Props, DefaultBSC
-from src.salsa import execute
+from src.salsa import salsa
 
 start = time.time()
 accession_numbers, protein_names = [''], ['']
