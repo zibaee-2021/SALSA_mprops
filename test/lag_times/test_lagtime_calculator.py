@@ -1,4 +1,8 @@
 from unittest import TestCase
+import os
+import pandas as pd
+from pandas import testing as pdt
+from root_path import abspath_root
 from src.lag_times import lagtime_calculator as lagcalc
 
 
@@ -47,5 +51,13 @@ class TestLagTimeCalculator(TestCase):
         self.assertEqual(expected, actual)
 
     def test_write_lag_time_means(self):
-        lag_time_means = {'syn': 23}
-        actual = lagcalc.write_lag_time_means(lag_time_means)
+        lag_time_means = {'asyn': 23, 'bsyn': 400}
+        lag_time_means_df = pd.DataFrame.from_dict(data=lag_time_means, orient='index',
+                                                            columns=['lag_time_means'])
+        lagcalc.write_lag_time_means(lag_time_means=lag_time_means, degree_used=4, tht_lagtime_end_value_used=16)
+
+        expected_lag_time_filename = f'lag_time_Degree_{4}_End_value_{16}.csv'
+        expected_lag_time_csv = os.path.join(abspath_root, 'data', 'tht_data', expected_lag_time_filename)
+        expected_lag_time_means_df = pd.read_csv(expected_lag_time_csv, index_col=[0])
+
+        pdt.assert_frame_equal(expected_lag_time_means_df, lag_time_means_df)
