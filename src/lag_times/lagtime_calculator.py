@@ -11,27 +11,29 @@ from sklearn.linear_model import LinearRegression
 
 STARTING_THT_VALUE = 4.0
 SQUARE_OF_STARTING_VALUE = np.square(STARTING_THT_VALUE)
+DOUBLE_STARTING_VALUE = STARTING_THT_VALUE * 2
 MIN_NUM_OF_LAG_TIMES_NEEDED = 3
 
 
 def _calc_mean_of_lag_times(lag_times: dict[str: List]) -> dict[str: float]:
     """
-    Calculate the mean of the 'lag times' of each synuclein. It is expected that this function is called only on the
-    cleaned 'lag times', such that only numerical values are included (`NA` is already removed) and synucleins with
+    Calculate the mean of the 'lag times' of each Synuclein. It is expected that this function is called only on the
+    cleaned 'lag times', such that only numerical values are included (`NA` is already removed) and Synucleins with
     less than 3 'lag times' are also removed.
-    :param lag_times: 'Lag times' of synucleins with 3 or more values and without any `NA`, mapped to the synuclein name.
-    :return: Mean of the given 'lag times' mapped to the corresponding synuclein name.
+    :param lag_times: 'Lag times' of Synucleins with 3 or more values and without any `NA`, mapped to the Synuclein
+    name.
+    :return: Mean of the given 'lag times' mapped to the corresponding Synuclein name.
     """
     return {syn: round(np.mean(lags), 1) for syn, lags in lag_times.items()}
 
 
 def _process_na(lag_times: dict[str: List]) -> dict[str: List]:
     """
-    Remove `NA` from the 'lag times' of each synuclein. Remove the synuclein entirely if it is then left with less
+    Remove `NA` from the 'lag times' of each Synuclein. Remove the Synuclein entirely if it is then left with less
     than the minimum number of 'lag times' deemed sufficient for including in the 'lag times' dataset, currently 3.
-    Replace all hyphens with underscores in synuclein names, necessary for mprops module.
-    :param lag_times: 'Lag times' for each synuclein including `NA` (indicating no filament assembly within 100 h).
-    :return: 'Lag times' of synucleins that have the minimum number of 'lag times', 3 or more.
+    Replace all hyphens with underscores in Synuclein names, necessary for mprops module.
+    :param lag_times: 'Lag times' for each Synuclein including `NA` (indicating no filament assembly within 100 h).
+    :return: 'Lag times' of Synucleins that have the minimum number of 'lag times', 3 or more.
     """
     processed_lag_times = {}
     for syn, lags in lag_times.items():
@@ -44,7 +46,7 @@ def _process_na(lag_times: dict[str: List]) -> dict[str: List]:
 
 def clean_and_mean(lag_times: dict[str: List]) -> dict[str: float]:
     """
-    Take the mean of the 'lag times' for each synuclein that has enough data - that is if 'lag times' from 3 or more
+    Take the mean of the 'lag times' for each Synuclein that has enough data - that is if 'lag times' from 3 or more
     experiments' have a numerical value.
     :param lag_times: Time taken for fluorescence emission to reach the square of the value at zero time.
     :return:
@@ -67,7 +69,9 @@ def _solve_for_y(poly_coefs, intercept, y) -> float:
     before subtracting the function by the 16.0.)
     :param poly_coefs: Coefficients of the polynomial function used to model the data.
     :param intercept: The y-intercept of the function, which is the translated starting ThT value, 4.0.
-    :param y: The ThT value that we want to solve the x (time) for. The square of the starting ThT value, hence 16.0.
+    :param y: The ThT value that we want to solve the x (time) for. This is the ThT value deemed to mark the end of
+    the 'lag time' (assigned to variable called `tht_lagtime_end_value` in other functions in this module).
+    This is currently a choice of either double (hence 8) or the square (hence 16) of the starting value.
     :return: The abscissa solution for the given ordinate value
     """
     pc = poly_coefs.copy()
@@ -87,7 +91,7 @@ def _plot(preproc, lin_reg, x, y, y_pred, syn_name):
     :param x: Time points (expected to be only two time points).
     :param y: ThT values (expected to be only two ThT values).
     :param y_pred: Predicted ThT value according to the trained polynomial regression model.
-    :param syn_name: The synuclein name.
+    :param syn_name: The Synuclein name.
     """
     X_grid = np.arange(min(x), max(x), 0.1)
     X_grid = X_grid.reshape((len(X_grid), 1))
@@ -101,11 +105,11 @@ def _plot(preproc, lin_reg, x, y, y_pred, syn_name):
 
 
 def _calculate_lag_times(syn_name: str, two_time_points: list, two_tht_values: list, lag_times: dict, make_plot: bool,
-                         degree_to_use: int) -> dict[str: List]:
+                         degree_to_use: int, tht_lagtime_end_value: float) -> dict[str: List]:
     """
     Calculate the 'lag time' as the time at which the square of the starting value is reached, from the given ThT
     values which are expected to only include values that reach this otherwise they are None. Use a polynomial
-    regression with the given degree and map all calculated values to the given synuclein name. (The implementation
+    regression with the given degree and map all calculated values to the given Synuclein name. (The implementation
     for assigning values to variables `x` and `y` includes filtering out empty rows which were present in an older
     version but are left in place as it is possible that I may alter the upstream functionality so that all the ThT
     values for the experiment are passed here.)
@@ -115,7 +119,9 @@ def _calculate_lag_times(syn_name: str, two_time_points: list, two_tht_values: l
     :param lag_times: All 'Lag times' calculated thus far, to which the 'lag time' being calculated here is added.
     :param make_plot: True to display a plot of the polynomial regression used.
     :param degree_to_use: The degree to use for the polynomial regression.
-    :return: All 'lag times', mapped to the corresponding synuclein name.
+    :param tht_lagtime_end_value: The ThT value that is deemed to be the end of the 'lag time'. Currently a choice of
+    either double (8.0) the starting value or the square (16.0) of the starting value.
+    :return: All 'lag times', mapped to the corresponding Synuclein name.
     """
     if two_tht_values is None:
         lag_hours = 'NA'
@@ -129,7 +135,7 @@ def _calculate_lag_times(syn_name: str, two_time_points: list, two_tht_values: l
         if make_plot:
             y_pred = lin_reg.predict(x_poly)
             _plot(preproc=poly_reg, lin_reg=lin_reg, x=x, y=y, y_pred=y_pred, syn_name=syn_name)
-        lag_hours = np.real(_solve_for_y(lin_reg.coef_, STARTING_THT_VALUE, SQUARE_OF_STARTING_VALUE))
+        lag_hours = np.real(_solve_for_y(lin_reg.coef_, STARTING_THT_VALUE, tht_lagtime_end_value))
         lag_hours = abs(round(float(lag_hours), 1))
     if syn_name not in lag_times:
         lag_times[syn_name] = [lag_hours]
@@ -174,19 +180,21 @@ def _get_data() -> List[str]:
             yield row
 
 
-def get_lag_times(make_plot: bool, degree_to_use: int) -> dict[str: List]:
+def get_lag_times(make_plot: bool, degree_to_use: int, tht_lagtime_end_value: float) -> dict[str: List]:
     """
     Read `translatedTo4.csv` file and determine the time taken for each protein's ThT fluorescence to reach the
     square of its starting value, which has been translated to 4.0. This is referred to here as a "lag time".
-    The file contains all ThT data for filament-forming synucleins measured between 01.11.01 and 30.10.09.
+    The file contains all ThT data for filament-forming Synucleins measured between 01.11.01 and 30.10.09.
     It is expected to have a particular format, starting a date. This is immediately followed in the next
-    row down by `Time (h)` in the first column and the names of the synuclein constructs in the adjoining columns.
+    row down by `Time (h)` in the first column and the names of the Synuclein constructs in the adjoining columns.
     The subsequent time points at which measurements were taken and the corresponding ThT fluorescence for each
     construct follow in the rows below.
     :param make_plot: True to generate a plot of the region of the ThT fluorescence curve that includes the value by which
     the 'lag time' is deemed to have ended.
     :param degree_to_use: The degree to use for the polynomial regression of the ThT data.
-    :return: Each synuclein name mapped to its 'lag times'.
+    :param tht_lagtime_end_value: The ThT value that is deemed to be the end of the 'lag time'. Currently a choice of
+    either double (8.0) the starting value or the square (16.0) of the starting value.
+    :return: Each Synuclein name mapped to its 'lag times'.
     """
     syn_names = ()
     time_points = np.zeros(10)
@@ -208,9 +216,12 @@ def get_lag_times(make_plot: bool, degree_to_use: int) -> dict[str: List]:
             time_points[i] = row[0]
         elif row[0] == '':
             for i, syn_name in enumerate(syn_names):
-                two_time_points, two_tht_values = _include_lag_phase_only(time_points=time_points, tht_values=tht_values[:, i])
-                lag_times = _calculate_lag_times(syn_name=syn_name, two_time_points=two_time_points, two_tht_values=two_tht_values,
-                                                 lag_times=lag_times, make_plot=make_plot, degree_to_use=degree_to_use)
+                two_time_points, two_tht_values = _include_lag_phase_only(time_points=time_points,
+                                                                          tht_values=tht_values[:, i])
+                lag_times = _calculate_lag_times(syn_name=syn_name, two_time_points=two_time_points,
+                                                 two_tht_values=two_tht_values, lag_times=lag_times,
+                                                 make_plot=make_plot, degree_to_use=degree_to_use,
+                                                 tht_lagtime_end_value=tht_lagtime_end_value)
             syn_names = ()
         else:
             tht_values[i, ] = [float(n) if n != '' else 0.0 for n in row[1: len(syn_names) + 1]]
@@ -219,28 +230,19 @@ def get_lag_times(make_plot: bool, degree_to_use: int) -> dict[str: List]:
     return lag_times
 
 
-def write_lag_time_means(lag_time_means: dict[str: float], degree_used: int):
+def write_lag_time_means(lag_time_means: dict[str: float], degree_used: int, tht_lagtime_end_value_used: float):
 
     col_names = ['Synucleins', 'lag_time_means']
     df = pd.DataFrame.from_dict(data=lag_time_means, orient='index', columns=[col_names[1]])
-    # df[col_names[0]] = df.index
-    # df = df[col_names]
-    # df.reset_index(drop=True, inplace=True)
-    lag_time_filename = f'lag_time_degree_{degree_used}.csv'
+    lag_time_filename = f'lag_time_Degree_{degree_used}_End_value_{tht_lagtime_end_value_used}.csv'
     lag_time_csv = os.path.join(abspath_root, 'data', 'tht_data', lag_time_filename)
     df.to_csv(lag_time_csv, index=True)
 
 
 if __name__ == '__main__':
-    # degree = 1
-    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
-    # degree = 2
-    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
-    # degree = 3
-    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
-    degree = 4
-    write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
-    # degree = 5
-    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
-    # degree = 6
-    # write_lag_time_means(clean_and_mean(get_lag_times(make_plot=False, degree_to_use=degree)), degree_used=degree)
+    # for degree in [1, 2, 3, 4, 5, 6]:
+    for degree in [4]:
+        for tht_lagtime_end_value_ in [SQUARE_OF_STARTING_VALUE, DOUBLE_STARTING_VALUE]:
+            write_lag_time_means(clean_and_mean(
+                get_lag_times(make_plot=False, degree_to_use=degree, tht_lagtime_end_value=tht_lagtime_end_value_)),
+                degree_used=degree, tht_lagtime_end_value_used=tht_lagtime_end_value_)
