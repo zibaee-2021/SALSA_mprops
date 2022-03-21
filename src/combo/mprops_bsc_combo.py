@@ -34,9 +34,11 @@ fibrillogenic than they actually were taking in to account the non-inclusion of 
 """
 
 
-def train_combo_model(syns_lags_seqs_props, make_plot: bool) -> Tuple[LinearRegression, float]:
+def train_combo_model(syns_lags_seqs_props: pDF, make_plot: bool) -> Tuple[LinearRegression, float]:
     """
-    Fit linear regression of given log of lag times to the given combination of physicochemical properties.    :param syns_lags_seqs_props:
+    Fit linear regression of given log of lag times to the given combination of physicochemical properties.
+    :param syns_lags_seqs_props: Synucleins (index) mapped to lag times, log of lag times, sequences and mean
+    properties.
     :param make_plot: True to display 4 plots of the linear regression for each of the 4 mean properties
     against the natural log of 'lag times'.
     :return: Trained linear regression model of log of lag times against combined properties. Corresponding
@@ -79,20 +81,21 @@ def _calc_relative_weights_for_nmprops_and_nbsc(syns_lags_seqs_props: pDF, make_
     return _2coefs, _2intcpts, _2rsq
 
 
-def generate_combo(syns_lnlags_seqs=None, make_plot: bool = True) -> pDF:
+def generate_combo(lagtime_means_csv_filename: str, syns_lnlags_seqs=None, make_plot: bool = True) -> pDF:
     """
     Predict lag time hours for all synucleins based on mean properties and beta-strand contiguity trained with
     observed lag times. Optionally display plots for each of the properties.
+    :param lagtime_means_csv_filename: Name of 'lag-time' means csv filename (including csv extension).
     :param syns_lnlags_seqs: Synuclein names, ln of lag times and sequences.
     :param make_plot: True to display 4 plots of the linear regression for each of the 4 mean properties, for a plot
     of mprops, a plot for beta-strand contiguity integrals and finally a plot of the combination of mprops and bSC.
     All of the plots are against the natural log of 'lag times' on the y-axes.
     :return: Synucleins mapped to predicted lag times in hours.
-    ['lag_time_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc', 'mprops',
+    ['lagtime_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc', 'mprops',
     'nmprops', 'bsc', 'nbsc', 'combo', 'pred']
     """
     if syns_lnlags_seqs is None:
-        syns_lnlags_seqs = utils.get_ln_lags_and_build_seqs()
+        syns_lnlags_seqs = utils.get_ln_lags_and_build_seqs(lagtime_means_csv_filename)
     syns_lags_seqs_props = mprops.compute_norm_mprops(syns_lnlags_seqs, make_plot)
     syns_lags_seqs_props = salsa.compute_norm_bsc_integrals(syns_lags_seqs_props)
     _2coefs, _2intcpts, _2rsq = _calc_relative_weights_for_nmprops_and_nbsc(syns_lags_seqs_props, make_plot=make_plot)
@@ -105,7 +108,5 @@ def generate_combo(syns_lnlags_seqs=None, make_plot: bool = True) -> pDF:
 if __name__ == '__main__':
     import time
     st = time.time()
-    utils.get_ln_lags_and_build_seqs()
-    df = generate_combo(True)
+    df = generate_combo(lagtime_means_csv_filename='lagtime_means_polynDegree_4_lagtimeEndvalue_16.csv', make_plot=True)
     print(f'time {round(time.time() - st, 2)} secs')
-    print(f'combo rsq {df[1]}')
