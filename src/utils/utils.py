@@ -7,27 +7,42 @@ from root_path import abspath_root
 import math
 from src.utils import util_data
 
+LAGTIMES_PATH = os.path.join(abspath_root, 'data', 'tht_data', 'lagtimes')
 
-def _get_ln_lags() -> pDF:
+
+def _get_ln_lags(lagtime_means_csv_filename: str) -> pDF:
     """
     Read all lag times from 4-degree polynomial linear regressions for synucleins.
     Generate the amino acid sequences.
     Compute normalised values of the 4 mean properties.
+    :param lagtime_means_csv_filename: Name of csv filename (including csv extension).
     :return: Synucleins (index) mapped to lag time means and natural log of lag times.
-    ['lag_time_means', 'ln_lags']
+    ['lagtime_means', 'ln_lags']
     """
-    syns_lags = pd.read_csv(os.path.join(abspath_root, 'data', 'tht_data', 'lag_time_degree_4.csv'), index_col=[0])
-    syns_lags['ln_lags'] = syns_lags.apply(lambda row: math.log(row['lag_time_means']), axis=1)
+    syns_lags = pd.read_csv(os.path.join(LAGTIMES_PATH, lagtime_means_csv_filename), index_col=[0])
+    syns_lags['ln_lags'] = syns_lags.apply(lambda row: math.log(row['lagtime_means']), axis=1)
     return syns_lags
 
 
 def _build_syn_sequences(syns_lagtimes: pDF) -> dict:
     """
-    Generate the amino acid sequences of the given synucleins. (the input is expected ton include columns of lag
-    time data but this is not used in this function).
-    :param syns_lags: Synucleins (inclydes lag time data).
+    Generate the amino acid sequences of the given Synucleins.
+    (Note: Although the input is expected to include a column containing the 'lag-times', only the names are used in
+    this function).
+    Expected formats of Synuclein names are as follows:
+    1. All human Synuclein names begin with the identity of Synuclein (alpha, beta, gamma) represented by a single
+    lowercase letter (`a`, `b`, `g`).
+    2. All hyphens replaced by underscores (e.g. `a1-80` replaced by `a1_80`).
+    3. Deletion mutants have `del` suffixed to the stretch of residues that were deleted, e.g. `a68_71del`,
+    with lowercase `d`.
+    4. The `b5V` mutant series indicate the total number of mutations made (to Valine or Glycine or Glutamine), but
+    not the positions, e.g. b5V4Q represents 5 Alanine to Valine substitutions, 4 Glutamate to Glutamine substitutions.
+    5. All other substitutions are use the wild-type residue (uppercase), followed by its position, followed by the
+    mutant residue (uppercase), e.g. `aK45VE46VV71ET72E`.
+    6. Fugu sequences have `fr_` prefix. Mouse beta is `mus_bsyn`, chicken beta is `gallus_bsyn`.
+    :param syns_lagtimes: Synucleins (inclydes lag time data).
     :return: Synucleins (index) mapped to their sequences.
-    ['lag_time_means', 'ln_lags', 'seqs']
+    ['lagtime_means', 'ln_lags', 'seqs']
     """
     syn_names = list(syns_lagtimes.index)
     util_data.check_syn_names(syn_names)
@@ -38,16 +53,19 @@ def _build_syn_sequences(syns_lagtimes: pDF) -> dict:
     fr_bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_FUGU')['SYUB_FUGU']
     fr_gsyn1 = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG1_FUGU')['SYUG1_FUGU']
     fr_gsyn2 = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG2_FUGU')['SYUG2_FUGU']
+    mus_bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_MOUSE')['SYUB_MOUSE']
+    gallus_bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('Q9I9G9_CHICK')['Q9I9G9_CHICK']
     b5v = mutator.mutate(prot_seq=bsyn, pos_aa={11: 'V', 19: 'V', 63: 'V', 78: 'V', 102: 'V'})
     assert (len(b5v) == 134)
     syn_seqs = {'asyn': asyn, 'gsyn': gsyn, 'fr_asyn': fr_asyn, 'fr_gsyn1': fr_gsyn1,
-                'fr_gsyn2': fr_gsyn2, 'b5V': b5v}
+                'fr_gsyn2': fr_gsyn2, 'mus_bsyn': mus_bsyn, 'gallus_bsyn': gallus_bsyn, 'b5V': b5v}
     for syn_name in syn_names:
         syn_seqs_keys = list(syn_seqs)
         if syn_name not in syn_seqs_keys:
-            if syn_name in ['a11_140', 'a21_140', 'a31_140', 'a41_140', 'a51_140', 'a61_140', 'a71_140', 'a1_75',
-                            'a1_80', 'b1_73', 'a68_71Del', 'a71_72Del', 'a71_72Del', 'a71_74Del', 'a71_78Del',
-                            'a71_81Del', 'a73_83Del', 'a74_84Del']:
+            if syn_name in ['a11_140', 'a21_140', 'a31_140', 'a41_140', 'a51_140', 'a61_140', 'a71_140',
+                            'a1_45', 'a1_50', 'a1_55', 'a1_60', 'a1_70', 'a1_75', 'a1_80', 'g1_80', 'b1_73',
+                            'a68_71del', 'a71_72del', 'a71_74del', 'a71_76del', 'a71_78del', 'a71_81del', 'a71_82del',
+                            'a73_83del', 'a74_84del', 'a73_82del']:
                 syn_seqs[syn_name] = mutator.make_fragment(syn_name)
             elif syn_name == 'bsyn':
                 syn_seqs[syn_name] = bsyn
@@ -93,19 +111,19 @@ def _build_syn_sequences(syns_lagtimes: pDF) -> dict:
             elif syn_name == 'aE46V':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={46: 'V'})
                 assert (len(syn_seqs[syn_name]) == 140)
-            elif syn_name == 'a45V46V':
+            elif syn_name == 'aK45VE46V':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={45: 'V', 46: 'V'})
                 assert (len(syn_seqs[syn_name]) == 140)
-            elif syn_name == 'a45V46V71E72E':
+            elif syn_name == 'aK45VE46VV71ET72E':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={45: 'V', 46: 'V', 71: 'E', 72: 'E'})
                 assert (len(syn_seqs[syn_name]) == 140)
-            elif syn_name == 'a71E72E':
+            elif syn_name == 'aV71ET72E':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=asyn, pos_aa={71: 'E', 72: 'E'})
                 assert (len(syn_seqs[syn_name]) == 140)
             elif syn_name == 'bR45V':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn, pos_aa={45: 'V'})
                 assert (len(syn_seqs[syn_name]) == 134)
-            elif syn_name == 'b45V46V':
+            elif syn_name == 'bR45VE46V':
                 syn_seqs[syn_name] = mutator.mutate(prot_seq=bsyn, pos_aa={45: 'V', 46: 'V'})
                 assert (len(syn_seqs[syn_name]) == 134)
             elif syn_name == 'bE46V':
@@ -132,19 +150,26 @@ def _build_syn_sequences(syns_lagtimes: pDF) -> dict:
             elif syn_name == 'fr_gsyn2':
                 syn_seqs[syn_name] = fr_gsyn2
                 assert (len(syn_seqs[syn_name]) == 124)
+            elif syn_name == 'mus_bsyn':
+                syn_seqs[syn_name] = mus_bsyn
+                assert (len(syn_seqs[syn_name]) == 133)
+            elif syn_name == 'gallus_bsyn':
+                syn_seqs[syn_name] = gallus_bsyn
+                assert (len(syn_seqs[syn_name]) == 133)
             else:
                 print(f'{syn_name} is not recognised.. there must be a typo in one of the conditions or I need to add '
                       f'this one')
     return syn_seqs
 
 
-def get_ln_lags_and_build_seqs() -> pDF:
+def get_ln_lags_and_build_seqs(lagtime_means_csv_filename: str) -> pDF:
     """
     Read all lag times of synucleins via polynomial linear regressions. Generate the amino acid sequences.
+    :param lagtime_means_csv_filename: Name of 'lag-time' means csv filename (including csv extension).
     :return: Synucleins, (index) mapped to lag time means, natural log of lag times and the amino acid sequences.
-    ['lag_time_means', 'ln_lags', 'seqs']
+    ['lagtime_means', 'ln_lags', 'seqs']
     """
-    syns_lnlags = _get_ln_lags()
+    syns_lnlags = _get_ln_lags(lagtime_means_csv_filename)
     syn_seqs_dict = _build_syn_sequences(syns_lnlags)
     syn_seqs = pDF.from_dict(syn_seqs_dict, orient='index', columns=['seqs'])
     syns_lnlags_seqs = syns_lnlags.join(syn_seqs)
@@ -152,4 +177,4 @@ def get_ln_lags_and_build_seqs() -> pDF:
 
 
 if __name__ == '__main__':
-    get_ln_lags_and_build_seqs()
+    get_ln_lags_and_build_seqs(lagtime_means_csv_filename='lagtime_means_polynDegree_4_lagtimeEndvalue_16.csv')
