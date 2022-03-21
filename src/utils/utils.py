@@ -5,6 +5,7 @@ from data.protein_sequences import read_seqs
 from src.mutation import mutator
 from root_path import abspath_root
 import math
+from src.utils import util_data
 
 
 def _get_ln_lags() -> pDF:
@@ -20,7 +21,7 @@ def _get_ln_lags() -> pDF:
     return syns_lags
 
 
-def _build_syn_sequences(syns_lags: pDF) -> dict:
+def _build_syn_sequences(syns_lagtimes: pDF) -> dict:
     """
     Generate the amino acid sequences of the given synucleins. (the input is expected ton include columns of lag
     time data but this is not used in this function).
@@ -28,7 +29,8 @@ def _build_syn_sequences(syns_lags: pDF) -> dict:
     :return: Synucleins (index) mapped to their sequences.
     ['lag_time_means', 'ln_lags', 'seqs']
     """
-    syn_names = list(syns_lags.index)
+    syn_names = list(syns_lagtimes.index)
+    util_data.check_syn_names(syn_names)
     asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_HUMAN')['SYUA_HUMAN']
     bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_HUMAN')['SYUB_HUMAN']
     gsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG_HUMAN')['SYUG_HUMAN']
