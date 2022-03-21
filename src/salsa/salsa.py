@@ -196,7 +196,7 @@ def compute_norm_bsc_integrals(df: pDF) -> pDF:
 
     :param df:
     :return:
-    ['lag_time_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc', 'mprops',
+    ['lagtime_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc', 'mprops',
     'nmprops', 'pred']
     """
     # df['bsc'] = df['seqs'].apply(_compute_bsc_integrals)
