@@ -36,17 +36,17 @@ fibrillogenic than they actually were taking in to account the non-inclusion of 
 
 def _calc_relative_weights_per_prop(syns_lags_seqs_props: pDF, make_plot: bool) -> Tuple[dict, dict, dict]:
     """
-    mprops is a weighted sum of the 4 mean properties. These relative weights are the coefficients (i.e. slopes of
-    linear plots) of each of following 4 plots (nmbp, nmh, nmnc, nmtc) against the natural log of the lag-times of
-    xxx-4xx  recombinant synuclein constructs. TODO input the range of synuclein numbers to be used...
+    `mprops` is a weighted sum of the 4 mean properties. These relative weights are the coefficients (i.e. slopes of
+    linear plots) of each of following 4 plots (nmbp, nmh, nmnc, nmtc) against the natural log of the
+    'lag-times' of recombinant synuclein constructs, typically numbering about 30 or more.
 
-    The lag-times were the time taken for the ThT value to become the squared of its value at time = 0. The 41
-    synuclein constructs that were included satisfied the following two requirements:
+    The 'lag-times' were the time taken for the ThT value to become the squared of its value at time = 0. The 41
+    Synuclein constructs that were included satisfied the following two requirements:
     1. They assembled with a detectable lag-time within 96 hours;
     2. They had been assayed ≥ 3 times (each from a different protein preparation batch).
-    :param syns_lags_seqs_props: Synuclein names, lag times, amino acid sequences and the 4 calculated nean properties.
+    :param syns_lags_seqs_props: Synuclein names, lag times, amino acid sequences and the 4 calculated mean properties.
     :param make_plot: True to display 4 plots of the linear regression for each of the 4 mean properties
-    against the natural log of 'lag times'.
+    against the natural log of 'lag-times'.
     :return: The 4 coefficients, 4 y-intercepts and 4 R-squared values of the 4 mean properties: mbp, mh, mnc, mtc.
     """
     x_nmbp, x_nmh, x_nmnc, x_nmtc = np.array(syns_lags_seqs_props.nmbp), np.array(syns_lags_seqs_props.nmh), \
@@ -69,10 +69,10 @@ def _calc_relative_weights_per_prop(syns_lags_seqs_props: pDF, make_plot: bool) 
 
 def compute_4_normalised_props(syns_lags_seqs: pDF) -> pDF:
     """
-    Compute normalised values of the 4 properties for given sequences, (mapped to log of lag times).
-    :param syns_lags_seqs: Synucleins, their log of lag times and sequences.
-    :return: Synucleins, their log of lag times, sequences and the 4 normalised mean properties.
-    ['lag_time_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc']
+    Compute normalised values of the 4 properties for given sequences, (mapped to log of 'lag-times').
+    :param syns_lags_seqs: Synucleins, their log of 'lag-times' and sequences.
+    :return: Synucleins, their log of 'lag-times', sequences and the 4 normalised mean properties.
+    ['lagtime_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc']
     """
     syns_lags_seqs['mbp'] = syns_lags_seqs['seqs'].apply(mbp.compute_mean_beta_sheet_prop)
     syns_lags_seqs['mh'] = syns_lags_seqs['seqs'].apply(lambda row:
@@ -90,10 +90,10 @@ def compute_norm_mprops(syns_lnlags_seqs: pDF, make_plot: bool) -> pDF:
     """
     Compute normalised mprops.
     :param make_plot: True to display 4 plots of the linear regression for each of the 4 mean properties
-    against the natural log of 'lag times'.
+    against the natural log of 'lag-times'.
     :return: Synucleins (index), normalised mprops and sequences.
-    ['lag_time_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc', 'mprops', 'nmprops']
-    Sliced down to two columns: ['lag_time_means', 'ln_lags', 'nmprops', 'seqs'].
+    ['lagtime_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc', 'mprops', 'nmprops']
+    Sliced down to two columns: ['lagtime_means', 'ln_lags', 'nmprops', 'seqs'].
     """
     # syns_lnlags_seqs = syns_lnlags_seqs.drop(['a1_80', 'fr_asyn', 'fr_bsyn', 'fr_gsyn1', 'fr_gsyn2', 'gsyn',
     #                                                   'ga'], axis=0)
@@ -107,9 +107,13 @@ def compute_norm_mprops(syns_lnlags_seqs: pDF, make_plot: bool) -> pDF:
     min_ = np.min(list(syns_lnlags_seqs_4props['mprops']))
     syns_lnlags_seqs_4props['nmprops'] = syns_lnlags_seqs_4props['mprops'].apply(lambda row: (row - min_) / (max_ - min_))
     print(f'_4rsq {_4rsq}')
-    return syns_lnlags_seqs_4props[['lag_time_means', 'ln_lags', 'nmprops', 'seqs']]
+    return syns_lnlags_seqs_4props[['lagtime_means', 'ln_lags', 'nmprops', 'seqs']]
 
 
 if __name__ == '__main__':
-    syns_lnlags_seqs = utils.get_ln_lags_and_build_seqs()
-    compute_norm_mprops(syns_lnlags_seqs, make_plot=True)
+    from src.lagtimes import lagtime_calculator as lc
+    for degree_used in [2, 3, 4, 5]:
+        for tht_end_value_used in [lc.SQUARE_OF_STARTING_VALUE, lc.DOUBLE_STARTING_VALUE]:
+            lt_filename = f'lagtime_means_polynDegree_{degree_used}_lagtimeEndvalue_{int(tht_end_value_used)}.csv'
+            syns_lnlags_seqs = utils.get_ln_lags_and_build_seqs(lagtime_means_csv_filename=lt_filename)
+            compute_norm_mprops(syns_lnlags_seqs, make_plot=True)
