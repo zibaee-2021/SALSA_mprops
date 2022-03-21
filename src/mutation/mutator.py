@@ -1,9 +1,8 @@
-from typing import List
+from typing import List, Tuple
 from enum import Enum
 from data.protein_sequences import read_seqs
-
-
 _20_AA = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+
 
 def _are_valid_positions_to_mutate(prot_id_seqs: dict, prot_id_point_mutations_to_make: dict[str: List[dict]]) -> bool:
     """
@@ -50,7 +49,7 @@ def _make_point_mutants(prot_id_seq: dict[str: str], point_mutants_to_make: dict
     """
     Generate new id suffix and mutated sequence for the given sequence according to the specified amino acid
     substitution. Include original protein name/id and its wild-type sequence.
-    :param prot_id_seq: Protein id/name mapped to its sequence. (Protein sequence should be in 1-letter notation.)
+    :param prot_id_seq: One protein id/name mapped to its sequence. (Protein sequence should be in 1-letter notation.)
     e.g. {'A4_HUMAN(672-713)' :'DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA'}
     :param point_mutants_to_make: Amino acid substitution, e.g. {1: ['Y', 'T'], 2 ['A', 'C']}
     :return: Name of new mutant mapped to the mutated sequence, as well as wild-type.
@@ -82,7 +81,7 @@ def make_point_mutants(prot_id_mutants_to_make: dict[str: dict[int: List[str]]])
     :param prot_id_mutants_to_make: Protein ids/names mapped to a collection of position-amino acid pairings.
     E.g. {'A4_HUMAN(672-713)': {1: ['Y', 'F']},
                    'P10636-7': {301: ['S', 'L']}}
-    :return: Protein ids each mapped to corresponding mutated sequences. Protein sequence in 1-letter notation.
+    :return: Protein ids, each mapped to corresponding mutated sequences. Protein sequence in 1-letter notation.
     e.g. {'A4_HUMAN(672-713)':
                             {'A4_HUMAN(672-713)' :'DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA',
                             'A4_HUMAN(672-713)(D1Y)' :'YAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA',
@@ -112,7 +111,7 @@ def make_fragment(syn_name: str) -> str:
         prot = gsyn
     else:
         print(f'Character should be a, b or g. Character passed was {syn_name[0]}')
-    if 'Del' in syn_name:
+    if 'del' in syn_name:
         start_end = syn_name[1:-3].split('_')
         fragment = prot[: int(start_end[0]) - 1] + prot[int(start_end[1]):]
     else:
@@ -123,7 +122,8 @@ def make_fragment(syn_name: str) -> str:
 
 def mutate(prot_seq: str, pos_aa: dict) -> str:
     """
-    Mutate given protein sequence at the given position(s) to the given residue(s).
+    Mutate given protein sequence at the given position(s) to the given residue(s). This function doesn't care about
+    the protein name/id, it just returns a sequence.
     e.g. You want to mutate your sequence: ACDEFG to ACDYFG. Here pos_aa should be {4: 'Y'}. This will replace the 'E'
     at array index position 3 to 'Y'.
     :param prot_seq: Protein sequence in 1-letter notation.
@@ -146,7 +146,7 @@ def mutate(prot_seq: str, pos_aa: dict) -> str:
     return mutated_seq
 
 
-def mutate_all_sequence(mut_option):
+def mutate_all_sequence(prot_seq: str, mut_option) -> Tuple:
     """
     :param mut_option: One of three following options can be chosen:
     1. to perform specific amino acid substitutions at specific positions in the given protein(s);
