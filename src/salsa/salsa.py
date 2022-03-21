@@ -154,9 +154,9 @@ def _has_valid_window_params(seq: str, window_len_min: int, window_len_max: int)
     return valid
 
 
-def compute(sequence: str, _property: str, params: dict) -> np.array:
+def compute_all_scored_windows(sequence: str, _property: str, params: dict) -> np.array:
     """
-    Calculate the salsa score for the given protein sequence, using the given option (e.g. mean beta-sheet
+    Calculate the SALSA scores for the given protein sequence, using the given option (e.g. mean beta-sheet
     propensities), sliding aver the sequence with the given range of window sizes and step size, returning only those
     values that score over the given threshold.
     To clarify the meaning of the minimum and maximum window sizes:
@@ -166,7 +166,7 @@ def compute(sequence: str, _property: str, params: dict) -> np.array:
     :param _property: The protein property to use for calculating salsa scores. E.g. mean beta-sheet.
     :param params: salsa parameters. They are minimum window size, for a range of window sizes, to use for sliding over
     the sequence.
-    :return: All salsa scores for all window sizes in the given range. An array of arrays.
+    :return: SALSA scores for all window sizes in the given range. An array of arrays.
     """
     scored_windows_all = np.empty(shape=(0, len(sequence)), dtype=float)
     if not _has_valid_window_params(seq=sequence, window_len_min=params['window_len_min'],
@@ -186,7 +186,7 @@ def _compute_bsc_integrals(seq: str) -> float:
     :param seq: Protein sequence in 1-letter notation.
     :return: SALSA beta-strand contiguity integral.
     """
-    scored_windows_all = compute(sequence=seq, _property=Props.bSC.value, params=DefaultBSC.all_params.value)
+    scored_windows_all = compute_all_scored_windows(sequence=seq, _property=Props.bSC.value, params=DefaultBSC.all_params.value)
     summed_scores = sum_scores_for_plot(scored_windows_all)
     return integrate_salsa_plot({'seq': summed_scores})['seq']
 
