@@ -82,11 +82,11 @@ def _calc_mean_of_lagtimes(lagtimes: Dict[str, list]) -> Dict[str, float]:
 
 def clean_and_mean(syn_lagtimes: Dict[str, list]) -> Dict[str, float]:
     """
-    Check and correct syntax of Synuclein names.
+    Validate and correct syntax of Synuclein names.
     Take the mean of the 'lag-times' for each Synuclein that has enough data - that is if 'lag-times' from 3 or more
     experiments' have a numerical value.
-    :param syn_lagtimes: 'Lag-times' mapped to Synuclein names.
-    :return:
+    :param syn_lagtimes: Synuclein names mapped to 'lag-times'.
+    :return: Synuclein names mapped to mean of 'lag-times' where sufficient data for the Synuclein is available.
     """
     syn_lagtimes = {syn.strip().replace('-', '_'): lags for syn, lags in syn_lagtimes.items()}
     util_data.check_syn_names(syn_names=list(syn_lagtimes))
