@@ -186,27 +186,28 @@ def _compute_bsc_integrals(seq: str) -> float:
     :param seq: Protein sequence in 1-letter notation.
     :return: SALSA beta-strand contiguity integral.
     """
-    scored_windows_all = compute_all_scored_windows(sequence=seq, _property=Props.bSC.value, params=DefaultBSC.all_params.value)
+    scored_windows_all = compute_all_scored_windows(sequence=seq, _property=Props.bSC.value,
+                                                    params=DefaultBSC.all_params.value)
     summed_scores = sum_scores_for_plot(scored_windows_all)
     return integrate_salsa_plot({'seq': summed_scores})['seq']
 
 
 def compute_norm_bsc_integrals(df: pDF) -> pDF:
     """
-
-    :param df:
-    :return:
-    ['lagtime_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc', 'mprops',
-    'nmprops', 'pred']
+    Compute normalised beta-strand contiguity integrals for the given Synucleins, mapped to their pre-generated
+    amino acid sequences. Typically called using the output of the `mprops_bsc_combo` module's `compute_norm_mprops()`
+    in `generate_combo()`. Thus, the argument will contain a number of columns of data which are not used here but
+    used in downstream computations, e.g. `ln_lags` and `nmprops`.
+    :param df: Synuclein sequences (mapped to other data columns ['lagtime_means', 'ln_lags', 'nmprops', 'seqs']).
+    :return: Normalised beta-strand contiguity, mapped to Synucleins. (Additional data included used in subsequent
+    computations in `mprops_bsc_combo` module. Columns: ['lagtime_means', 'ln_lags', 'nmprops', 'seqs', 'bsc', 'nbsc'])
     """
-    # df['bsc'] = df['seqs'].apply(_compute_bsc_integrals)
     df_ = df.copy()
     df_.loc[:, 'bsc'] = df['seqs'].apply(_compute_bsc_integrals)
     max_ = np.max(list(df_['bsc']))
     min_ = np.min(list(df_['bsc']))
-    # df['nbsc'] = df['bsc'].apply(lambda row: (row - min_) / (max_ - min_))
     df__ = df_.copy()
-    df__.loc[:, 'nbsc'] = df_['bsc'].apply(lambda row: (row - min_) / (max_ - min_))
+    df__.loc[:, 'nbsc'] = df_['bsc'].apply(lambda row: ((row - min_) / (max_ - min_)) + 0.01)
     return df__
 
 
