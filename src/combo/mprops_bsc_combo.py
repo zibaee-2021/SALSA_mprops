@@ -68,12 +68,12 @@ def _calc_relative_weights_for_nmprops_and_nbsc(syns_lags_seqs_props: pDF, make_
     x_nbsc, x_nmprops = x_nbsc.reshape((-1, 1)), x_nmprops.reshape((-1, 1))
     y = np.array(syns_lags_seqs_props.ln_lags)
     _2coefs, _2intcpts, _2rsq = {}, {}, {}
-    # NOTE: Pycharm bug `TypeError: 'NoneType' object is not callable` in debugger mode.
     for prop_name, prop_values in zip(['nbsc', 'nmprops'], [x_nbsc, x_nmprops]):
         model = LinearRegression()
         model.fit(prop_values, y)
-        if make_plot: plotter.plot(model, x=prop_values, y=y, data_labels=list(syns_lags_seqs_props.index),
-                                   x_label=prop_name, title=prop_name)
+        if make_plot:
+            plotter.plot(model, x=prop_values, y=y, data_labels=list(syns_lags_seqs_props.index), x_label=prop_name,
+                         title=prop_name)
         _2coefs[prop_name] = round(float(model.coef_), 3)
         _2intcpts[prop_name] = round(float(model.intercept_), 3)
         _2rsq[prop_name] = round(float(model.score(prop_values, y)), 3)
@@ -97,11 +97,12 @@ def generate_combo(lagtime_means_csv_filename: str, syns_lnlags_seqs=None, make_
     if syns_lnlags_seqs is None:
         syns_lnlags_seqs = utils.get_ln_lags_and_build_seqs(lagtime_means_csv_filename)
     syns_lags_seqs_props = mprops.compute_norm_mprops(syns_lnlags_seqs, make_plot)
+
     syns_lags_seqs_props = salsa.compute_norm_bsc_integrals(syns_lags_seqs_props)
     _2coefs, _2intcpts, _2rsq = _calc_relative_weights_for_nmprops_and_nbsc(syns_lags_seqs_props, make_plot=make_plot)
     syns_lags_seqs_props_ = syns_lags_seqs_props.copy()
-    syns_lags_seqs_props_.loc[:, 'combo'] = syns_lags_seqs_props.apply(lambda row: row.nbsc * _2coefs['nbsc'] +
-                                                               row.nmprops * _2coefs['nmprops'], axis=1)
+    syns_lags_seqs_props_.loc[:, 'combo'] = syns_lags_seqs_props.\
+        apply(lambda row: row.nbsc * _2coefs['nbsc'] + row.nmprops * _2coefs['nmprops'], axis=1)
     return syns_lags_seqs_props_
 
 
