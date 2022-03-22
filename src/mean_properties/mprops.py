@@ -82,7 +82,8 @@ def compute_4_normalised_props(syns_lags_seqs: pDF) -> pDF:
     for prop_name in ['mbp', 'mh', 'mnc', 'mtc']:
         max_ = np.max(list(syns_lags_seqs[prop_name]))
         min_ = np.min(list(syns_lags_seqs[prop_name]))
-        syns_lags_seqs[f'n{prop_name}'] = syns_lags_seqs[prop_name].apply(lambda row: (row - min_) / (max_ - min_))
+        syns_lags_seqs[f'n{prop_name}'] = syns_lags_seqs[prop_name].apply(
+            lambda row: ((row - min_) / (max_ - min_)) + 0.01)
     return syns_lags_seqs
 
 
@@ -105,7 +106,8 @@ def compute_norm_mprops(syns_lnlags_seqs: pDF, make_plot: bool) -> pDF:
                                                                     row.nmtc * _4coefs['nmtc'], axis=1)
     max_ = np.max(list(syns_lnlags_seqs_4props['mprops']))
     min_ = np.min(list(syns_lnlags_seqs_4props['mprops']))
-    syns_lnlags_seqs_4props['nmprops'] = syns_lnlags_seqs_4props['mprops'].apply(lambda row: (row - min_) / (max_ - min_))
+    syns_lnlags_seqs_4props['nmprops'] = syns_lnlags_seqs_4props['mprops'].apply(
+        lambda row: ((row - min_) / (max_ - min_)) + 0.01)
     print(f'_4rsq {_4rsq}')
     return syns_lnlags_seqs_4props[['lagtime_means', 'ln_lags', 'nmprops', 'seqs']]
 
