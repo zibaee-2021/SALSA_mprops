@@ -26,7 +26,7 @@ params = {'window_len_min': DefaultMLSC.window_len_min.value,
 all_summed_scores = dict()
 for prot_id, mutant_ids_seqs in prot_ids_seqs_mutant_ids_seqs.items():
     for mutant_id, mutant_seq in mutant_ids_seqs.items():
-        scored_windows_all = salsa.compute(sequence=mutant_seq, _property=_property, params=params)
+        scored_windows_all = salsa.compute_all_scored_windows(sequence=mutant_seq, _property=_property, params=params)
         summed_scores = salsa.sum_scores_for_plot(scored_windows_all)
         all_summed_scores[mutant_id] = summed_scores
 

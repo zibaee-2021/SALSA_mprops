@@ -29,7 +29,7 @@ params = Options.DefaultBSC.all_params.value
 # STEP 2 - salsa produces an array holding a single numbers for each residue.
 all_summed_scores = dict()
 for prot_id, prot_seq in prot_id_seqs.items():
-    scored_windows_all = salsa.compute(sequence=prot_seq, _property=_property, params=params)
+    scored_windows_all = salsa.compute_all_scored_windows(sequence=prot_seq, _property=_property, params=params)
     summed_scores = salsa.sum_scores_for_plot(scored_windows_all)
     all_summed_scores[prot_id] = summed_scores
 
