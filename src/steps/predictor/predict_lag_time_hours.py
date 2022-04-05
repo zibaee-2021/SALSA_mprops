@@ -37,7 +37,7 @@ def fit_and_predict_syns(lagtime_means_csv_filename: str, make_plots: bool) -> p
     print(f'{lagtime_means_csv_filename}: combo_model coef {coef}, combo_model_intercept {intcpt}, rsq {rsq}')
     preds = combo_model.predict(np.array(syns_lags_seqs_props['combo']).reshape(-1, 1))
     syns_lags_seqs_props['pred'] = np.exp(preds)
-    return syns_lags_seqs_props[['lagtime_means', 'pred']]
+    return syns_lags_seqs_props[['lagtime_means', 'pred', 'nmprops', 'nbsc']]
 
 
 if __name__ == '__main__':
@@ -50,6 +50,5 @@ if __name__ == '__main__':
         filename = os.fsdecode(b_csv_filename)
         if filename.endswith(".csv"):
             syns_lnlags_seqs = fit_and_predict_syns(lagtime_means_csv_filename=filename, make_plots=False)
-
-    print(syns_lnlags_seqs.head(50))
+            # print(syns_lnlags_seqs.head(50))
 
