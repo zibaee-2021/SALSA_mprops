@@ -1,6 +1,12 @@
 """
-Module to apply a sampling strategy for detecting the optimal configuration of side-chain-side-chain
-interactions in a stacked amyloid fold.
+This module is intended to perform the following two tasks:
+1. Generate 2d tuple representations of all possible conformations of a given length of sequence.
+2. Thread the amino acid sequence identity through these conformations to compute the total complementarity.
+
+The rationale for this is to apply a brute-force sampling strategy for detecting the optimal configuration of
+side-chain-side-chain interactions in a stacked amyloid fold, from a given starting conformation. With no
+pre-determined starting conformation or restrictions, the task is searching every possible conformation of the given
+sequence in a 2d landscape.
 The theory is that by scoring expected side-chain-side-chain interactions according to relative
 levels of complementarity (or otherwise), the sum of all these values for each possible configuration
 will correlate with observed data. Such a finding would strongly suggest that the population of
@@ -223,7 +229,12 @@ def build_conformations(seq: str, starting_conformations: List[Tuple[Tuple]] = N
     :param seq:
     :param starting_conformations:
     :return:
+    TODO: Fix the position of the second residue as well as the first N-terminal residue to avoid populating a huge
+    number of conformations that are identical but simply rotated about the anchor residue. Fixing the position of
+    the second residue as well as the first, seems to address a large if not all of this potential repetition.
     """
+    # TODO
+    # all_protein_confs = [((0, 0), (0, 1),)] if starting_conformations is None else starting_conformations
     all_protein_confs = [((0, 0),)] if starting_conformations is None else starting_conformations
     for i, aa in enumerate(seq):
         print(f'starting residue {aa} at pos {i + 1}')
@@ -231,6 +242,16 @@ def build_conformations(seq: str, starting_conformations: List[Tuple[Tuple]] = N
             all_protein_confs = get_conformations(all_protein_confs)
     return all_protein_confs
 
+"""
+One strategy for reducing the potential number of conformations to sample is to start from the known structures 
+and explore conformational variants from that. This would help establish whether these are the most energetically 
+favourable according to intra-protein bonds, or if there are many other equivalent or more stable conformations.  
+
+Another way is to compute the complementarity score for each conformation and only keep those which score above a 
+threshold. This helps with memory.
+
+
+"""
 
 if __name__ == '__main__':
     # print(multiprocessing.cpu_count())
