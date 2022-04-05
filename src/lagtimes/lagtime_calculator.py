@@ -14,12 +14,14 @@ from src.utils import util_data
 STARTING_THT_VALUE = 4.0
 SQUARE_OF_STARTING_VALUE = np.square(STARTING_THT_VALUE)
 DOUBLE_STARTING_VALUE = STARTING_THT_VALUE * 2
+_1_5_STARTING_VALUE = STARTING_THT_VALUE * 1.5
 MIN_NUM_OF_LAGTIMES_NEEDED = 3
 STR_TIME_H = 'Time (h)'
 ALL_THT_DATA_CSV_PATH = os.path.join(abspath_root, 'data', 'tht_data', 'AllThTData.csv')
 LAGTIMES_PATH = os.path.join(abspath_root, 'data', 'tht_data', 'lagtimes')
 THT_PATH = os.path.join(abspath_root, 'data', 'tht_data')
 ACCEPTABLE_PROPORTION_OF_NULL_LAGTIMES = 1/8
+STANDARD_ASYN_END_THT_VALUE = 250
 
 
 def _has_enough_nonnull_lagtimes(lagtimes: list) -> bool:
@@ -357,7 +359,7 @@ def standardise_tht() -> List[dict]:
             one_tht_expt.append(dict(zip(temp_col_names, row)))
         elif 90 <= float(row[0]) < 101:
             one_tht_expt.append(dict(zip(temp_col_names, row)))
-            scaling_factor = 100 / float(row[1])
+            scaling_factor = STANDARD_ASYN_END_THT_VALUE / float(row[1])
             translate_by = {syn_name: STARTING_THT_VALUE - (scaling_factor * zero_time_values[syn_name]) for
                             syn_name in syn_names}
             standardised_tht_all.extend(_standardise_tht(one_tht_expt, translate_by, scaling_factor, syn_names))
@@ -390,9 +392,9 @@ def write_standardised_tht_data_all(standardised_tht_all: List[dict]):
 if __name__ == '__main__':
     # from src.utils.file_manipulator import read_xls_and_write_csv
     # read_xls_and_write_csv(xls_path=os.path.join(abspath_root, 'data', 'tht_data', 'AllThTData.xls'))
-    # write_standardised_tht_data_all(standardise_tht())
-    for degree_to_use in [2, 3, 4, 5]:
-        for lagtime_end_value_to_use in [SQUARE_OF_STARTING_VALUE, DOUBLE_STARTING_VALUE]:
+    write_standardised_tht_data_all(standardise_tht())
+    for degree_to_use in [3, 4, 5]:
+        for lagtime_end_value_to_use in [_1_5_STARTING_VALUE, DOUBLE_STARTING_VALUE]:
             lagtimes_ = get_lagtimes(make_plot=False, degree_to_use=degree_to_use,
                                      tht_lagtime_end_value=lagtime_end_value_to_use)
             lagtime_means_ = clean_and_mean(lagtimes_)
