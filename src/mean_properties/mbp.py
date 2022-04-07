@@ -22,9 +22,12 @@ def compute_mean_beta_sheet_prop(sequence: str) -> float:
     """
     beta_sum, alpha_sum, turn_sum = 0, 0, 0
     for c in sequence:
-        beta_sum += CFP.BETASTRAND.value[c]
-        alpha_sum += CFP.ALPHAHELIX.value[c]
-        turn_sum += CFP.TURN.value[c]
+        if c == ' ':
+            raise KeyError('Remove white-space from sequence and run again.')
+        else:
+            beta_sum += CFP.BETASTRAND.value[c]
+            alpha_sum += CFP.ALPHAHELIX.value[c]
+            turn_sum += CFP.TURN.value[c]
     return beta_sum / (0.5 * (alpha_sum + turn_sum))
 
 
