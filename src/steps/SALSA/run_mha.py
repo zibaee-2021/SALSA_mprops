@@ -11,14 +11,14 @@ from src.salsa import salsa
 
 start = time.time()
 # STEP 0 - Which proteins are you interested in?
-# accession_numbers = ['']
+accession_numbers, protein_names = [''], ['']
 # accession_numbers = ['P37840']
 # accession_numbers = ['P37840', 'Q16143', 'P10636-8']
-protein_names = ['']
 # protein_names = ['SYUA_HUMAN', 'SYUB_HUMAN']
 # protein_names = ['TADBP_HUMAN']
 # accession_numbers = ['P10636-5', 'P10636-8']
-accession_numbers = ['P05067(672-711)', 'P05067(672-713)']
+# accession_numbers = ['P05067(672-711)', 'P05067(672-713)']
+protein_names = ['T106B_HUMAN']
 # accession_numbers = ['P10636-2', 'P10636-4', 'P10636-5']
 # protein_names = ['SYUA_HUMAN', 'PRIO_HUMAN', 'URE2_YEAST', 'E9P8Q3_YEASX', 'TADBP_HUMAN']
 prot_ids = protein_names + accession_numbers
@@ -39,7 +39,7 @@ for prot_id, prot_seq in prot_id_seqs.items():
 
 
 # STEP 3 - Plot SALSA summed scores
-# execute.plot_summed_scores(all_summed_scores, _property, prot_name_labels=list(all_summed_scores.keys()), params=params)
+# salsa.plot_summed_scores(all_summed_scores, _property, prot_name_labels=list(all_summed_scores.keys()), params=params)
 
 # STEP 4 - Generate a single scalar representing the property of interest for the protein of interest.
 salsa_integrals = salsa.integrate_salsa_plot(all_summed_scores)

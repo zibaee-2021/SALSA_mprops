@@ -5,8 +5,9 @@ from src.salsa.Options import Props, DefaultBSC
 from src.salsa import salsa
 
 start = time.time()
+
+# STEP 0 - SELECT PROTEINS:
 accession_numbers, protein_names = [''], ['']
-# STEP 0 - Which proteins are you interested in?
 # accession_numbers = ['']
 # accession_numbers = ['P37840']
 # accession_numbers = ['P37840', 'Q16143', 'P10636-8']
@@ -16,28 +17,29 @@ accession_numbers, protein_names = [''], ['']
 # protein_names = ['SYUA_HUMAN']
 # protein_names = ['TADBP_HUMAN']
 # protein_names = ['SYUA_HUMAN', 'PRIO_HUMAN', 'URE2_YEAST', 'E9P8Q3_YEASX', 'TADBP_HUMAN']
-protein_names = ['SYUA_FUGU', 'SYUB_FUGU', 'SYUG1_FUGU', 'SYUG2_FUGU']
+# protein_names = ['SYUA_FUGU', 'SYUB_FUGU', 'SYUG1_FUGU', 'SYUG2_FUGU']
+protein_names =['T106B_HUMAN', 'SYUA_HUMAN']
 prot_ids = accession_numbers + protein_names
 prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids=prot_ids)
 
-# STEP 1 - Define property and corresponding parameters.
+# STEP 1 - SELECT PROPERTY AND CORRESPONDING PARAMETERS:
 _property = Props.bSC.value
 params = DefaultBSC.all_params.value
 
-# STEP 2 - salsa produces an array holding a single numbers for each residue.
+# STEP 2 - RUN SALSA TO GENERATE SUMMED SCORES PER RESIDUE:
 all_summed_scores = dict()
 for prot_id, prot_seq in prot_id_seqs.items():
     scored_windows_all = salsa.compute_all_scored_windows(sequence=prot_seq, _property=_property, params=params)
     summed_scores = salsa.sum_scores_for_plot(scored_windows_all)
     all_summed_scores[prot_id] = summed_scores
 
-# STEP 3 - Plot SALSA summed scores
-# execute.plot_summed_scores(all_summed_scores, _property, prot_name_labels=list(all_summed_scores.keys()), params=params)
+# STEP 3 - PLOT OUTPUT OF PREVIOUS STEP:
+salsa.plot_summed_scores(all_summed_scores, _property, prot_name_labels=list(all_summed_scores.keys()), params=params)
 
-# STEP 4 - Generate a single scalar representing the property of interest for the protein of interest.
+# STEP 4 - SUM SCORES TO SCALAR:
 salsa_integrals = salsa.integrate_salsa_plot(all_summed_scores)
 
-# STEP 5 - Write out all_summed_scores and salsa integrals
+# STEP 5 - WRITE RESULTS TO CSV:
 params_ = dict()
 params_['prot_id'] = None
 params_['prop'] = _property
