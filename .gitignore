@@ -6,3 +6,4 @@ salsa_outputs
 tht_data
 sandbox
 .pyc
+*pycache*
