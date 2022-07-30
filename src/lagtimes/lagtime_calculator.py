@@ -403,11 +403,16 @@ def write_standardised_tht_data_all(standardised_tht_all: List[dict]):
 if __name__ == '__main__':
     # from src.utils.file_manipulator import read_xls_and_write_csv
     # read_xls_and_write_csv(xls_path=os.path.join(abspath_root, 'data', 'tht_data', 'AllThTData.xls'))
-    write_standardised_tht_data_all(standardise_tht())
-    for degree_to_use in [3, 4, 5]:
-        for lagtime_end_value_to_use in [_1_5_STARTING_VALUE, DOUBLE_STARTING_VALUE]:
-            lagtimes_ = get_lagtimes(make_plot=False, degree_to_use=degree_to_use,
+
+    # write_standardised_tht_data_all(standardise_tht())
+    for _degree_to_use in [3, 4, 5]:
+        for lagtime_end_value_to_use in [_1_5_STARTING_VALUE, DOUBLE_STARTING_VALUE, SQUARE_OF_STARTING_VALUE]:
+            _lagtimes = get_lagtimes(make_plot=False, degree_to_use=_degree_to_use,
                                      tht_lagtime_end_value=lagtime_end_value_to_use)
-            lagtime_means_ = clean_and_mean(lagtimes_)
-            write_lagtime_means(lagtime_means=lagtime_means_, degree_used=degree_to_use,
+            write_lagtimes(lagtimes=_lagtimes, degree_used=_degree_to_use,
+                           tht_lagtime_end_value_used=lagtime_end_value_to_use)
+            _lagtimes_cleaned = clean(syn_lagtimes=_lagtimes)
+            _lagtime_means_stdev = calculate_mean(_lagtimes_cleaned)
+            # _lagtime_means_stdev = __clean_and_mean(syn_lagtimes=_lagtimes)
+            write_lagtime_means(lagtime_means=_lagtime_means_stdev, degree_used=_degree_to_use,
                                 tht_lagtime_end_value_used=lagtime_end_value_to_use)
