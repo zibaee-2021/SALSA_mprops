@@ -338,8 +338,8 @@ def _standardise_tht(pre_standardised_tht: list, translate_by: Dict[str, float],
 
 def standardise_tht() -> List[dict]:
     """
-    Scale all ThT values of all Synucleins in one experiment according to the final value (96 hours) of the
-    concurrently run alpha-Synuclein, according to the equation: (100 / alpha-Synuclein's 96 hour ThT value).
+    Scale all ThT values of all Synucleins in one experiment according to the final value (4 days) of the
+    concurrently run alpha-Synuclein, according to the equation: (100 / alpha-Synuclein's 4-day ThT value).
     Translate all scaled ThT values for each Synuclein in one experiment according to the starting value (0 hours)
     for each Synuclein, such that all will start at the STARTING_THT_VALUE (typically 4.0) and all subsequent time
     points will be translated by the same difference. (Note: the necessary order of operations, i.e. scaling followed
