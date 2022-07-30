@@ -20,7 +20,7 @@ STR_TIME_H = 'Time (h)'
 ALL_THT_DATA_CSV_PATH = os.path.join(abspath_root, 'data', 'tht_data', 'AllThTData.csv')
 LAGTIMES_PATH = os.path.join(abspath_root, 'data', 'tht_data', 'lagtimes')
 THT_PATH = os.path.join(abspath_root, 'data', 'tht_data')
-ACCEPTABLE_PROPORTION_OF_NULL_LAGTIMES = 1/8
+ACCEPTABLE_MAX_PROPORTION_OF_NULL_LAGTIMES = 1 / 8
 STANDARD_ASYN_END_THT_VALUE = 250
 
 
@@ -48,7 +48,7 @@ def _has_high_enough_proportion_of_non_null_lagtimes(lagtimes: list) -> bool:
     :return: True if the given list has at least the minimum proportion of non-null to null values.
     """
     num_of_nones = len([lag for lag in lagtimes if lag == 'NA'])
-    has_enough_prop_of_lagtimes = (num_of_nones / len(lagtimes)) <= ACCEPTABLE_PROPORTION_OF_NULL_LAGTIMES
+    has_enough_prop_of_lagtimes = (num_of_nones / len(lagtimes)) <= ACCEPTABLE_MAX_PROPORTION_OF_NULL_LAGTIMES
     return has_enough_prop_of_lagtimes
 
 
@@ -68,6 +68,16 @@ def _calc_mean_of_nonnulls(lagtimes: list) -> float:
     mean_ = np.mean(lagtimes)
     return float(mean_)  # This cast is unnecessary but PyCharm's type checker is not currently working for this.
 
+def calculate_mean(syn_lagtimes: Dict[str, list]) -> Dict[str, Tuple[float, float]]:
+    """
+    Calculate mean of observed 'lag-times' for each Synucleins construct. It is expected that this function is called
+    only on the cleaned 'lag-times', such that only numerical values are included (`NA` is already removed) and
+    Synucleins with less than 3 'lag-times' are also removed.
+    :param syn_lagtimes: Synuclein names mapped to 'lag-times', with 3 or more values and without any `NA`,
+    mapped to the Synuclein name.
+    :return: Mean and standard deviation of given 'lag-times' mapped to corresponding Synuclein name.
+    """
+    return {syn: _calc_mean_of_nonnulls(lags) for syn, lags in syn_lagtimes.items()}
 
 def _calc_mean_of_lagtimes(lagtimes: Dict[str, list]) -> Dict[str, float]:
     """
