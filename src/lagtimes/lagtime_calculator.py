@@ -64,10 +64,13 @@ def _remove_nulls(lagtimes: list) -> list:
     return nonnulls
 
 
-def _calc_mean_of_nonnulls(lagtimes: list) -> float:
+def _calc_mean_of_nonnulls(lagtimes: list) -> Tuple[float, float]:
     lagtimes = _remove_nulls(lagtimes)
     mean_ = np.mean(lagtimes)
-    return float(mean_)  # This cast is unnecessary but PyCharm's type checker is not currently working for this.
+    stdev_ = np.std(lagtimes)
+    return round(float(mean_), 1), round(float(stdev_), 1)
+    # This float cast operation is unnecessary but PyCharm's type checker is incorrectly flagging it.
+
 
 def calculate_mean(syn_lagtimes: Dict[str, list]) -> Dict[str, Tuple[float, float]]:
     """
@@ -384,12 +387,12 @@ def standardise_tht() -> List[dict]:
 def write_lagtime_means(lagtime_means: Dict[str, float], degree_used: int, tht_lagtime_end_value_used: float):
     """
 
-    :param lagtime_means: Mean of the 'lag-times' for each Synuclein.
-    :param degree_used: Polynomial degree used to fit the two ThT values that span the end of lag-phase.
-    :param tht_lagtime_end_value_used: Value of ThT (relative to starting value) used to mark end of lag-phase.
+    :param lagtime_means: Mean & standard deviation of the 'lag-times' for each Synuclein.
+    :param degree_used: Polynomial degree used to fit the two ThT values that span the end of 'lag-phase'.
+    :param tht_lagtime_end_value_used: Value of ThT (relative to starting value) used to mark end of 'lag-phase'.
     """
-    col_names = ['Synucleins', 'lagtime_means']
-    df = pd.DataFrame.from_dict(data=lagtime_means, orient='index', columns=[col_names[1]])
+    col_names = ['Synucleins', 'lagtime_means', 'std_devs']
+    df = pd.DataFrame.from_dict(data=lagtime_means, orient='index', columns=col_names[1: 3])
     lagtime_filename = f'lagtime_means_polynDegree_{degree_used}_lagtimeEndvalue_{int(tht_lagtime_end_value_used)}.csv'
     df.to_csv(os.path.join(LAGTIME_MEANS_PATH, lagtime_filename), index=True)
 
