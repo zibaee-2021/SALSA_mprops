@@ -19,6 +19,7 @@ MIN_NUM_OF_LAGTIMES_NEEDED = 3
 STR_TIME_H = 'Time (h)'
 ALL_THT_DATA_CSV_PATH = os.path.join(abspath_root, 'data', 'tht_data', 'AllThTData.csv')
 LAGTIMES_PATH = os.path.join(abspath_root, 'data', 'tht_data', 'lagtimes')
+LAGTIME_MEANS_PATH = os.path.join(LAGTIMES_PATH, 'lagtime_means')
 THT_PATH = os.path.join(abspath_root, 'data', 'tht_data')
 ACCEPTABLE_MAX_PROPORTION_OF_NULL_LAGTIMES = 1 / 8
 STANDARD_ASYN_END_THT_VALUE = 250
@@ -390,7 +391,7 @@ def write_lagtime_means(lagtime_means: Dict[str, float], degree_used: int, tht_l
     col_names = ['Synucleins', 'lagtime_means']
     df = pd.DataFrame.from_dict(data=lagtime_means, orient='index', columns=[col_names[1]])
     lagtime_filename = f'lagtime_means_polynDegree_{degree_used}_lagtimeEndvalue_{int(tht_lagtime_end_value_used)}.csv'
-    df.to_csv(os.path.join(LAGTIMES_PATH, lagtime_filename), index=True)
+    df.to_csv(os.path.join(LAGTIME_MEANS_PATH, lagtime_filename), index=True)
 
 
 def write_standardised_tht_data_all(standardised_tht_all: List[dict]):
