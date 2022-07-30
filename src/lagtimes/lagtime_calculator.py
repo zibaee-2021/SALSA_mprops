@@ -83,31 +83,32 @@ def calculate_mean(syn_lagtimes: Dict[str, list]) -> Dict[str, Tuple[float, floa
     """
     return {syn: _calc_mean_of_nonnulls(lags) for syn, lags in syn_lagtimes.items()}
 
-def _calc_mean_of_lagtimes(lagtimes: Dict[str, list]) -> Dict[str, float]:
-    """
-    Calculate the mean of the 'lag-times' of each Synuclein. It is expected that this function is called only on the
-    cleaned 'lag-times', such that only numerical values are included (`NA` is already removed) and Synucleins with
-    less than 3 'lag-times' are also removed.
-    :param lagtimes: 'lag-times' of Synucleins with 3 or more values and without any `NA`, mapped to the Synuclein
-    name.
-    :return: Mean of the given 'lag-times' mapped to the corresponding Synuclein name.
-    """
-    return {syn: round(_calc_mean_of_nonnulls(lags), 1) for syn, lags in lagtimes.items()
-            if _has_high_enough_proportion_of_non_null_lagtimes(lags) and _has_enough_nonnull_lagtimes(lags)}
 
-
-def clean_and_mean(syn_lagtimes: Dict[str, list]) -> Dict[str, float]:
+def clean(syn_lagtimes: Dict[str, list]) -> Dict[str, list]:
     """
     Validate and correct syntax of Synuclein names.
-    Take the mean of the 'lag-times' for each Synuclein that has enough data - that is if 'lag-times' from 3 or more
-    experiments' have a numerical value.
+    Remove Synuclein expts that do not have enough ThT data - i.e. less than 3 'lag-times'.
+    Some Synucleins may be slow to assemble such that the ThT value did not increase (above the heuristic value)
+    within the 96-hour cut-off, in one or more experiments. For example, given the following 'lag-times' 68 h, 75 h,
+    80 h, NA, NA, there are 3 numerical 'lag-time' values, which satisfies the minimum number required. However,
+    the mean cannot include 2 of the 5 experiments because it is non-numeric. Therefore, the 74 h mean of the 3 is
+    likely overestimating the fibrillogenic propensity of the protein, because in theory, the other 2
+    experiments may have 'lag-times' of 115 h and 125 h. The "real" mean would have been 93 h. To address this, another
+    heuristic cut-off is used - `ACCEPTABLE_MAX_PROPORTION_OF_NULL_LAGTIMES` - whereby even if the protein has the
+    minimum number of numerical 'lag-times', it will still be excluded from the subsequent regression modelling if
+    there is a null in more than 1/8 proportion of experiments.
     :param syn_lagtimes: Synuclein names mapped to 'lag-times'.
-    :return: Synuclein names mapped to mean of 'lag-times' where sufficient data for the Synuclein is available.
+    :return: Synucleins and expts mapped to their 'lag-times', where sufficient data for the Synuclein is available.
     """
-    syn_lagtimes = {syn.strip().replace('-', '_'): lags for syn, lags in syn_lagtimes.items()}
-    util_data.check_syn_names(syn_names=list(syn_lagtimes))
-    syn_lagtime_means = _calc_mean_of_lagtimes(syn_lagtimes)
-    return syn_lagtime_means
+    syn_lagtimes_cleaned = {syn.strip().replace('-', '_'): lags for syn, lags in syn_lagtimes.items()}
+    try:
+        util_data.check_syn_names(syn_names=list(syn_lagtimes_cleaned))
+        syn_lagtimes_cleaned = {syn: _remove_nulls(lags) for syn, lags in syn_lagtimes_cleaned.items()
+                                if _has_high_enough_proportion_of_non_null_lagtimes(lags) and
+                                _has_enough_nonnull_lagtimes(lags)}
+    except ValueError as ve:
+        print(ve)
+    return syn_lagtimes_cleaned
 
 
 def _solve_for_y(poly_coefs, intercept, y) -> float:
@@ -416,6 +417,5 @@ if __name__ == '__main__':
                            tht_lagtime_end_value_used=lagtime_end_value_to_use)
             _lagtimes_cleaned = clean(syn_lagtimes=_lagtimes)
             _lagtime_means_stdev = calculate_mean(_lagtimes_cleaned)
-            # _lagtime_means_stdev = __clean_and_mean(syn_lagtimes=_lagtimes)
             write_lagtime_means(lagtime_means=_lagtime_means_stdev, degree_used=_degree_to_use,
                                 tht_lagtime_end_value_used=lagtime_end_value_to_use)
