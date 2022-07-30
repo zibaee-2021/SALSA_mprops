@@ -387,7 +387,8 @@ def standardise_tht() -> List[dict]:
 
 def write_lagtime_means(lagtime_means: Dict[str, float], degree_used: int, tht_lagtime_end_value_used: float):
     """
-
+    Write means and standard deviations of 'lag-times' per Synuclein.
+    (These values are used for fitting regression models to the protein physicochemical properties.)
     :param lagtime_means: Mean & standard deviation of the 'lag-times' for each Synuclein.
     :param degree_used: Polynomial degree used to fit the two ThT values that span the end of 'lag-phase'.
     :param tht_lagtime_end_value_used: Value of ThT (relative to starting value) used to mark end of 'lag-phase'.
