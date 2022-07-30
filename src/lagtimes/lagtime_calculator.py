@@ -268,7 +268,7 @@ def get_lagtimes(make_plot: bool, degree_to_use: int, tht_lagtime_end_value: flo
     :param make_plot: True to generate a plot of the region of the ThT fluorescence curve that includes the value by which
     the 'lag-time' is deemed to have ended.
     :param degree_to_use: The degree to use for the polynomial regression of the ThT data.
-    :param tht_lagtime_end_value: Value of ThT (relative to starting value) that is used to mark end of lag-phase.
+    :param tht_lagtime_end_value: Value of ThT (relative to starting value) that is used to mark end of 'lag-phase'.
     :return: Each Synuclein name mapped to its 'lag-times', or 'NA' where the ThT does not or increases by
     not above the threshold (typically double the starting value or the square of the starting value).
     """
