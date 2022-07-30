@@ -287,7 +287,7 @@ def get_lagtimes(make_plot: bool, degree_to_use: int, tht_lagtime_end_value: flo
             tht_values = np.zeros((10, len(syn_names)))
         elif row[0] == '0' or row[0] == '0.0':
             i = 0
-            tht_values[i, ] = [float(n) if n != '' else 0.0 for n in row[1:len(syn_names) + 1]]
+            tht_values[i, ] = [float(n) if n != '' else 0.0 for n in row[1: len(syn_names) + 1]]
             time_points[i] = row[0]
         elif row[0] == '':
             for i, syn_name in enumerate(syn_names):
