@@ -198,9 +198,11 @@ def compute_norm_bsc_integrals(df: pDF) -> pDF:
     amino acid sequences. Typically called using the output of the `mprops_bsc_combo` module's `compute_norm_mprops()`
     in `generate_combo()`. Thus, the argument will contain a number of columns of data which are not used here but
     used in downstream computations, e.g. `ln_lags` and `nmprops`.
-    :param df: Synuclein sequences (mapped to other data columns ['lagtime_means', 'ln_lags', 'nmprops', 'seqs']).
-    :return: Normalised beta-strand contiguity, mapped to Synucleins. (Additional data included used in subsequent
-    computations in `mprops_bsc_combo` module. Columns: ['lagtime_means', 'ln_lags', 'nmprops', 'seqs', 'bsc', 'nbsc'])
+    :param df: Table of 5 columns including Synucleins as index, 'lag-time' means, ln of 'lag-time', normalised mean
+    properties, amino acid sequences: [(index), 'lagtime_means', 'ln_lags', 'nmprops', 'seqs'].
+    :return: Table of 7 columns including Synucleins as index, 'lag-time' means, log of 'lag-times',
+    normalised mean properties, amino acid sequences, beta-strand contiguity and normalised beta-strand contiguity:
+    [(index), 'lagtime_means', 'ln_lags', 'nmprops', 'seqs', 'bsc', 'nbsc']).
     """
     df_ = df.copy()
     df_.loc[:, 'bsc'] = df['seqs'].apply(_compute_bsc_integrals)
