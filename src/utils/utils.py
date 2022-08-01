@@ -12,10 +12,8 @@ LAGTIME_MEANS_PATH = os.path.join(abspath_root, 'data', 'tht_data', 'lagtimes', 
 
 def _get_ln_lags(csv_filename: str) -> pDF:
     """
-    Read all 'lag-times' from 4-degree polynomial linear regressions for Synucleins.
-    Generate the amino acid sequences.
-    Compute normalised values of the 4 mean properties.
-    :param csv_filename: Name of csv filename (including csv extension).
+    Calculate natural logs of all 'lag-time' means.
+    :param csv_filename: Name of csv filename. This must include the csv extension.
     :return: Table of 4 columns including Synucleins as index, 'lag-time' means and log of 'lag-times':
     [(index), 'lagtime_means', 'ln_lags', 'seqs'].
     """
@@ -164,11 +162,10 @@ def _build_syn_sequences(pdf: pDF) -> dict:
 
 def get_loglags_and_build_seqs(csv_filename: str) -> pDF:
     """
-    Read file containing mean 'lag-times' of Synucleins, calculate natural log of the 'lag-times' and generate amino
-    acid sequences from names of Synuclein constructs.
+    Generate table of natural logs of 'lag-time' means and amino acid sequences
     :param csv_filename: Name of 'lag-time' means csv filename (including csv extension).
-    :return: Table of 4 columns including Synucleins as index, 'lag-time' means, natural log of 'lag-times' and the
-    amino acid sequences: [(index), 'lagtime_means', 'ln_lags', 'seqs'].
+    :return: Table of 4 columns including Synucleins as index, 'lag-time' means, their natural log values and amino
+    acid sequences of corresponding Synuclein: [(index), 'lagtime_means', 'ln_lags', 'seqs'].
     """
     pdf = _get_ln_lags(csv_filename)
     syn_seqs_dict = _build_syn_sequences(pdf)
