@@ -18,23 +18,23 @@ from pandas import DataFrame as pDF
 #     return {"message": "Hello World"}
 
 
-def fit_and_predict_syns(lagtime_means_csv_filename: str, make_plots: bool) -> pDF:
+def fit_and_predict_syns(csv_filename: str, make_plots: bool) -> pDF:
     """
-    Generate the combo algorithm (from scratch) by fitting all 4 mean properties, mprops and beta-strand contiguity
-    to the log of lag times for synucleins.
-    :param lagtime_means_csv_filename: Name of 'lag-time' means csv filename (including csv extension).
-    :return: Synucleins (index) mapped to observed lag time means (hours) and predicted lag times (hours).
-    ['lagtime_means', 'pred']
+    Generate the combination algorithm, from scratch, by fitting all 4 mean properties, mprops and beta-strand
+    contiguity to the log of 'lag-times' for synucleins.
+    :param csv_filename: Name of 'lag-time' means csv filename (including csv extension).
+    :return: Table of 5 columns including Synucleins as index, 'lag-time' means, predicted 'lag-times', normalised
+    mean properties and normalised beta-strand contiguity: [(index), 'lagtime_means', 'pred', 'nmprops', 'nbsc']]
     """
-    syns_lnlags_seqs = utils.get_ln_lags_and_build_seqs(lagtime_means_csv_filename)
-    syns_lags_seqs_props = mprops_bsc_combo.generate_combo(lagtime_means_csv_filename=lagtime_means_csv_filename,
-                                                           syns_lnlags_seqs=syns_lnlags_seqs, make_plot=make_plots)
+    syns_lagmeans_lnlags_seqs = utils.get_loglags_and_build_seqs(csv_filename)
+    syns_lags_seqs_props = mprops_bsc_combo.generate_combo(csv_filename=csv_filename,
+                                                           pdf=syns_lagmeans_lnlags_seqs, make_plot=make_plots)
     combo_model, rsq = mprops_bsc_combo.train_combo_model(syns_lags_seqs_props, make_plot=make_plots)
     coef = round(float(combo_model.coef_), 3)
     intcpt = round(float(combo_model.intercept_), 3)
-    lagtime_means_csv_filename = lagtime_means_csv_filename.replace('lagtime_means_polynDegree', 'polydeg')
-    lagtime_means_csv_filename = lagtime_means_csv_filename.replace('lagtimeEndvalue_', 'lgEnd')
-    print(f'{lagtime_means_csv_filename}: combo_model coef {coef}, combo_model_intercept {intcpt}, rsq {rsq}')
+    csv_filename = csv_filename.replace('lagtime_means_polynDegree', 'polydeg')
+    csv_filename = csv_filename.replace('lagtimeEndvalue_', 'lgEnd')
+    print(f'{csv_filename}: combo_model coef {coef}, combo_model_intercept {intcpt}, rsq {rsq}')
     preds = combo_model.predict(np.array(syns_lags_seqs_props['combo']).reshape(-1, 1))
     syns_lags_seqs_props['pred'] = np.exp(preds)
     return syns_lags_seqs_props[['lagtime_means', 'pred', 'nmprops', 'nbsc']]
@@ -49,6 +49,6 @@ if __name__ == '__main__':
     for b_csv_filename in os.listdir(b_lagtime_dir_path):
         filename = os.fsdecode(b_csv_filename)
         if filename.endswith(".csv"):
-            syns_lnlags_seqs = fit_and_predict_syns(lagtime_means_csv_filename=filename, make_plots=False)
-            # print(syns_lnlags_seqs.head(50))
+            syns_lnlags_seqs = fit_and_predict_syns(csv_filename=filename, make_plots=False)
+            print(syns_lnlags_seqs.head(50))
 
