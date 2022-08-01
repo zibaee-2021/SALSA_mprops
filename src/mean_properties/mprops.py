@@ -62,8 +62,9 @@ def _calc_relative_weights_per_prop(pdf: pDF, make_plot: bool, model: LinearRegr
     # NOTE: Pycharm bug `TypeError: 'NoneType' object is not callable` in debugger mode.
     for prop_name, prop_values in zip(['nmbp', 'nmh', 'nmnc', 'nmtc'], [x_nmbp, x_nmh, x_nmnc, x_nmtc]):
         model.fit(prop_values, y)
-        if make_plot: plotter.plot(model, x=prop_values, y=y, data_labels=list(syns_lags_seqs_props.index),
-                                   title=prop_name, x_label=prop_name)
+        if make_plot:
+            plotter.plot(model, x=prop_values, y=y, data_labels=list(pdf.index),
+                         title=prop_name, x_label=prop_name)
         _4coefs[prop_name] = round(float(model.coef_), 3)
         _4intcpts[prop_name] = round(float(model.intercept_), 3)
         # _4rsq[prop_name] = round(float(model.score(prop_values, y)), 3)
