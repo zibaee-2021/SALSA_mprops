@@ -44,7 +44,7 @@ def _build_syn_sequences(pdf: pDF) -> dict:
     [(index), 'lagtime_means', 'ln_lags']
     :return: Synucleins mapped to their sequences.
     """
-    syn_names = list(syns_lagtimes.index)
+    syn_names = list(pdf.index)
     util_data.check_syn_names(syn_names)
     asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_HUMAN')['SYUA_HUMAN']
     bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_HUMAN')['SYUB_HUMAN']
