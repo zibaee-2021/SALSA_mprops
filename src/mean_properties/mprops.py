@@ -34,7 +34,7 @@ fibrillogenic than they actually were taking in to account the non-inclusion of 
 """
 
 
-def _calc_relative_weights_per_prop(syns_lags_seqs_props: pDF, make_plot: bool) -> Tuple[dict, dict, dict]:
+def _calc_relative_weights_per_prop(pdf: pDF, make_plot: bool, model: LinearRegression) -> Tuple[dict, dict, dict]:
     """
     `mprops` is a weighted sum of the 4 mean properties. These relative weights are the coefficients (i.e. slopes of
     linear plots) of each of following 4 plots (nmbp, nmh, nmnc, nmtc) against the natural log of the
@@ -53,11 +53,10 @@ def _calc_relative_weights_per_prop(syns_lags_seqs_props: pDF, make_plot: bool) 
     :param model: Model to use for regression of 'lag-times' to physicochemical properties.
     :return: The 4 coefficients, 4 y-intercepts and 4 R-squared values of the 4 mean properties: mbp, mh, mnc, mtc.
     """
-    x_nmbp, x_nmh, x_nmnc, x_nmtc = np.array(syns_lags_seqs_props.nmbp), np.array(syns_lags_seqs_props.nmh), \
-                                    np.array(syns_lags_seqs_props.nmnc), np.array(syns_lags_seqs_props.nmtc)
+    x_nmbp, x_nmh, x_nmnc, x_nmtc = np.array(pdf.nmbp), np.array(pdf.nmh), np.array(pdf.nmnc), np.array(pdf.nmtc)
     x_nmbp, x_nmh, x_nmnc, x_nmtc = x_nmbp.reshape((-1, 1)), x_nmh.reshape((-1, 1)),\
                                     x_nmnc.reshape((-1, 1)), x_nmtc.reshape((-1, 1))
-    y = np.array(syns_lags_seqs_props.ln_lags)
+    y = np.array(pdf.ln_lags)
     _4coefs, _4intcpts, _4rsq = {}, {}, {}
     # NOTE: Pycharm bug `TypeError: 'NoneType' object is not callable` in debugger mode.
     for prop_name, prop_values in zip(['nmbp', 'nmh', 'nmnc', 'nmtc'], [x_nmbp, x_nmh, x_nmnc, x_nmtc]):
@@ -71,36 +70,39 @@ def _calc_relative_weights_per_prop(syns_lags_seqs_props: pDF, make_plot: bool) 
     return _4coefs, _4intcpts, _4rsq
 
 
-def compute_4_normalised_props(syns_lags_seqs: pDF) -> pDF:
+def compute_4_normalised_props(pdf: pDF) -> pDF:
     """
     Compute normalised values of the 4 properties for given sequences, (mapped to log of 'lag-times').
-    :param syns_lags_seqs: Synucleins, their log of 'lag-times' and sequences.
-    :return: Synucleins, their log of 'lag-times', sequences and the 4 normalised mean properties.
-    ['lagtime_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc']
+    :param pdf: Table of 4 columns including Synucleins as index, 'lag-time' means,
+    natural log of 'lag-times' and amino acid sequences: [(index), 'lagtime_means', 'ln_lags', 'seqs'].
+    :return: Table of 12 columns including Synucleins as index, 'lag-time' means, log of 'lag-times',
+    amino acid sequences, the 4 mean properties and the 4 mean properties normalised:
+    [(index), 'lagtime_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc']
     """
-    syns_lags_seqs['mbp'] = syns_lags_seqs['seqs'].apply(mbp.compute_mean_beta_sheet_prop)
-    syns_lags_seqs['mh'] = syns_lags_seqs['seqs'].apply(lambda row:
-                                                        mh.compute_mean_hydrophobicity(row, Scales.RW.value))
-    syns_lags_seqs['mnc'] = syns_lags_seqs['seqs'].apply(mnc_mtc.compute_mean_net_charge)
-    syns_lags_seqs['mtc'] = syns_lags_seqs['seqs'].apply(mnc_mtc.compute_mean_total_charge)
+    pdf['mbp'] = pdf['seqs'].apply(mbp.compute_mean_beta_sheet_prop)
+    pdf['mh'] = pdf['seqs'].apply(lambda row: mh.compute_mean_hydrophobicity(row, Scales.RW.value))
+    pdf['mnc'] = pdf['seqs'].apply(mnc_mtc.compute_mean_net_charge)
+    pdf['mtc'] = pdf['seqs'].apply(mnc_mtc.compute_mean_total_charge)
     for prop_name in ['mbp', 'mh', 'mnc', 'mtc']:
-        max_ = np.max(list(syns_lags_seqs[prop_name]))
-        min_ = np.min(list(syns_lags_seqs[prop_name]))
-        syns_lags_seqs[f'n{prop_name}'] = syns_lags_seqs[prop_name].apply(
+        max_ = np.max(list(pdf[prop_name]))
+        min_ = np.min(list(pdf[prop_name]))
+        pdf[f'n{prop_name}'] = pdf[prop_name].apply(
             lambda row: ((row - min_) / (max_ - min_)) + 0.01)
-    return syns_lags_seqs
+    return pdf
 
 
-def compute_norm_mprops(syns_lnlags_seqs: pDF, make_plot: bool) -> pDF:
+def compute_norm_mprops(pdf: pDF, make_plot: bool, model: LinearRegression) -> pDF:
     """
     Compute normalised mprops.
-    :param make_plot: True to display 4 plots of the linear regression for each of the 4 mean properties
-    against the natural log of 'lag-times'.
-    :return: Synucleins (index), normalised mprops and sequences.
-    ['lagtime_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc', 'mprops', 'nmprops']
-    Sliced down to two columns: ['lagtime_means', 'ln_lags', 'nmprops', 'seqs'].
+    :param pdf: Table of 4 columns including Synucleins as index, 'lag-time' means, natural log of 'lag-times' and
+    amino acid sequences: [(index), 'lagtime_means', 'ln_lags', 'seqs'].
+    :param make_plot: True to display 4 plots of linear regression model of each of the 4 mean properties against
+    natural log of 'lag-times'.
+    :param model: Model to use for regression of 'lag-times' to physicochemical properties.
+    :return: Table of 5 columns including Synucleins as index, 'lag-time' means, log of 'lag-times', normalised mprops
+    and amino acid sequences: [(index), 'lagtime_means', 'ln_lags', 'nmprops', 'seqs'].
     """
-    # syns_lnlags_seqs = syns_lnlags_seqs.drop(['a1_80', 'fr_asyn', 'fr_bsyn', 'fr_gsyn1', 'fr_gsyn2', 'gsyn',
+    # pdf = pdf.drop(['a1_80', 'fr_asyn', 'fr_bsyn', 'fr_gsyn1', 'fr_gsyn2', 'gsyn',
     #                                                   'ga'], axis=0)
     syns_lnlags_seqs_4props = compute_4_normalised_props(syns_lnlags_seqs)
     _4coefs, _4intcpts, _4rsq = _calc_relative_weights_per_prop(syns_lnlags_seqs_4props, make_plot=make_plot)
