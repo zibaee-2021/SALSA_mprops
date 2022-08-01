@@ -106,18 +106,23 @@ def compute_norm_mprops(pdf: pDF, make_plot: bool, model: LinearRegression) -> p
     """
     # pdf = pdf.drop(['a1_80', 'fr_asyn', 'fr_bsyn', 'fr_gsyn1', 'fr_gsyn2', 'gsyn',
     #                                                   'ga'], axis=0)
-    syns_lnlags_seqs_4props = compute_4_normalised_props(syns_lnlags_seqs)
-    _4coefs, _4intcpts, _4rsq = _calc_relative_weights_per_prop(syns_lnlags_seqs_4props, make_plot=make_plot)
-    syns_lnlags_seqs['mprops'] = syns_lnlags_seqs.apply(lambda row: row.nmbp * _4coefs['nmbp'] +
-                                                                    row.nmh * _4coefs['nmh'] +
-                                                                    row.nmnc * _4coefs['nmnc'] +
-                                                                    row.nmtc * _4coefs['nmtc'], axis=1)
-    max_ = np.max(list(syns_lnlags_seqs_4props['mprops']))
-    min_ = np.min(list(syns_lnlags_seqs_4props['mprops']))
-    syns_lnlags_seqs_4props['nmprops'] = syns_lnlags_seqs_4props['mprops'].apply(
+    # To use the same 32 Syns used in JBC 2010 paper:
+    _32_syns_JBC = ['asyn', 'a11_140', 'a21_140', 'a31_140', 'a41_140', 'a51_140', 'a61_140',
+                    'a1_80', 'a68_71del', 'a71_72del', 'a71_74del', 'a71_78del', 'a71_81del',
+                    'a73_83del', 'ba1', 'ba12', 'b5V', 'b5V2Q', 'b5V4Q', 'b5V6Q', 'b5V8Q',
+                    'aT72V', 'aV71ET72E', 'aA30P', 'aE46K', 'aA53T', 'aS87E', 'aS129E', 'b1_73',
+                    'fr_asyn', 'fr_gsyn1', 'fr_gsyn2']
+    pdf = pdf.loc[_32_syns_JBC]
+    pdf_ = compute_4_normalised_props(pdf)
+    _4coefs, _4intcpts, _4rsq = _calc_relative_weights_per_prop(pdf_, make_plot=make_plot, model=model)
+    pdf['mprops'] = pdf.apply(lambda row: row.nmbp * _4coefs['nmbp'] + row.nmh * _4coefs['nmh'] +
+                                          row.nmnc * _4coefs['nmnc'] + row.nmtc * _4coefs['nmtc'], axis=1)
+    max_ = np.max(list(pdf_['mprops']))
+    min_ = np.min(list(pdf_['mprops']))
+    pdf_['nmprops'] = pdf_['mprops'].apply(
         lambda row: ((row - min_) / (max_ - min_)) + 0.01)
     print(f'_4rsq {_4rsq}')
-    return syns_lnlags_seqs_4props[['lagtime_means', 'ln_lags', 'nmprops', 'seqs']]
+    return pdf_[['lagtime_means', 'ln_lags', 'nmprops', 'seqs']]
 
 
 if __name__ == '__main__':
