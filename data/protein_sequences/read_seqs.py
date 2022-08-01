@@ -40,7 +40,8 @@ def read_protein_sequences_csv(csv=None) -> pDF:
     Note: th1e arguments `skipinitialspace=True` and `quotechar="'"` are required because the csv file contains
     single quotes, which otherwise would be included as part of the string.
     :param csv: csv filename with extension, none by default.
-    :return: Tabulated list of sequences with corresponding column names.
+    :return: Table of 5 columns including protein names, identifiers and amino acid sequences:
+    ['AC', 'fragment', 'name', 'common_name', 'sequence']
     """
     if csv is None:
         csv = 'protein_sequences.csv'
