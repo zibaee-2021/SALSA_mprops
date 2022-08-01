@@ -1,3 +1,4 @@
+import os
 from typing import Tuple
 from pandas import DataFrame as pDF
 from src.mean_properties import mbp, mh, mnc_mtc
@@ -125,10 +126,27 @@ def compute_norm_mprops(pdf: pDF, make_plot: bool, model: LinearRegression) -> p
     return pdf_[['lagtime_means', 'ln_lags', 'nmprops', 'seqs']]
 
 
+from src.lagtimes import lagtime_calculator as ltc
+
 if __name__ == '__main__':
     from src.lagtimes import lagtime_calculator as lc
-    for degree_used in [2, 3, 4, 5]:
-        for tht_end_value_used in [lc.SQUARE_OF_STARTING_VALUE, lc.DOUBLE_STARTING_VALUE]:
+    for degree_used in [5]:
+        # for tht_end_value_used in [lc.SQUARE_OF_STARTING_VALUE, lc.DOUBLE_STARTING_VALUE]:
+        for tht_end_value_used in [lc.SQUARE_OF_STARTING_VALUE]:
             lt_filename = f'lagtime_means_polynDegree_{degree_used}_lagtimeEndvalue_{int(tht_end_value_used)}.csv'
-            syns_lnlags_seqs = utils.get_ln_lags_and_build_seqs(lagtime_means_csv_filename=lt_filename)
-            compute_norm_mprops(syns_lnlags_seqs, make_plot=True)
+
+            if os.path.exists(os.path.join(ltc.LAGTIMES_PATH, lt_filename)):
+                _pdf = utils.get_loglags_and_build_seqs(csv_filename=lt_filename)
+                syns = list(_pdf.index)
+                print(f'The following {len(syns)} Synucleins used here are: {syns}')
+                for model in [LinearRegression(), Lasso(), Ridge(), ElasticNet()]:
+                    print(f'model used is {str(model)}')
+                    compute_norm_mprops(_pdf, make_plot=True, model=model)
+
+
+# _syns_not_included_in_32_JBC  = ['gsyn', 'fr_asyn', 'fr_gsyn1', 'fr_gsyn2', 'mus_bsyn',
+#                                  'gallus_bsyn', 'b5V', 'a71_140', 'a1_45', 'a1_50', 'a1_55', 'a1_60',
+#                                  'a1_70', 'a1_75', 'g1_80', 'a71_76del', 'a71_82del', 'a74_84del',
+#                                  'a73_82del', 'bsyn', 'ga', 'aK45V', 'aE46V', 'aK45VE46V',
+#                                  'aK45VE46VV71ET72E', 'bR45V', 'bR45VE46V', 'bE46V', 'mus_bsyn',
+#                                  'gallus_bsyn']
