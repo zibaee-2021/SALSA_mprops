@@ -2,7 +2,8 @@ from typing import Tuple
 from pandas import DataFrame as pDF
 from src.mean_properties import mbp, mh, mnc_mtc
 import numpy as np
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
+from sklearn.metrics import r2_score
 from data.aa_properties.read_props import Scales
 from src.utils import plotter, utils
 """
@@ -60,13 +61,13 @@ def _calc_relative_weights_per_prop(pdf: pDF, make_plot: bool, model: LinearRegr
     _4coefs, _4intcpts, _4rsq = {}, {}, {}
     # NOTE: Pycharm bug `TypeError: 'NoneType' object is not callable` in debugger mode.
     for prop_name, prop_values in zip(['nmbp', 'nmh', 'nmnc', 'nmtc'], [x_nmbp, x_nmh, x_nmnc, x_nmtc]):
-        model = LinearRegression()
         model.fit(prop_values, y)
         if make_plot: plotter.plot(model, x=prop_values, y=y, data_labels=list(syns_lags_seqs_props.index),
                                    title=prop_name, x_label=prop_name)
         _4coefs[prop_name] = round(float(model.coef_), 3)
         _4intcpts[prop_name] = round(float(model.intercept_), 3)
-        _4rsq[prop_name] = round(float(model.score(prop_values, y)), 3)
+        # _4rsq[prop_name] = round(float(model.score(prop_values, y)), 3)
+        _4rsq[prop_name] = round(float(r2_score(y_pred=prop_values, y_true=y)), 3)
     return _4coefs, _4intcpts, _4rsq
 
 
