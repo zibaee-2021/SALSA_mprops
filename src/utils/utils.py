@@ -7,10 +7,10 @@ from root_path import abspath_root
 import math
 from src.utils import util_data
 
-LAGTIMES_PATH = os.path.join(abspath_root, 'data', 'tht_data', 'lagtimes')
+LAGTIME_MEANS_PATH = os.path.join(abspath_root, 'data', 'tht_data', 'lagtimes', 'lagtime_means')
 
 
-def _get_ln_lags(lagtime_means_csv_filename: str) -> pDF:
+def _get_ln_lags(csv_filename: str) -> pDF:
     """
     Read all lag times from 4-degree polynomial linear regressions for synucleins.
     Generate the amino acid sequences.
@@ -19,9 +19,9 @@ def _get_ln_lags(lagtime_means_csv_filename: str) -> pDF:
     :return: Synucleins (index) mapped to lag time means and natural log of lag times.
     ['lagtime_means', 'ln_lags']
     """
-    syns_lags = pd.read_csv(os.path.join(LAGTIMES_PATH, lagtime_means_csv_filename), index_col=[0])
-    syns_lags['ln_lags'] = syns_lags.apply(lambda row: math.log(row['lagtime_means']), axis=1)
-    return syns_lags
+    pdf = pd.read_csv(os.path.join(LAGTIME_MEANS_PATH, csv_filename), index_col=[0])
+    pdf['ln_lags'] = pdf.apply(lambda row: math.log(row['lagtime_means']), axis=1)
+    return pdf
 
 
 def _build_syn_sequences(syns_lagtimes: pDF) -> dict:
