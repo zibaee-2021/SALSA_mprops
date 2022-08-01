@@ -35,14 +35,14 @@ class TestLagTimeCalculator(TestCase):
         self.assertTrue(lagcalc._has_high_enough_proportion_of_non_null_lagtimes([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'NA']))
 
     def test__calc_mean_of_lagtimes(self):
-        self.assertDictEqual({'asyn': 2}, lagcalc._calc_mean_of_lagtimes({'asyn': [1, 2, 3]}))
-        self.assertDictEqual({}, lagcalc._calc_mean_of_lagtimes({'asyn': [80, 60, 'NA']}))
-        self.assertDictEqual({}, lagcalc._calc_mean_of_lagtimes({'asyn': [10, 10, 10, 'NA']}))
-        self.assertDictEqual({}, lagcalc._calc_mean_of_lagtimes({'asyn': [10, 10, 10, 10, 'NA']}))
-        self.assertDictEqual({}, lagcalc._calc_mean_of_lagtimes({'asyn': [10, 10, 10, 10, 10, 'NA']}))
-        self.assertDictEqual({}, lagcalc._calc_mean_of_lagtimes({'asyn': [10, 10, 10, 10, 10, 10, 'NA']}))
-        self.assertDictEqual({'asyn': 10}, lagcalc._calc_mean_of_lagtimes({'asyn': [10, 10, 10, 10, 10, 10, 10, 'NA']}))
-        self.assertDictEqual({'asyn': 10}, lagcalc._calc_mean_of_lagtimes({'asyn': [10, 10, 10, 10, 10, 10, 10, 10,
+        self.assertDictEqual({'asyn': 2}, lagcalc.calculate_mean({'asyn': [1, 2, 3]}))
+        self.assertDictEqual({}, lagcalc.calculate_mean({'asyn': [80, 60, 'NA']}))
+        self.assertDictEqual({}, lagcalc.calculate_mean({'asyn': [10, 10, 10, 'NA']}))
+        self.assertDictEqual({}, lagcalc.calculate_mean({'asyn': [10, 10, 10, 10, 'NA']}))
+        self.assertDictEqual({}, lagcalc.calculate_mean({'asyn': [10, 10, 10, 10, 10, 'NA']}))
+        self.assertDictEqual({}, lagcalc.calculate_mean({'asyn': [10, 10, 10, 10, 10, 10, 'NA']}))
+        self.assertDictEqual({'asyn': 10}, lagcalc.calculate_mean({'asyn': [10, 10, 10, 10, 10, 10, 10, 'NA']}))
+        self.assertDictEqual({'asyn': 10}, lagcalc.calculate_mean({'asyn': [10, 10, 10, 10, 10, 10, 10, 10,
                                                                                     'NA']}))
 
     def test__include_lag_phase_only(self):
