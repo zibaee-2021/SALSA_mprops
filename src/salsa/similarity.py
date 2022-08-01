@@ -118,7 +118,7 @@ def _detect_similarity_by_sharpened_cosine_distance():
 if __name__ == '__main__':
     # prot_seq = read_seqs.read_protein_sequence_txt(read_seqs.TxtFiles.ASYN.value)
     prot_ids = 'P10636-8'
-    prot_seq = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids=prot_ids)
+    prot_seq = read_seqs.get_seqs_by_uniprot_acc_nums_or_names(prot_ids=prot_ids)
     scored_windows_all = compute_all_scored_windows(sequence=prot_seq[prot_ids], _property=Props.bSC.value,
                                                     params=DefaultBSC.all_params.value)
     summed_scores = execute.sum_scores_for_plot(scored_windows_all)

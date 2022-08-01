@@ -46,15 +46,15 @@ def _build_syn_sequences(pdf: pDF) -> dict:
     """
     syn_names = list(pdf.index)
     util_data.check_syn_names(syn_names)
-    asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_HUMAN')['SYUA_HUMAN']
-    bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_HUMAN')['SYUB_HUMAN']
-    gsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG_HUMAN')['SYUG_HUMAN']
-    fr_asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_FUGU')['SYUA_FUGU']
-    fr_bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_FUGU')['SYUB_FUGU']
-    fr_gsyn1 = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG1_FUGU')['SYUG1_FUGU']
-    fr_gsyn2 = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG2_FUGU')['SYUG2_FUGU']
-    mus_bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_MOUSE')['SYUB_MOUSE']
-    gallus_bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('Q9I9G9_CHICK')['Q9I9G9_CHICK']
+    asyn = read_seqs.get_seqs_by_uniprot_acc_nums_or_names('SYUA_HUMAN')['SYUA_HUMAN']
+    bsyn = read_seqs.get_seqs_by_uniprot_acc_nums_or_names('SYUB_HUMAN')['SYUB_HUMAN']
+    gsyn = read_seqs.get_seqs_by_uniprot_acc_nums_or_names('SYUG_HUMAN')['SYUG_HUMAN']
+    fr_asyn = read_seqs.get_seqs_by_uniprot_acc_nums_or_names('SYUA_FUGU')['SYUA_FUGU']
+    fr_bsyn = read_seqs.get_seqs_by_uniprot_acc_nums_or_names('SYUB_FUGU')['SYUB_FUGU']
+    fr_gsyn1 = read_seqs.get_seqs_by_uniprot_acc_nums_or_names('SYUG1_FUGU')['SYUG1_FUGU']
+    fr_gsyn2 = read_seqs.get_seqs_by_uniprot_acc_nums_or_names('SYUG2_FUGU')['SYUG2_FUGU']
+    mus_bsyn = read_seqs.get_seqs_by_uniprot_acc_nums_or_names('SYUB_MOUSE')['SYUB_MOUSE']
+    gallus_bsyn = read_seqs.get_seqs_by_uniprot_acc_nums_or_names('Q9I9G9_CHICK')['Q9I9G9_CHICK']
     b5v = mutator.mutate(prot_seq=bsyn, pos_aa={11: 'V', 19: 'V', 63: 'V', 78: 'V', 102: 'V'})
     assert (len(b5v) == 134)
     syn_seqs = {'asyn': asyn, 'gsyn': gsyn, 'fr_asyn': fr_asyn, 'fr_gsyn1': fr_gsyn1,

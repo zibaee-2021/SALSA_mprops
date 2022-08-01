@@ -92,7 +92,7 @@ def make_point_mutants(prot_id_mutants_to_make: dict[str: dict[int: List[str]]])
     """
     prot_ids_mutant_ids_seqs = dict()
     for prot_id, pos_residues in prot_id_mutants_to_make.items():
-        prot_id_seq = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids=prot_id)
+        prot_id_seq = read_seqs.get_seqs_by_uniprot_acc_nums_or_names(prot_ids=prot_id)
         mutant_ids_seqs = _make_point_mutants(prot_id_seq=prot_id_seq, point_mutants_to_make=pos_residues)
         prot_ids_mutant_ids_seqs[prot_id] = mutant_ids_seqs
     return prot_ids_mutant_ids_seqs
@@ -100,9 +100,9 @@ def make_point_mutants(prot_id_mutants_to_make: dict[str: dict[int: List[str]]])
 
 def make_fragment(syn_name: str) -> str:
     prot = ''
-    asyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUA_HUMAN')['SYUA_HUMAN']
-    bsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUB_HUMAN')['SYUB_HUMAN']
-    gsyn = read_seqs.get_sequences_by_uniprot_accession_nums_or_names('SYUG_HUMAN')['SYUG_HUMAN']
+    asyn = read_seqs.get_seqs_by_uniprot_acc_nums_or_names('SYUA_HUMAN')['SYUA_HUMAN']
+    bsyn = read_seqs.get_seqs_by_uniprot_acc_nums_or_names('SYUB_HUMAN')['SYUB_HUMAN']
+    gsyn = read_seqs.get_seqs_by_uniprot_acc_nums_or_names('SYUG_HUMAN')['SYUG_HUMAN']
     if syn_name[0] == 'a':
         prot = asyn
     elif syn_name[0] == 'b':

@@ -22,7 +22,7 @@ protein_names = ['T106B_HUMAN']
 # accession_numbers = ['P10636-2', 'P10636-4', 'P10636-5']
 # protein_names = ['SYUA_HUMAN', 'PRIO_HUMAN', 'URE2_YEAST', 'E9P8Q3_YEASX', 'TADBP_HUMAN']
 prot_ids = protein_names + accession_numbers
-prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids)
+prot_id_seqs = read_seqs.get_seqs_by_uniprot_acc_nums_or_names(prot_ids)
 
 # STEP 1 - Define property and corresponding parameters.
 _property = Props.mHA.value

@@ -21,7 +21,7 @@ protein_names = [base_prot_id, query_prot_id]
 # protein_names = ['SYUA_HUMAN', 'PRIO_HUMAN', 'URE2_YEAST', 'E9P8Q3_YEASX', 'TADBP_HUMAN']
 accession_numbers = ['']
 prot_ids = protein_names + accession_numbers
-prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids)
+prot_id_seqs = read_seqs.get_seqs_by_uniprot_acc_nums_or_names(prot_ids)
 
 # STEP 1 - Define property and corresponding parameters.
 _property = Props.bSC.value

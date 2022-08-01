@@ -18,7 +18,7 @@ protein_names = ['T106B_HUMAN', 'SYUA_HUMAN']
 # protein_names = ['TADBP_HUMAN']
 # protein_names = ['PRIO_HUMAN']
 # protein_names = ['SYUA_HUMAN', 'PRIO_HUMAN', 'URE2_YEAST', 'E9P8Q3_YEASX', 'TADBP_HUMAN']
-prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids=accession_numbers+protein_names)
+prot_id_seqs = read_seqs.get_seqs_by_uniprot_acc_nums_or_names(prot_ids=accession_numbers + protein_names)
 
 # STEP 1 - SELECT PROPERTY AND CORRESPONDING PARAMETERS:
 # _property = Props.bSC.value

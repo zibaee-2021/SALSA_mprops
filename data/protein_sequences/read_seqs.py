@@ -102,7 +102,7 @@ def _separate_id_and_fragment(prot_frag_id: str) -> Tuple[str, str]:
     return prot_id, frag[1:-1]
 
 
-def get_sequences_by_uniprot_accession_nums_or_names(prot_ids) -> dict[str:str]:
+def get_seqs_by_uniprot_acc_nums_or_names(prot_ids) -> dict[str:str]:
     """
     Retrieve protein sequence(s) of interest corresponding to the given identifier(s) and/or name(s).
     Uniprot "accession number". NOTE: It is not a number. It has an alphanumeric format, such as 'Q16143'.
@@ -143,5 +143,5 @@ if __name__ == '__main__':
 
     prot_ids_not_in_csv_file = ['P05067']
     # actual = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids=prot_ids)
-    actual = get_sequences_by_uniprot_accession_nums_or_names(prot_ids=prot_ids_not_in_csv_file)
+    actual = get_seqs_by_uniprot_acc_nums_or_names(prot_ids=prot_ids_not_in_csv_file)
     print(actual)

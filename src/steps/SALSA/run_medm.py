@@ -18,7 +18,7 @@ accession_numbers = ['P10636-2', 'P10636-4', 'P10636-5']
 # protein_names = ['SYUA_HUMAN', 'PRIO_HUMAN', 'URE2_YEAST', 'E9P8Q3_YEASX', 'TADBP_HUMAN']
 
 prot_ids = accession_numbers + protein_names
-prot_id_seqs = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids)
+prot_id_seqs = read_seqs.get_seqs_by_uniprot_acc_nums_or_names(prot_ids)
 
 # STEP 1 - SELECT PROPERTY AND CORRESPONDING PARAMETERS:
 _property = Props.mEDM.value

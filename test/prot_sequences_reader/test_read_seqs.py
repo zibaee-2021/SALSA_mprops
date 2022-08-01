@@ -6,7 +6,7 @@ class TestReadSequences(TestCase):
 
     def test_get_sequences_by_uniprot_accession_nums_or_names(self):
         prot_ids = ['E9P8Q3', 'SYUA_HUMAN', 'P05067(672-713)', 'P05067']
-        actual = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids=prot_ids)
+        actual = read_seqs.get_seqs_by_uniprot_acc_nums_or_names(prot_ids=prot_ids)
         expected = {'P05067(672-713)': 'DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA',
                     'E9P8Q3': 'DSNQGNNQQNYQQYSQNGNQQQGNNRYQGYQAYNAQAQPAGGYYQNYQGYSGYQQGGYQQYNPDAGYQQQYNPQGGYQQYN'
                               'PQGGYQQQFNPQGGRGNYKNFNYNNNLQGYQAGFQPQSQGMSLNDFQKQQKQAAPKPKKTLKLVSSSGIKLANATKKVGTK'
