@@ -6,8 +6,9 @@ from src.mutation import mutator
 from root_path import abspath_root
 import math
 from src.utils import util_data
+from src.lagtimes import lagtime_calculator as ltc
 
-LAGTIME_MEANS_PATH = os.path.join(abspath_root, 'data', 'tht_data', 'lagtimes', 'lagtime_means')
+LAGTIME_MEANS_PATH = ltc.LAGTIME_MEANS_PATH
 
 
 def _get_ln_lags(csv_filename: str) -> pDF:
