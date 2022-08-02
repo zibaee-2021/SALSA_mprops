@@ -200,8 +200,8 @@ def _calculate_lagtimes(syn_name: str, two_time_points: list, two_tht_values: li
     return lagtimes
 
 
-def _include_lag_phase_only(time_points: np.array, tht_values: np.array, tht_lagtime_end_value: float) \
-        -> Tuple[np.array, np.array]:
+def _include_lag_phase_only(time_points: np.ndarray, tht_values: np.ndarray, tht_lagtime_end_value: float) \
+        -> Tuple[np.ndarray, np.ndarray]:
     """
     Find the first time point that the ThT fluorescence emission has reach and/or exceeded the square of the starting
     value and return this and the time point immediately before it, as well as the corresponding ThT values.
@@ -424,9 +424,9 @@ if __name__ == '__main__':
     # read_xls_and_write_csv(xls_path=os.path.join(abspath_root, 'data', 'tht_data', 'AllThTData.xls'))
 
     # write_standardised_tht_data_all(standardise_tht())
-    for _degree_to_use in [3, 4, 5]:
-        for lagtime_end_value_to_use in [_1_5_STARTING_VALUE, DOUBLE_STARTING_VALUE, SQUARE_OF_STARTING_VALUE]:
-            _lagtimes = get_lagtimes(make_plot=False, degree_to_use=_degree_to_use,
+    for _degree_to_use in [3]:
+        for lagtime_end_value_to_use in [SQUARE_OF_STARTING_VALUE]:
+            _lagtimes = get_lagtimes(make_plot=True, degree_to_use=_degree_to_use,
                                      tht_lagtime_end_value=lagtime_end_value_to_use)
             write_lagtimes(lagtimes=_lagtimes, degree_used=_degree_to_use,
                            tht_lagtime_end_value_used=lagtime_end_value_to_use)

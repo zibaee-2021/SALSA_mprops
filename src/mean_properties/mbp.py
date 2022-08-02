@@ -31,7 +31,7 @@ def compute_mean_beta_sheet_prop(sequence: str) -> float:
     return beta_sum / (0.5 * (alpha_sum + turn_sum))
 
 
-def massive_compute_mean_beat_sheet_prop(sequences: np.array) -> float:
+def massive_compute_mean_beat_sheet_prop(sequences: np.ndarray) -> float:
     """
     Perform `compute_mean_beta_sheet_prop` on large numbers of protein sequences.
     Consider constructing numpy matrices for potential performance enhancements.

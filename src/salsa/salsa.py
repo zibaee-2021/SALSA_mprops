@@ -63,11 +63,11 @@ def plot_summed_scores(prot_id_summed_scores: dict, _property: str, prot_name_la
     plt.show()
 
 
-def sum_scores_for_plot(scored_windows_all: np.array) -> np.array:
+def sum_scores_for_plot(scored_windows_all: np.ndarray) -> np.ndarray:
     return scored_windows_all.sum(axis=0)
 
 
-def _filter_top_scoring_windows(scored_windows_all: np.array, top_scoring_windows_num: int) -> np.array:
+def _filter_top_scoring_windows(scored_windows_all: np.ndarray, top_scoring_windows_num: int) -> np.ndarray:
     with_values_at_end = np.sort(scored_windows_all, axis=1)
     # print(f'with_values_at_end {with_values_at_end}')
     indices_of_order = np.argsort(with_values_at_end[:, -1])
@@ -81,7 +81,7 @@ def _filter_top_scoring_windows(scored_windows_all: np.array, top_scoring_window
     return top_scoring_windows
 
 
-def _compute(seq: str, prop: str, ws: int, params: dict) -> np.array:
+def _compute(seq: str, prop: str, ws: int, params: dict) -> np.ndarray:
     """
     Calculate the salsa score for the given protein sequence, using the given option (e.g. mean beta sheet
     propensities), sliding aver the sequence with the given window size and step size, returning only those values
@@ -154,7 +154,7 @@ def _has_valid_window_params(seq: str, window_len_min: int, window_len_max: int)
     return valid
 
 
-def compute_all_scored_windows(sequence: str, _property: str, params: dict) -> np.array:
+def compute_all_scored_windows(sequence: str, _property: str, params: dict) -> np.ndarray:
     """
     Calculate the SALSA scores for the given protein sequence, using the given option (e.g. mean beta-sheet
     propensities), sliding aver the sequence with the given range of window sizes and step size, returning only those

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot(model, x: np.array, y: np.array, data_labels: list, title: str, x_label: str, y_label: str = 'ln(lag-time)'):
+def plot(model, x: np.ndarray, y: np.ndarray, data_labels: list, title: str, x_label: str, y_label: str = 'ln(lag-time)'):
     """
     Generate and display 2D plot of the given data points, as well as the line of the model-predicted values.
     :param model: Trained model, expected to be that of linear regression.

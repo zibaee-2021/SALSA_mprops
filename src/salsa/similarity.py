@@ -11,7 +11,7 @@ The utility of this module is not determined or clear at this moment.
 """
 
 
-def _calc_sum_of_products_of_summed_scores(base: np.array, query: np.array) -> np.array:
+def _calc_sum_of_products_of_summed_scores(base: np.ndarray, query: np.ndarray) -> np.ndarray:
     """
     Calculate the sum of products of summed scores', by taking the product of the query sequence's scores and a
     sliding window (of the same length as the query) over the base sequence's scores.
@@ -31,8 +31,8 @@ def _calc_sum_of_products_of_summed_scores(base: np.array, query: np.array) -> n
     return np.sum(products_of_summed_scores, axis=0)
 
 
-def compute_sum_of_products_of_summed_scores(base_summed_scores: np.array, query_summed_scores: np.array,
-                                             query_window_len_min: int, query_window_len_max: int) -> np.array:
+def compute_sum_of_products_of_summed_scores(base_summed_scores: np.ndarray, query_summed_scores: np.ndarray,
+                                             query_window_len_min: int, query_window_len_max: int) -> np.ndarray:
     """
     Generate a similarity score between two SALSA summed scores.
     :param base_summed_scores: SALSA summed_scores, expected to be for the whole sequence of one protein.
@@ -58,7 +58,7 @@ def compute_sum_of_products_of_summed_scores(base_summed_scores: np.array, query
     return np.sum(sums_of_products, axis=0)
 
 
-def _find_peaks(prot_id_summed_scores: dict[str: np.array], min_cut_off: float) -> dict[str: Tuple[str]]:
+def _find_peaks(prot_id_summed_scores: dict[str: np.ndarray], min_cut_off: float) -> dict[str: Tuple[str]]:
     """
     For the given protein's summed scores, identify the start and end positions of peaks, identified as regions
     scoring above the given cut off.
@@ -88,7 +88,7 @@ def _find_peaks(prot_id_summed_scores: dict[str: np.array], min_cut_off: float) 
     return {prot_id: tuple_of_peaks}
 
 
-def find_peaks(prot_ids_summed_scores: dict[str: np.array], min_cut_off: float) -> dict:
+def find_peaks(prot_ids_summed_scores: dict[str: np.ndarray], min_cut_off: float) -> dict:
     """
     For the given proteins' summed scores, identify the start and end positions of peaks, identified as regions
     scoring above the given cut off.
