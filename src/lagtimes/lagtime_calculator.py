@@ -146,7 +146,8 @@ def _solve_lagtime(poly_coefs, intercept, y) -> float:
     return roots[0]
 
 
-def _plot(preproc, lin_reg, x, y, y_pred, syn_name):
+def _plot(preproc: PolynomialFeatures, lin_reg: LinearRegression, x: list, y: np.ndarray, y_pred: float, syn_name: str,
+          degree_used: int, tht_lag: float, lag_hrs: float):
     """
     Display a plot of the polynomial regression, with the given time points as abscissa. The ordinate includes both
     the ThT values and the predicted values with the regression line.
@@ -156,13 +157,16 @@ def _plot(preproc, lin_reg, x, y, y_pred, syn_name):
     :param y: ThT values (expected to be only two ThT values).
     :param y_pred: Predicted ThT value according to the trained polynomial regression model.
     :param syn_name: The Synuclein name.
+    :param degree_used: Polynomial degree used for fitting ThT data (for plot title).
+    :param tht_lag: ThT value immediately after the end of 'lag-time' (for plot title).
+    :param lag_hrs: 'lag-time' in hours.
     """
     X_grid = np.arange(min(x), max(x), 0.1)
     X_grid = X_grid.reshape((len(X_grid), 1))
     plt.scatter(x, y, color='red')
     plt.scatter(x, y_pred, color='green')
     plt.plot(X_grid, lin_reg.predict(preproc.fit_transform(X_grid)), color='black')
-    plt.title(f'Polynomial Regression for {syn_name}')
+    plt.title(f'{syn_name.upper()}/ lag={lag_hrs}hr/ lag ThT={round(tht_lag, 1)}/ poly-degr={degree_used} ')
     plt.xlabel('Time')
     plt.ylabel('ThT (h)')
     plt.show()
@@ -198,6 +202,12 @@ def _calculate_lagtimes(syn_name: str, two_time_points: list, two_tht_values: li
         lag_hours = np.real(_solve_lagtime(poly_coefs=lin_reg.coef_, intercept=STARTING_THT_VALUE,
                                            y=tht_lagtime_end_value))
         lag_hours = abs(round(float(lag_hours), 1))
+
+        if make_plot:
+            y_pred = lin_reg.predict(x_poly)
+            _plot(preproc=poly_reg, lin_reg=lin_reg, x=x, y=y, y_pred=y_pred, syn_name=syn_name,
+                  degree_used=degree_to_use, tht_lag=two_tht_values[-1], lag_hrs=lag_hours)
+
     if syn_name not in lagtimes:
         lagtimes[syn_name] = [lag_hours]
     else:
