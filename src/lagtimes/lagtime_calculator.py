@@ -12,9 +12,9 @@ from sklearn.linear_model import LinearRegression
 from src.utils import util_data
 
 STARTING_THT_VALUE = 4.0
-SQUARE_OF_STARTING_VALUE = np.square(STARTING_THT_VALUE)
-DOUBLE_STARTING_VALUE = STARTING_THT_VALUE * 2
-_1_5_STARTING_VALUE = STARTING_THT_VALUE * 1.5
+SQUARE_OF_STARTING_VALUE = np.square(STARTING_THT_VALUE)  # e.g. 16.0
+DOUBLE_STARTING_VALUE = STARTING_THT_VALUE * 2  # e.g. 8.0
+_1_5_STARTING_VALUE = STARTING_THT_VALUE * 1.5  # e.g. 6.0
 MIN_NUM_OF_LAGTIMES_NEEDED = 3
 STR_TIME_H = 'Time (h)'
 ALL_THT_DATA_CSV_PATH = os.path.join(abspath_root, 'data', 'tht_data', 'AllThTData.csv')
