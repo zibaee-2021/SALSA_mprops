@@ -111,24 +111,31 @@ def clean(syn_lagtimes: Dict[str, list]) -> Dict[str, list]:
     return syn_lagtimes_cleaned
 
 
-def _solve_for_y(poly_coefs, intercept, y) -> float:
+def _solve_lagtime(poly_coefs, intercept, y) -> float:
     """
-    Solve the given polynomial function for the given intercept and
-    Find the time value corresponding to the given ThT value (expected to be the square of the starting ThT value).
-    As the model is created from a polynomial, the roots of the function are required to solve.
-    E.g. If degree of polynomial used is 3, function will be: y = m3 * x^3 + m2 * x^2 + m1 + x + c, where `m` is the
-    coefficient of each x value. `c` is the y-intercept. Hence to solve using the roots, the equation is translated
-    along the ordinate so that y = 0, such that 0 = m3 * x^3 + m2 * x^2 + m1 + x + c. Therefore, to solve for the y
-    value of 16.0, the function is subtracted by this value.
-    Note numpy.roots expects the order of the equation to be as shown above - starting with higher order and ending
-    with the intercept. However, scikit-learn's model.coef_ retuen the coefficient the other way round (hence I
-    `flip` the order) and it lacks the intercept value, so I add this to the end of the flipped array,
-    before subtracting the function by the 16.0.)
+    Find time taken to reach the end of the 'lag-phase' according to the pre-determined start value (e.g. 4.0) and
+    the pre-determined function of that start value (e.g. square of 4.0).
+
+    Implementation details:
+    Solve given polynomial for given intercept and ordinate, returning the corresponding abscissa value.
+    As the model is created from a polynomial, the roots of the function are required to solve it.
+    E.g. If degree of polynomial used is 3, function will be:
+                y = (m3 * x^3) + (m2 * x^2) + (m1 + x) + c,
+    where `m` is the coefficient of each x value and `c` is the y-intercept.
+    Hence, to solve using the roots, the equation is translated along the ordinate so that y = 0, such that:
+                0 = (m3 * x^3) + (m2 * x^2) + (m1 + x) + c.
+    Therefore, to solve for the y value of 16.0, the function must be subtracted by 16.0.
+
+    Note: While `numpy.roots` expects the order of the equation to be as shown above - starting with higher order and
+    ending with the intercept, `poly_coefs` comes from `sklearn.linear_model.LinearRegression.coef_` which
+    returns the coefficient the other way round (hence I must `flip` the order). Furthermore, sklearn's `poly_coefs`
+    lacks the intercept value, so I must add this to the end of the flipped array, before subtracting the function by
+    the 16.0.)
     :param poly_coefs: Coefficients of the polynomial function used to model the data.
     :param intercept: The y-intercept of the function, which is the translated starting ThT value, 4.0.
-    :param y: The ThT value that we want to solve the x (time) for. This is the ThT value deemed to mark the end of
-    the 'lag-time' (assigned to variable called `tht_lagtime_end_value` in other functions in this module).
-    This is currently a choice of either double (hence 8) or the square (hence 16) of the starting value.
+    :param y: ThT value that we want to solve abscissa (time) for. This heuristic is used to mark the end of the
+    'lag-phase' (assigned to variable called `tht_lagtime_end_value` in other functions in this module).
+    E.g. 16.0 (square of starting value 4.0).
     :return: The abscissa solution for the given ordinate value
     """
     pc = poly_coefs.copy()
@@ -188,10 +195,8 @@ def _calculate_lagtimes(syn_name: str, two_time_points: list, two_tht_values: li
         x_poly = poly_reg.fit_transform(x)
         lin_reg = LinearRegression()
         lin_reg.fit(x_poly, y)
-        if make_plot:
-            y_pred = lin_reg.predict(x_poly)
-            _plot(preproc=poly_reg, lin_reg=lin_reg, x=x, y=y, y_pred=y_pred, syn_name=syn_name)
-        lag_hours = np.real(_solve_for_y(lin_reg.coef_, STARTING_THT_VALUE, tht_lagtime_end_value))
+        lag_hours = np.real(_solve_lagtime(poly_coefs=lin_reg.coef_, intercept=STARTING_THT_VALUE,
+                                           y=tht_lagtime_end_value))
         lag_hours = abs(round(float(lag_hours), 1))
     if syn_name not in lagtimes:
         lagtimes[syn_name] = [lag_hours]
