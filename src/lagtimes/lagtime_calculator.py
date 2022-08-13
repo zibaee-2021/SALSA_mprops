@@ -10,19 +10,9 @@ import re
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from src.utils import util_data
+from src.utils.Constants import LagTimeCalc
 
-STARTING_THT_VALUE = 4.0
-SQUARE_OF_STARTING_VALUE = np.square(STARTING_THT_VALUE)  # e.g. 16.0
-DOUBLE_STARTING_VALUE = STARTING_THT_VALUE * 2  # e.g. 8.0
-_1_5_STARTING_VALUE = STARTING_THT_VALUE * 1.5  # e.g. 6.0
-MIN_NUM_OF_LAGTIMES_NEEDED = 3
-STR_TIME_H = 'Time (h)'
-ALL_THT_DATA_CSV_PATH = os.path.join(abspath_root, 'data', 'tht_data', 'AllThTData.csv')
-LAGTIMES_PATH = os.path.join(abspath_root, 'data', 'tht_data', 'lagtimes')
-LAGTIME_MEANS_PATH = os.path.join(LAGTIMES_PATH, 'lagtime_means')
-THT_PATH = os.path.join(abspath_root, 'data', 'tht_data')
-ACCEPTABLE_MAX_PROPORTION_OF_NULL_LAGTIMES = 1 / 8
-STANDARD_ASYN_END_THT_VALUE = 250
+constants = LagTimeCalc()
 
 
 def _has_enough_nonnull_lagtimes(lagtimes: list) -> bool:
@@ -34,7 +24,7 @@ def _has_enough_nonnull_lagtimes(lagtimes: list) -> bool:
     :return: True if the given list has at least the minimum number of non-null 'lag-times'.
     """
     has_enough_nonnull_lagtimes = len([lagtime for lagtime in lagtimes if lagtime != 'NA']) >= \
-                                  MIN_NUM_OF_LAGTIMES_NEEDED
+                                  constants.MIN_NUM_OF_LAGTIMES_NEEDED
     return has_enough_nonnull_lagtimes
 
 
@@ -49,7 +39,7 @@ def _has_high_enough_proportion_of_non_null_lagtimes(lagtimes: list) -> bool:
     :return: True if the given list has at least the minimum proportion of non-null to null values.
     """
     num_of_nones = len([lag for lag in lagtimes if lag == 'NA'])
-    has_enough_prop_of_lagtimes = (num_of_nones / len(lagtimes)) <= ACCEPTABLE_MAX_PROPORTION_OF_NULL_LAGTIMES
+    has_enough_prop_of_lagtimes = (num_of_nones / len(lagtimes)) <= constants.ACCEPTABLE_MAX_PROPORTION_OF_NULL_LAGTIMES
     return has_enough_prop_of_lagtimes
 
 
@@ -199,7 +189,7 @@ def _calculate_lagtimes(syn_name: str, two_time_points: list, two_tht_values: li
         x_poly = poly_reg.fit_transform(x)
         lin_reg = LinearRegression()
         lin_reg.fit(x_poly, y)
-        lag_hours = np.real(_solve_lagtime(poly_coefs=lin_reg.coef_, intercept=STARTING_THT_VALUE,
+        lag_hours = np.real(_solve_lagtime(poly_coefs=lin_reg.coef_, intercept=constants.STARTING_THT_VALUE,
                                            y=tht_lagtime_end_value))
         lag_hours = abs(round(float(lag_hours), 1))
 
@@ -265,7 +255,8 @@ def _is_date(row_col_0: str) -> bool:
 
 
 def _get_data() -> List[str]:
-    csvpath = os.path.join(THT_PATH, f"standardised_tht_start_at_{str(STARTING_THT_VALUE).replace('.', '_')}.csv")
+    csvpath = os.path.join(constants.THT_PATH,
+                           f"standardised_tht_start_at_{str(constants.STARTING_THT_VALUE).replace('.', '_')}.csv")
     with open(csvpath, 'r') as csv_:
         for row in csv.reader(csv_):
             yield row
@@ -297,7 +288,7 @@ def get_lagtimes(make_plot: bool, degree_to_use: int, tht_lagtime_end_value: flo
     for row in data_:
         if _is_date(row[0]):
             continue
-        elif row[0] == STR_TIME_H:
+        elif row[0] == constants.STR_TIME_H:
             syn_names += tuple(filter(None, row[1:]))
             tht_values = np.zeros((10, len(syn_names)))
         elif row[0] == '0' or row[0] == '0.0':
@@ -361,7 +352,7 @@ def standardise_tht() -> List[dict]:
     by translation, means that alpha-Synuclein's final standardised ThT value is rarely exactly 100.0)
     :return: Standardised ThT data
     """
-    df = pd.read_csv(ALL_THT_DATA_CSV_PATH, header=None)
+    df = pd.read_csv(constants.ALL_THT_DATA_CSV_PATH, header=None)
     num_of_cols = df.shape[1]
     temp_col_names = tuple(range(num_of_cols))
     one_tht_expt = []
@@ -377,7 +368,7 @@ def standardise_tht() -> List[dict]:
             one_tht_expt.append(dict(zip(temp_col_names, row)))
         elif row[0].lower().startswith('time'):
             row_list = list(row)
-            row_list[0] = STR_TIME_H
+            row_list[0] = constants.STR_TIME_H
             row = tuple(row_list)
             one_tht_expt.append(dict(zip(temp_col_names, row)))
             assert(row[1] == 'asyn')
@@ -389,8 +380,8 @@ def standardise_tht() -> List[dict]:
             one_tht_expt.append(dict(zip(temp_col_names, row)))
         elif 90 <= float(row[0]) < 101:
             one_tht_expt.append(dict(zip(temp_col_names, row)))
-            scaling_factor = STANDARD_ASYN_END_THT_VALUE / float(row[1])
-            translate_by = {syn_name: STARTING_THT_VALUE - (scaling_factor * zero_time_values[syn_name]) for
+            scaling_factor = constants.STANDARD_ASYN_END_THT_VALUE / float(row[1])
+            translate_by = {syn_name: constants.STARTING_THT_VALUE - (scaling_factor * zero_time_values[syn_name]) for
                             syn_name in syn_names}
             standardised_tht_all.extend(_standardise_tht(one_tht_expt, translate_by, scaling_factor, syn_names))
             one_tht_expt = []
@@ -410,7 +401,7 @@ def write_lagtimes(lagtimes: Dict[str, list], degree_used: int, tht_lagtime_end_
     """
     pdf = pd.Series(lagtimes).to_frame('lagtimes (h)')
     lagtime_filename = f'lagtime_polynDegree_{degree_used}_lagtimeEndvalue_{int(tht_lagtime_end_value_used)}.csv'
-    pdf.to_csv(os.path.join(LAGTIMES_PATH, lagtime_filename), index=True)
+    pdf.to_csv(os.path.join(constants.LAGTIMES_PATH, lagtime_filename), index=True)
 
 
 def write_lagtime_means(lagtime_means: Dict[str, Tuple[float, float]], degree_used: int,
@@ -425,13 +416,13 @@ def write_lagtime_means(lagtime_means: Dict[str, Tuple[float, float]], degree_us
     col_names = ['Synucleins', 'lagtime_means', 'std_devs']
     df = pd.DataFrame.from_dict(data=lagtime_means, orient='index', columns=col_names[1: 3])
     lagtime_filename = f'lagtime_means_polynDegree_{degree_used}_lagtimeEndvalue_{int(tht_lagtime_end_value_used)}.csv'
-    df.to_csv(os.path.join(LAGTIME_MEANS_PATH, lagtime_filename), index=True)
+    df.to_csv(os.path.join(constants.LAGTIME_MEANS_PATH, lagtime_filename), index=True)
 
 
 def write_standardised_tht_data_all(standardised_tht_all: List[dict]):
-    standardised_tht_filename = f"standardised_tht_start_at_{str(STARTING_THT_VALUE).replace('.', '_')}.csv"
+    standardised_tht_filename = f"standardised_tht_start_at_{str(constants.STARTING_THT_VALUE).replace('.', '_')}.csv"
     df = pd.DataFrame(standardised_tht_all)
-    df.to_csv(os.path.join(THT_PATH, standardised_tht_filename), index=False, header=False)
+    df.to_csv(os.path.join(constants.THT_PATH, standardised_tht_filename), index=False, header=False)
 
 
 if __name__ == '__main__':
@@ -440,7 +431,7 @@ if __name__ == '__main__':
 
     # write_standardised_tht_data_all(standardise_tht())
     for _degree_to_use in [3]:
-        for lagtime_end_value_to_use in [SQUARE_OF_STARTING_VALUE]:
+        for lagtime_end_value_to_use in [constants.SQUARE_OF_STARTING_VALUE]:
             _lagtimes = get_lagtimes(make_plot=True, degree_to_use=_degree_to_use,
                                      tht_lagtime_end_value=lagtime_end_value_to_use)
             write_lagtimes(lagtimes=_lagtimes, degree_used=_degree_to_use,
