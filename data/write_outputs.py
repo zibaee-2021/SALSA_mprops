@@ -19,7 +19,9 @@ def write_csv(params_, prop_dirname, prot_id_seqs, all_summed_scores, salsa_inte
         summed_scores_for_csv['integral'].iat[0] = salsa_integrals
         timestamp = str(round(time.time()))
         path = os.path.join(abspath_root, 'data', 'salsa_outputs', prot_id, prop_dirname, 'summed_scores')
-        try: os.makedirs(path)
-        except OSError: print('Creation of directories %s failed' % path)
+        try:
+            os.makedirs(path)
+        except OSError:
+            print('Leaf directory of %s may already exist. Should be ok, but check file has been written.' % path)
         csv_ = os.path.join(path, timestamp + '.csv')
         summed_scores_for_csv.to_csv(csv_)
