@@ -67,7 +67,7 @@ def _build_syn_sequences(pdf: pDF) -> dict:
             elif syn_name == 'bsyn':
                 syn_seqs[syn_name] = bsyn
                 assert (len(syn_seqs[syn_name]) == 134)
-            elif syn_name == 'ba1':  # bsyn1-72, asyn73-83, bsyn73-134. Hence this should be 145 aa long
+            elif syn_name == 'ba1':  # ba1 is bsyn1-72--asyn73-83--bsyn73-134. Hence length is 145.
                 syn_seqs[syn_name] = bsyn[:72] + asyn[72:83] + bsyn[72:]
                 assert (len(syn_seqs[syn_name]) == 145)
             elif syn_name == 'ba12':  # asyn1-96, bsyn86-134. Hence this should be 145 aa long.
@@ -176,4 +176,4 @@ def get_loglags_and_build_seqs(csv_filename: str) -> pDF:
 
 
 if __name__ == '__main__':
-    get_loglags_and_build_seqs(csv_filename='lagtime_means_polynDegree_4_lagtimeEndvalue_8.csv')
+    get_loglags_and_build_seqs(csv_filename='lagtime_means_polynomDeg_4_lagtimeEndvalue_8.csv')
