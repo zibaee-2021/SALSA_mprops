@@ -3,12 +3,10 @@ import pandas as pd
 from pandas import DataFrame as pDF
 from data.protein_sequences import read_seqs
 from src.mutation import mutator
-from root_path import abspath_root
 import math
 from src.utils import util_data
-from src.lagtimes import lagtime_calculator as ltc
-
-LAGTIME_MEANS_PATH = ltc.LAGTIME_MEANS_PATH
+from src.utils.Constants import LagTimeCalc
+constants = LagTimeCalc()
 
 
 def _get_ln_lags(csv_filename: str) -> pDF:
@@ -18,7 +16,7 @@ def _get_ln_lags(csv_filename: str) -> pDF:
     :return: Table of 4 columns including Synucleins as index, 'lag-time' means and log of 'lag-times':
     [(index), 'lagtime_means', 'ln_lags', 'seqs'].
     """
-    pdf = pd.read_csv(os.path.join(LAGTIME_MEANS_PATH, csv_filename), index_col=[0])
+    pdf = pd.read_csv(os.path.join(constants.LAGTIME_MEANS_PATH, csv_filename), index_col=[0])
     pdf['ln_lags'] = pdf.apply(lambda row: math.log(row['lagtime_means']), axis=1)
     return pdf
 
