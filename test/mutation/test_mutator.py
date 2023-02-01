@@ -22,18 +22,18 @@ class TestMutator(TestCase):
         # {'SYUA_HUMAN': [{30: 'P'}], 'P10636-7': [{301: 'S'}, {301: 'L'}]}
         prot_id = 'test_peptide_AAP'
         self.assertTrue(mutator._are_valid_positions_to_mutate(prot_id_seqs={prot_id: 'AAP'},
-                                                              prot_id_point_mutations_to_make={prot_id: [{3: 'D'}]}))
+                                                               prot_id_point_mutations_to_make={prot_id: [{3: 'D'}]}))
         self.assertTrue(mutator._are_valid_positions_to_mutate(prot_id_seqs={prot_id: 'AAP'},
-                                                              prot_id_point_mutations_to_make={prot_id: [{3: 'D'},
+                                                               prot_id_point_mutations_to_make={prot_id: [{3: 'D'},
                                                                                                          {2: 'E'}]}))
         self.assertTrue(mutator._are_valid_positions_to_mutate(prot_id_seqs={prot_id: 'AAP'},
-                                                              prot_id_point_mutations_to_make={prot_id: {3: 'D'}}))
+                                                               prot_id_point_mutations_to_make={prot_id: {3: 'D'}}))
 
         self.assertFalse(mutator._are_valid_positions_to_mutate(prot_id_seqs={prot_id: 'AAP'},
-                                                               prot_id_point_mutations_to_make={prot_id: {4: 'D'}}))
+                                                                prot_id_point_mutations_to_make={prot_id: {4: 'D'}}))
 
         self.assertFalse(mutator._are_valid_positions_to_mutate(prot_id_seqs={prot_id: 'AAP'},
-                                                               prot_id_point_mutations_to_make={prot_id: {0: 'D'}}))
+                                                                prot_id_point_mutations_to_make={prot_id: {0: 'D'}}))
 
     def test__make_point_mutant_simple1(self):
         actual = mutator._make_point_mutants(prot_id_seq={'simple': 'AAP'}, point_mutants_to_make={3: ['D', 'T']})
