@@ -210,9 +210,11 @@ def compute_norm_bsc_integrals(df: pDF) -> pDF:
     df_.loc[:, 'bsc'] = df['seqs'].apply(_compute_bsc_integrals)
     max_ = np.max(list(df_['bsc']))
     min_ = np.min(list(df_['bsc']))
-    df__ = df_.copy()
-    df__.loc[:, 'nbsc'] = df_['bsc'].apply(lambda row: ((row - min_) / (max_ - min_)) + 0.01)
-    return df__
+    # df__ = df_.copy()
+    # df__.loc[:, 'nbsc'] = df_['bsc'].apply(lambda row: ((row - min_) / (max_ - min_)) + 0.01)
+    # return df__
+    df_.loc[:, 'nbsc'] = df_['bsc'].apply(lambda row: ((row - min_) / (max_ - min_)) + 0.01)
+    return df_
 
 
 if __name__ == '__main__':
