@@ -435,7 +435,7 @@ def write_lagtimes(lagtimes: Dict[str, list], degree_used: int, tht_lagtime_end_
     :param tht_lagtime_end_value_used: Value of ThT (relative to starting value) used to mark end of 'lag-phase'.
     """
     pdf = pd.Series(lagtimes).to_frame('lagtimes (h)')
-    lagtime_filename = f'lagtime_polynDegree_{degree_used}_lagtimeEndvalue_{int(tht_lagtime_end_value_used)}.csv'
+    lagtime_filename = f'lt_polyDeg{degree_used}_ltEnd{int(tht_lagtime_end_value_used)}.csv'
     pdf.to_csv(os.path.join(constants.LAGTIMES_PATH, lagtime_filename), index=True)
 
 

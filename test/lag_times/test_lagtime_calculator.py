@@ -35,14 +35,14 @@ class TestLagTimeCalculator(TestCase):
         self.assertTrue(lagcalc._has_high_enough_proportion_of_non_null_lagtimes([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'NA']))
 
     def test__calc_mean_of_lagtimes(self):
-        self.assertDictEqual({'asyn': 2}, lagcalc.calculate_mean({'asyn': [1, 2, 3]}))
-        self.assertDictEqual({}, lagcalc.calculate_mean({'asyn': [80, 60, 'NA']}))
-        self.assertDictEqual({}, lagcalc.calculate_mean({'asyn': [10, 10, 10, 'NA']}))
-        self.assertDictEqual({}, lagcalc.calculate_mean({'asyn': [10, 10, 10, 10, 'NA']}))
-        self.assertDictEqual({}, lagcalc.calculate_mean({'asyn': [10, 10, 10, 10, 10, 'NA']}))
-        self.assertDictEqual({}, lagcalc.calculate_mean({'asyn': [10, 10, 10, 10, 10, 10, 'NA']}))
-        self.assertDictEqual({'asyn': 10}, lagcalc.calculate_mean({'asyn': [10, 10, 10, 10, 10, 10, 10, 'NA']}))
-        self.assertDictEqual({'asyn': 10}, lagcalc.calculate_mean({'asyn': [10, 10, 10, 10, 10, 10, 10, 10,
+        self.assertDictEqual({'asyn': 2}, lagcalc.calculate_means_and_stdev({'asyn': [1, 2, 3]}))
+        self.assertDictEqual({}, lagcalc.calculate_means_and_stdev({'asyn': [80, 60, 'NA']}))
+        self.assertDictEqual({}, lagcalc.calculate_means_and_stdev({'asyn': [10, 10, 10, 'NA']}))
+        self.assertDictEqual({}, lagcalc.calculate_means_and_stdev({'asyn': [10, 10, 10, 10, 'NA']}))
+        self.assertDictEqual({}, lagcalc.calculate_means_and_stdev({'asyn': [10, 10, 10, 10, 10, 'NA']}))
+        self.assertDictEqual({}, lagcalc.calculate_means_and_stdev({'asyn': [10, 10, 10, 10, 10, 10, 'NA']}))
+        self.assertDictEqual({'asyn': 10}, lagcalc.calculate_means_and_stdev({'asyn': [10, 10, 10, 10, 10, 10, 10, 'NA']}))
+        self.assertDictEqual({'asyn': 10}, lagcalc.calculate_means_and_stdev({'asyn': [10, 10, 10, 10, 10, 10, 10, 10,
                                                                                     'NA']}))
 
     def test__include_lag_phase_only(self):
@@ -55,11 +55,13 @@ class TestLagTimeCalculator(TestCase):
         self.assertCountEqual(expected[1], actual[1])
 
     def test_write_lagtime_means(self):
-        lagtime_means = {'asyn': 23, 'bsyn': 400}
-        lagtime_means_df = pd.DataFrame.from_dict(data=lagtime_means, orient='index', columns=['lagtime_means'])
-        lagcalc.write_lagtime_means(lagtime_means=lagtime_means, degree_used=4, tht_lagtime_end_value_used=16)
+        lagtime_means_stdev = {'asyn': [12.3, 5.7], 'S87E': [29.9, 7.7]}
+        col_names = ['lagtime_means', 'std_devs']
+        lagtime_means_df = pd.DataFrame.from_dict(data=lagtime_means_stdev, orient='index', columns=col_names)
+        lagcalc.write_lagtime_means(lagtime_means_stdev=lagtime_means_stdev, degree_used=4,
+                                    tht_lagtime_end_value_used=16, dst_dir=constants.TEST_LAGTIMES_PATH)
 
-        expected_lagtime_filename = 'lagtime_means_polynDegree_4_lagtimeEndvalue_16.csv'
+        expected_lagtime_filename = 'ltMeans_polyDeg4_ltEnd16.csv'
         expected_lagtime_csv = os.path.join(abspath_root, 'data', 'tht_data', 'lagtimes', expected_lagtime_filename)
         expected_lagtime_means_df = pd.read_csv(expected_lagtime_csv, index_col=[0])
         pdt.assert_frame_equal(expected_lagtime_means_df, lagtime_means_df)
