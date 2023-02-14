@@ -170,13 +170,13 @@ def _solve_lagtime(poly_coefs, intercept, y) -> float:
     return roots[0]
 
 
-def _plot(preproc: PolynomialFeatures, lin_reg: LinearRegression, x: list, y: np.ndarray, y_pred: float, syn_name: str,
+def _plot(preproc: PolynomialFeatures, model: LinearRegression, x: list, y: np.ndarray, y_pred: float, syn_name: str,
           degree_used: int, tht_lag: float, lag_hrs: float):
     """
     Display a plot of the polynomial regression, with the given time points as abscissa. The ordinate includes both
     the ThT values and the predicted values with the regression line.
     :param preproc: Preprocessing method used. (For example the polynomial, according to a specified degree).
-    :param lin_reg: The linear regression model, already trained only polynomially processed time point values.
+    :param model: The linear regression model, already trained only polynomially processed time point values.
     :param x: Time points (expected to be only two time points).
     :param y: ThT values (expected to be only two ThT values).
     :param y_pred: Predicted ThT value according to the trained polynomial regression model.
@@ -189,7 +189,7 @@ def _plot(preproc: PolynomialFeatures, lin_reg: LinearRegression, x: list, y: np
     X_grid = X_grid.reshape((len(X_grid), 1))
     plt.scatter(x, y, color='red')
     plt.scatter(x, y_pred, color='green')
-    plt.plot(X_grid, lin_reg.predict(preproc.fit_transform(X_grid)), color='black')
+    plt.plot(X_grid, model.predict(preproc.fit_transform(X_grid)), color='black')
     plt.title(f'{syn_name.upper()}/ lag={lag_hrs}hr/ lag ThT={round(tht_lag, 1)}/ poly-degr={degree_used} ')
     plt.xlabel('Time')
     plt.ylabel('ThT (h)')
@@ -222,15 +222,15 @@ def _calculate_lagtimes(syn_name: str, two_time_points: np.ndarray, two_tht_valu
         y = np.array(two_tht_values[0: len(x)])
         poly_reg = PolynomialFeatures(degree=degree_to_use)
         x_poly = poly_reg.fit_transform(x)
-        lin_reg = LinearRegression()
-        lin_reg.fit(x_poly, y)
-        lag_hours = np.real(_solve_lagtime(poly_coefs=lin_reg.coef_, intercept=constants.STARTING_THT_VALUE,
+        model = LinearRegression()
+        model.fit(x_poly, y)
+        lag_hours = np.real(_solve_lagtime(poly_coefs=model.coef_, intercept=constants.STARTING_THT_VALUE,
                                            y=tht_lagtime_end_value))
         lag_hours = abs(round(float(lag_hours), 1))
 
         if make_plot:
-            y_pred = lin_reg.predict(x_poly)
-            _plot(preproc=poly_reg, lin_reg=lin_reg, x=x, y=y, y_pred=y_pred, syn_name=syn_name,
+            y_pred = model.predict(x_poly)
+            _plot(preproc=poly_reg, model=model, x=x, y=y, y_pred=y_pred, syn_name=syn_name,
                   degree_used=degree_to_use, tht_lag=two_tht_values[-1], lag_hrs=lag_hours)
 
     if syn_name not in lagtimes:
