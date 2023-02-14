@@ -1,5 +1,7 @@
 from unittest import TestCase
 import os
+import numpy as np
+import numpy.testing as npt
 import pandas as pd
 from pandas import testing as pdt
 from root_path import abspath_root
@@ -48,11 +50,13 @@ class TestLagTimeCalculator(TestCase):
     def test__include_lag_phase_only(self):
         X = [0, 4, 8, 24, 48, 96]
         y = [4.0, 6.1, 12.4, 16.0, 97.5, 123.6]
-        actual = lagcalc._include_lag_phase_only(X, y)
-        expected = [8, 24], [12.4, 16.0]
-        self.assertTupleEqual(expected, actual)
-        self.assertCountEqual(expected[0], actual[0])
-        self.assertCountEqual(expected[1], actual[1])
+        time_points = np.array(X)
+        tht_values = np.array(y)
+        tht_lagtime_end_value = 16
+
+        actual = lagcalc._include_lag_phase_only(time_points, tht_values, tht_lagtime_end_value)
+        expected = np.array([8, 24]), np.array([12.4, 16.0])
+        npt.assert_array_equal(expected, actual)
 
     def test_write_lagtime_means(self):
         lagtime_means_stdev = {'asyn': [12.3, 5.7], 'S87E': [29.9, 7.7]}
