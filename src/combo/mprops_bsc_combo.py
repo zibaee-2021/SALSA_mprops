@@ -50,11 +50,12 @@ def train_combo_model(pdf: pDF, make_plot: bool, model: linear_model) -> Tuple[l
     """
     x_combo = np.array(pdf.combo)
     x_combo = x_combo.reshape((-1, 1))
-    y = np.array(pdf.ln_lags)
-    model.fit(x_combo, y)
-    rsq = round(float(model.score(x_combo, y)), 3)
+    y_ln_lags = np.array(pdf.ln_lags)
+    model.fit(x_combo, y_ln_lags)
+    rsq = round(float(model.score(x_combo, y_ln_lags)), 3)
     if make_plot:
-        plotter.plot(model, x=x_combo, y=y, data_labels=list(pdf.index), title='combo', x_label='combined properties')
+        plotter.plot(model, x=x_combo, y=y_ln_lags, data_labels=list(pdf.index), title='combo',
+                     x_label='combined properties')
     return model, rsq
 
 
@@ -72,16 +73,16 @@ def _calc_relative_weights_for_nmprops_and_nbsc(pdf: pDF, make_plot: bool,
     """
     x_nbsc, x_nmprops = np.array(pdf.nbsc), np.array(pdf.nmprops)
     x_nbsc, x_nmprops = x_nbsc.reshape((-1, 1)), x_nmprops.reshape((-1, 1))
-    y = np.array(pdf.ln_lags)
+    y_ln_lags = np.array(pdf.ln_lags)
     _2coefs, _2intcpts, _2rsq = {}, {}, {}
-    for prop_name, prop_values in zip(['nbsc', 'nmprops'], [x_nbsc, x_nmprops]):
-        model.fit(prop_values, y)
+    for prop_name, x_prop_values in zip(['nbsc', 'nmprops'], [x_nbsc, x_nmprops]):
+        model.fit(x_prop_values, y_ln_lags)
         if make_plot:
-            plotter.plot(model, x=prop_values, y=y, data_labels=list(pdf.index), x_label=prop_name,
+            plotter.plot(model, x=x_prop_values, y=y_ln_lags, data_labels=list(pdf.index), x_label=prop_name,
                          title=prop_name)
         _2coefs[prop_name] = round(float(model.coef_), 3)
         _2intcpts[prop_name] = round(float(model.intercept_), 3)
-        _2rsq[prop_name] = round(float(model.score(prop_values, y)), 3)
+        _2rsq[prop_name] = round(float(model.score(x_prop_values, y_ln_lags)), 3)
     print(f'_2rsq {_2rsq}')
     return _2coefs, _2intcpts, _2rsq
 

@@ -60,18 +60,16 @@ def _calc_relative_weights_per_prop(pdf: pDF, make_plot: bool, model: linear_mod
     x_nmbp, x_nmh, x_nmnc, x_nmtc = np.array(pdf.nmbp), np.array(pdf.nmh), np.array(pdf.nmnc), np.array(pdf.nmtc)
     x_nmbp, x_nmh, x_nmnc, x_nmtc = x_nmbp.reshape((-1, 1)), x_nmh.reshape((-1, 1)),\
                                     x_nmnc.reshape((-1, 1)), x_nmtc.reshape((-1, 1))
-    y = np.array(pdf.ln_lags)
+    y_ln_lags = np.array(pdf.ln_lags)
     _4coefs, _4intcpts, _4rsq = {}, {}, {}
-    # NOTE: Pycharm bug `TypeError: 'NoneType' object is not callable` in debugger mode.
-    for prop_name, prop_values in zip(['nmbp', 'nmh', 'nmnc', 'nmtc'], [x_nmbp, x_nmh, x_nmnc, x_nmtc]):
-        model.fit(prop_values, y)
+    for prop_name, x_prop_values in zip(['nmbp', 'nmh', 'nmnc', 'nmtc'], [x_nmbp, x_nmh, x_nmnc, x_nmtc]):
+        model.fit(x_prop_values, y_ln_lags)
         if make_plot:
-            plotter.plot(model, x=prop_values, y=y, data_labels=list(pdf.index),
+            plotter.plot(model, x=x_prop_values, y=y_ln_lags, data_labels=list(pdf.index),
                          title=prop_name, x_label=prop_name)
         _4coefs[prop_name] = round(float(model.coef_), 3)
         _4intcpts[prop_name] = round(float(model.intercept_), 3)
-        # _4rsq[prop_name] = round(float(model.score(prop_values, y)), 3)
-        _4rsq[prop_name] = round(float(r2_score(y_pred=prop_values, y_true=y)), 3)
+        _4rsq[prop_name] = round(float(model.score(x_prop_values, y_ln_lags)), 3)
     return _4coefs, _4intcpts, _4rsq
 
 
