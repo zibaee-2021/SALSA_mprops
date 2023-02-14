@@ -4,33 +4,26 @@ from src.utils import utils
 from src.combo import mprops_bsc_combo
 from root_path import abspath_root
 from pandas import DataFrame as pDF
-# from fastapi import FastAPI
-# import nest_asyncio
-# import uvicorn
-# app = FastAPI(title='SALSA_mprops estimator')
-# nest_asyncio.apply()
-# host = "0.0.0.0" if os.getenv("DOCKER-SETUP") else "127.0.0.1"
-# uvicorn.run(app, host=host, port=8000)
-#
-#
-# @app.get("/")
-# async def root():
-#     return {"message": "Hello World"}
+from sklearn import linear_model
+from sklearn.linear_model import LinearRegression
 
 
-def fit_and_predict_syns(csv_filename: str, make_plots: bool) -> pDF:
+
+
+def fit_and_predict_syns(csv_filename: str, make_plots: bool, model: linear_model) -> pDF:
     """
     Generate the combination algorithm, from scratch, by fitting all 4 mean properties, mprops and beta-strand
     contiguity to the log of lagtimes for synucleins.
     :param csv_filename: Name of lagtime means csv filename (including csv extension).
     :param make_plots: True to make plots in IDE.
+    :param model: Linear model to use for fitting combination of properties to log of lagtimes.
     :return: Table of 5 columns including synucleins as index, lagtime means, predicted lagtimes, normalised
     mean properties and normalised beta-strand contiguity: [(index), 'lagtime_means', 'pred', 'nmprops', 'nbsc']]
     """
     syns_lagmeans_lnlags_seqs = utils.get_loglags_and_build_seqs(csv_filename)
-    syns_lags_seqs_props = mprops_bsc_combo.generate_combo(csv_filename=csv_filename,
+    syns_lags_seqs_props = mprops_bsc_combo.generate_combo(csv_filename=csv_filename, model=model,
                                                            pdf=syns_lagmeans_lnlags_seqs, make_plot=make_plots)
-    combo_model, rsq = mprops_bsc_combo.train_combo_model(syns_lags_seqs_props, make_plot=make_plots)
+    combo_model, rsq = mprops_bsc_combo.train_combo_model(syns_lags_seqs_props, make_plots, model=model)
     coef = round(float(combo_model.coef_), 3)
     intcpt = round(float(combo_model.intercept_), 3)
     csv_filename = csv_filename.replace('lagtime_means_polynDegree', 'polydeg')
@@ -46,10 +39,12 @@ if __name__ == '__main__':
     lagtime_dir_path = os.path.join(abspath_root, 'data', 'tht_data', 'lagtimes', 'lagtime_means')
     b_lagtime_dir_path = os.fsencode(lagtime_dir_path)
     syns_lnlags_seqs = None
+    models_to_try = [LinearRegression()]
 
     for b_csv_filename in os.listdir(b_lagtime_dir_path):
         filename = os.fsdecode(b_csv_filename)
         if filename.endswith('.csv'):
-            syns_lnlags_seqs = fit_and_predict_syns(csv_filename=filename, make_plots=True)
-            print(syns_lnlags_seqs.head(50))
+            for model_ in models_to_try:
+                syns_lnlags_seqs = fit_and_predict_syns(csv_filename=filename, make_plots=True, model=model_)
+                print(syns_lnlags_seqs.head(50))
 
