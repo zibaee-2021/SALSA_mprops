@@ -2,14 +2,17 @@ from enum import Enum
 import numpy as np
 
 """
-Differences in the Chou-Fasman numbers used in the original Java implementation of mean beta-sheet propensity from
-the implementation here.
-Asparagine alpha-helical preference number of 0.76 was used. Here I use 0.99. 
-Asparagine reverse turn preference number of 1.24. Here I use 1.34.
-Glutamic acid beta-strand preference number of 0.59 was used. Here I use 0.52.
-The values assigned here in the CFP enum below are also in data/aa_properties/aa_props.csv. Ideally the values here 
-would be read from that file but for reasons of performance, I've opted to allow duplication for now, hardcoding the 
-values in this script as an enum.
+There are 3 differences in value of Chou-Fasman numbers I use below, compared to those used in Sumner's original Java 
+implementation of mean beta-sheet propensity. They are:
+1. Asparagine alpha-helical preference number of 0.76 was used. Here I use 0.99. 
+2. Asparagine reverse turn preference number of 1.24. Here I use 1.34.
+3. Glutamic acid beta-strand preference number of 0.59 was used. Here I use 0.52.
+
+
+Note the Chou-Fasman Preferences numbers are stored in this file in CFP Enum below. 
+They are also stored in data/aa_properties/aa_props.csv. 
+This duplication is temporary until I decide how to handle this. 
+(The reason for including CFPs in this file is that the code is slow when reading from the csv).
 """
 
 
