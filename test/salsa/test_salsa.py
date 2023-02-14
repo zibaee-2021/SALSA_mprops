@@ -83,11 +83,11 @@ class TestSalsa(TestCase):
         self.assertEqual(4915.88, actual)
 
     def test_compute_norm_bsc_integrals(self):
-        col_names = ['Synucleins', 'seqs']
+        col_names = ['synucleins', 'seqs']
         seqs = {'asyn': self.asyn, 'bsyn': self.bsyn}
         input_df = pd.DataFrame.from_dict(data=seqs, orient='index', columns=[col_names[1]])
 
-        col_names = ['Synucleins', 'seqs', 'bsc', 'nbsc']
+        col_names = ['synucleins', 'seqs', 'bsc', 'nbsc']
         seqs = {'asyn': [self.asyn, 3513.9, 1.0], 'bsyn': [self.bsyn, 1145.11, 0.0]}
         expected_df = pd.DataFrame.from_dict(data=seqs, orient='index', columns=[col_names[1:]])
 
