@@ -3,8 +3,9 @@ from typing import Tuple
 from pandas import DataFrame as pDF
 from src.mean_properties import mbp, mh, mnc_mtc
 import numpy as np
-from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
-from sklearn.metrics import r2_score
+from sklearn import linear_model
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet, LogisticRegression, BayesianRidge, \
+    PoissonRegressor, SGDRegressor, HuberRegressor
 from data.aa_properties.read_props import Scales
 from src.utils import plotter, utils
 
@@ -37,7 +38,7 @@ fibrillogenic than they actually were taking in to account the non-inclusion of 
 """
 
 
-def _calc_relative_weights_per_prop(pdf: pDF, make_plot: bool, model: LinearRegression) -> Tuple[dict, dict, dict]:
+def _calc_relative_weights_per_prop(pdf: pDF, make_plot: bool, model: linear_model) -> Tuple[dict, dict, dict]:
     """
     `mprops` is a weighted sum of the 4 mean properties. These relative weights are the coefficients (i.e. slopes of
     linear plots) of each of following 4 plots (nmbp, nmh, nmnc, nmtc) against the natural log of the
@@ -53,7 +54,7 @@ def _calc_relative_weights_per_prop(pdf: pDF, make_plot: bool, model: LinearRegr
     ['lagtime_means', 'ln_lags', 'seqs', 'mbp', 'mh', 'mnc', 'mtc', 'nmbp', 'nmh', 'nmnc', 'nmtc'].
     :param make_plot: True to display 4 plots of the linear regression for each of the 4 mean properties against the
     natural log of lagtimes.
-    :param model: Model to use for regression of lagtimes to physicochemical properties.
+    :param model: Linear model to use for regression of lagtimes to physicochemical properties.
     :return: The 4 coefficients, 4 y-intercepts and 4 R-squared values of the 4 mean properties: mbp, mh, mnc, mtc.
     """
     x_nmbp, x_nmh, x_nmnc, x_nmtc = np.array(pdf.nmbp), np.array(pdf.nmh), np.array(pdf.nmnc), np.array(pdf.nmtc)
@@ -95,7 +96,7 @@ def compute_4_normalised_props(pdf: pDF) -> pDF:
     return pdf
 
 
-def compute_norm_mprops(pdf: pDF, make_plot: bool, model: LinearRegression) -> pDF:
+def compute_norm_mprops(pdf: pDF, make_plot: bool, model: linear_model) -> pDF:
     """
     Compute normalised mprops.
     :param pdf: Table of 4 columns including synucleins as index, lagtime means, natural log of lagtimes and

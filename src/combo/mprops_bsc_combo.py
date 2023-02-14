@@ -2,6 +2,7 @@ from typing import Tuple
 from pandas import DataFrame as pDF
 from src.mean_properties import mprops
 import numpy as np
+from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
 from src.salsa import salsa
 from src.utils import plotter, utils
@@ -34,30 +35,31 @@ fibrillogenic than they actually were taking in to account the non-inclusion of 
 """
 
 
-def train_combo_model(pdf: pDF, make_plot: bool) -> Tuple[LinearRegression, float]:
+def train_combo_model(pdf: pDF, make_plot: bool, model: linear_model) -> Tuple[linear_model, float]:
     """
-    Fit linear regression of given log of lagtimes to the given combination of physicochemical properties.
-    (`sklearn.linear_model.LinearRegression` uses Ordinary Least Squares rather than gradient descent).
+    Fit linear model (e.g. LinearRegression) of given log of lagtimes to the given combination of physicochemical
+    properties. (Note: `sklearn.linear_model.LinearRegression` uses Ordinary Least Squares rather than gradient
+    descent).
     :param pdf: Table of 4 columns including synucleins (index) mapped to lagtimes,
     log of lagtimes, amino acid sequences and mean properties.
-    :param make_plot: True to display 4 plots of the linear regression for each of the 4 mean properties
+    :param make_plot: True to display 4 plots of the linear model for each of the 4 mean properties
     against the natural log of lagtimes.
-    :return: Trained linear regression model of log of lagtimes against combined properties anf the corresponding
+    :param model: Linear model to use for fitting combination of properties to log of lagtimes.
+    :return: Trained linear model of log of lagtimes against combined properties anf the corresponding
     'coefficient of determination'.
     """
     x_combo = np.array(pdf.combo)
     x_combo = x_combo.reshape((-1, 1))
     y = np.array(pdf.ln_lags)
-    model = LinearRegression()
     model.fit(x_combo, y)
     rsq = round(float(model.score(x_combo, y)), 3)
     if make_plot:
-        plotter.plot(model, x=x_combo, y=y, data_labels=list(pdf.index),
-                     title='combo', x_label='combined properties')
+        plotter.plot(model, x=x_combo, y=y, data_labels=list(pdf.index), title='combo', x_label='combined properties')
     return model, rsq
 
 
-def _calc_relative_weights_for_nmprops_and_nbsc(pdf: pDF, make_plot: bool) -> Tuple[dict, dict, dict]:
+def _calc_relative_weights_for_nmprops_and_nbsc(pdf: pDF, make_plot: bool,
+                                                model: linear_model) -> Tuple[dict, dict, dict]:
     """
     Calculate the weights for two given properties for synucleins: normalised mprops (nmprops) and normalised
     integrals of beta-strand contiguity (nbSC).
@@ -73,7 +75,6 @@ def _calc_relative_weights_for_nmprops_and_nbsc(pdf: pDF, make_plot: bool) -> Tu
     y = np.array(pdf.ln_lags)
     _2coefs, _2intcpts, _2rsq = {}, {}, {}
     for prop_name, prop_values in zip(['nbsc', 'nmprops'], [x_nbsc, x_nmprops]):
-        model = LinearRegression()
         model.fit(prop_values, y)
         if make_plot:
             plotter.plot(model, x=prop_values, y=y, data_labels=list(pdf.index), x_label=prop_name,
@@ -85,12 +86,13 @@ def _calc_relative_weights_for_nmprops_and_nbsc(pdf: pDF, make_plot: bool) -> Tu
     return _2coefs, _2intcpts, _2rsq
 
 
-def generate_combo(csv_filename: str, pdf=None, make_plot: bool = True) -> pDF:
+def generate_combo(csv_filename: str, model: linear_model, pdf=None, make_plot: bool = True) -> pDF:
     """
     Calculate predictions of lagtime hours for all synucleins based on mean properties and beta-strand contiguity,
     trained on observed lagtimes. Optionally display plots for each of the properties.
     :param csv_filename: <Optional>. Name of lagtime means csv filename (including csv extension),
     e.g. 'ltMeans_polyDeg3_ltEnd8.csv'. If no value given, then a value for `syns_lnlags_seqs` is expected to be given.
+    :param model: Linear model to use for fitting combination of properties to log of lagtimes.
     :param pdf: <Optional>. Table of 4 columns including synucleins as index, lagtime means,
     log of lagtimes and amino acid sequences. [(index), 'lagtime_means', 'ln_lags', 'seqs'].
     If nothing passed, pdf is generated via the utils.get_loglags_and_build_seqs() using `csv_filename` parameter.
@@ -103,17 +105,20 @@ def generate_combo(csv_filename: str, pdf=None, make_plot: bool = True) -> pDF:
     """
     if pdf is None:
         pdf = utils.get_loglags_and_build_seqs(csv_filename)
-    pdf_ = mprops.compute_norm_mprops(pdf, make_plot)
+    pdf_ = mprops.compute_norm_mprops(pdf, make_plot, model)
     pdf_ = salsa.compute_norm_bsc_integrals(pdf_)
-    _2coefs, _2intcpts, _2rsq = _calc_relative_weights_for_nmprops_and_nbsc(pdf_, make_plot=make_plot)
-    pdf__ = pdf_.copy()
-    pdf__.loc[:, 'combo'] = pdf_.\
-        apply(lambda row: row.nbsc * _2coefs['nbsc'] + row.nmprops * _2coefs['nmprops'], axis=1)
-    return pdf__
+    _2coefs, _2intcpts, _2rsq = _calc_relative_weights_for_nmprops_and_nbsc(pdf_, make_plot, model)
+    # pdf_ = pdf_.drop('bsc', axis=1)
+    pdf_.loc[:, 'combo'] = pdf_.\
+        apply(lambda row: (row.nbsc * _2coefs['nbsc'] + _2intcpts['nbsc']) +
+                          (row.nmprops * _2coefs['nmprops'] + _2intcpts['nmprops']), axis=1)
+    return pdf_
 
 
 if __name__ == '__main__':
     import time
     st = time.time()
-    df = generate_combo(csv_filename='ltMeans_polyDeg3_ltEnd16.csv', make_plot=True)
-    print(f'time {round(time.time() - st, 2)} secs')
+    models_to_try = [LinearRegression()]
+    for model_ in models_to_try:
+        df = generate_combo(csv_filename='ltMeans_polyDeg3_ltEnd16.csv', make_plot=True, model=model_)
+        print(f'time {round(time.time() - st, 2)} secs')
