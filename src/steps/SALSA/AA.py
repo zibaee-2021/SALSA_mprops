@@ -1,5 +1,6 @@
 from enum import Enum, unique
 
+
 @unique
 class AA(Enum):
     Alanine = 'A'
