@@ -6,6 +6,9 @@ import pandas as pd
 from pandas import testing as pdt
 from root_path import abspath_root
 from src.lagtimes import lagtime_calculator as lagcalc
+from src.utils.Constants import LagTimeCalc
+
+constants = LagTimeCalc()
 
 
 class TestLagTimeCalculator(TestCase):
