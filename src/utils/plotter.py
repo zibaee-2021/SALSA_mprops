@@ -1,11 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn import linear_model
 
 
-def plot(model, x: np.ndarray, y: np.ndarray, data_labels: list, title: str, x_label: str, y_label: str = 'ln(lag-time)'):
+def plot(model: linear_model, x: np.ndarray, y: np.ndarray, data_labels: list, title: str, x_label: str,
+         y_label: str = 'ln(lag-time)'):
     """
     Generate and display 2D plot of the given data points, as well as the line of the model-predicted values.
-    :param model: Trained model, expected to be that of linear regression.
+    :param model: Trained linear model, (e.g. linear regression.)
     :param x: Independent variables.
     :param y: Dependent variables.
     :param data_labels: Labels for each data point, expected to be synuclein names.
