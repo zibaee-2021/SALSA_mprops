@@ -48,7 +48,7 @@ def plot_summed_scores(prot_id_summed_scores: dict, _property: str, prot_name_la
                 f"{' |'  + str(params['periodicity'])+'°' if params['periodicity'] else ''} "
     assert(len(prot_name_labels) == len(prot_id_summed_scores))
     max_len_xaxis = _get_length_of_longest_prot_seq(prot_id_summed_scores)
-    xtick_interval = math.ceil(max_len_xaxis/40)
+    xtick_interval = math.ceil(max_len_xaxis / 40)
     fig, ax = plt.subplots()
     for prot_name, summed_scores_ in prot_id_summed_scores.items():
         ax.plot(np.arange(1, len(summed_scores_) + 1), summed_scores_, label=prot_name)
