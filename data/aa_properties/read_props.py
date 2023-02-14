@@ -25,7 +25,7 @@ def read_all_hydrophobicity_scales_csv() -> pDF:
     return pd.read_csv(hydroph_scales_csv)
 
 
-def read_hydrophobicity_scale(scale: str = None) -> dict:
+def read_hydrophobicity_scale(scale: str) -> dict:
     """
     Read and map given hydrophobicity scale to amino acid as key and hydrophobicity number as value. (Note the scales
     includes the Radzicka & Wolfenden hydrophilicity scale).
