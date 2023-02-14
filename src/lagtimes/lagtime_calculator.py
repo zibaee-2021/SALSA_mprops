@@ -11,7 +11,6 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from src.utils import util_data
 from src.utils.Constants import LagTimeCalc
-
 constants = LagTimeCalc()
 """
 Logic of the data pipeline that produces lag-time data from raw ThT data. 

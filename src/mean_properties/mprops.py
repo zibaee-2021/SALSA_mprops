@@ -7,6 +7,7 @@ from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.metrics import r2_score
 from data.aa_properties.read_props import Scales
 from src.utils import plotter, utils
+
 """
 The derivation of the coefficients for each of the 4 mean properties (mean beta-sheet propensity, mean hydrophilicity, 
 mean absolute net charge and mean total charge) is based on the kinetics of fibrillogenesis for recombinant 
