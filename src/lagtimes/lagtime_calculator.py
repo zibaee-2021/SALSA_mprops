@@ -82,15 +82,21 @@ def _remove_nulls(lagtimes: list) -> list:
     return nonnulls
 
 
-def _calc_mean_of_nonnulls(lagtimes: list) -> Tuple[float, float]:
+def _calc_means_and_stdev_of_nonnulls(lagtimes: list) -> List[float]:
+    """
+    Calculate means and standard deviations for given lagtimes. (The parameter passed is expected to be the
+    lag-times of a single synuclein.)
+    :param lagtimes: lagtimes (expected to be in hours).
+    :return: Means and standard deviations of given lagtimes.
+    """
     lagtimes = _remove_nulls(lagtimes)
     mean_ = np.mean(lagtimes)
     stdev_ = np.std(lagtimes)
-    return round(float(mean_), 1), round(float(stdev_), 1)
-    # This float cast operation is unnecessary but PyCharm's type checker is incorrectly flagging it.
+    return [round(float(mean_), 1), round(float(stdev_), 1)]
+    # This float cast operation is unnecessary but PyCharm's type checker is currently incorrectly flagging it.
 
 
-def calculate_mean(syn_lagtimes: Dict[str, list]) -> Dict[str, Tuple[float, float]]:
+def calculate_means_and_stdev(syn_lagtimes: Dict[str, list]) -> Dict[str, List[float]]:
     """
     Calculate mean of observed lagtimes for each synucleins construct. It is expected that this function is called
     only on the cleaned lagtimes, such that only numerical values are included (`NA` is already removed) and
@@ -433,8 +439,8 @@ def write_lagtimes(lagtimes: Dict[str, list], degree_used: int, tht_lagtime_end_
     pdf.to_csv(os.path.join(constants.LAGTIMES_PATH, lagtime_filename), index=True)
 
 
-def write_lagtime_means(lagtime_means: Dict[str, Tuple[float, float]], degree_used: int,
-                        tht_lagtime_end_value_used: float):
+def write_lagtime_means(lagtime_means_stdev: Dict[str, List[float]], degree_used: int,
+                        tht_lagtime_end_value_used: float, dst_dir: str = constants.LAGTIME_MEANS_PATH):
     """
     Write means and standard deviations of lagtimes per synuclein.
     (These values are used for fitting regression models to the protein physicochemical properties.)
@@ -443,10 +449,10 @@ def write_lagtime_means(lagtime_means: Dict[str, Tuple[float, float]], degree_us
     :param tht_lagtime_end_value_used: Value of ThT (relative to starting value) used to mark end of 'lag-phase'.
     :param dst_dir: Destination directory (including absolute path). Default is data/tht_data/lagtimes/lagtime_means.
     """
-    col_names = ['Synucleins', 'lagtime_means', 'std_devs']
-    df = pd.DataFrame.from_dict(data=lagtime_means, orient='index', columns=col_names[1: 3])
-    lagtime_filename = f'lagtime_means_polynDegree_{degree_used}_lagtimeEndvalue_{int(tht_lagtime_end_value_used)}.csv'
-    df.to_csv(os.path.join(constants.LAGTIME_MEANS_PATH, lagtime_filename), index=True)
+    col_names = ['lagtime_means', 'std_devs']
+    df = pd.DataFrame.from_dict(data=lagtime_means_stdev, orient='index', columns=col_names)
+    lagtime_filename = f'ltMeans_polyDeg{degree_used}_ltEnd{int(tht_lagtime_end_value_used)}.csv'
+    df.to_csv(os.path.join(dst_dir, lagtime_filename), index=True)
 
 
 def write_standardised_tht_data_all(standardised_tht_all: List[dict]):
