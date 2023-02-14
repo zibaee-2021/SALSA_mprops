@@ -39,6 +39,10 @@ class LagTimeCalc:
         return os.path.join(abspath_root, 'data', 'tht_data', 'lagtimes')
 
     @property
+    def TEST_LAGTIMES_PATH(self):
+        return os.path.join(abspath_root, 'test', 'lag_times', 'data', 'tht_data')
+
+    @property
     def LAGTIME_MEANS_PATH(self):
         return os.path.join(self.LAGTIMES_PATH, 'lagtime_means')
 
