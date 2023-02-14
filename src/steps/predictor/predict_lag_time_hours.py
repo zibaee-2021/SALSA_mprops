@@ -26,8 +26,6 @@ def fit_and_predict_syns(csv_filename: str, make_plots: bool, model: linear_mode
     combo_model, rsq = mprops_bsc_combo.train_combo_model(syns_lags_seqs_props, make_plots, model=model)
     coef = round(float(combo_model.coef_), 3)
     intcpt = round(float(combo_model.intercept_), 3)
-    csv_filename = csv_filename.replace('lagtime_means_polynDegree', 'polydeg')
-    csv_filename = csv_filename.replace('lagtimeEndvalue_', 'lgEnd')
     print(f'{csv_filename}: combo_model coef {coef}, combo_model_intercept {intcpt}, rsq {rsq}')
     preds = combo_model.predict(np.array(syns_lags_seqs_props['combo']).reshape(-1, 1))
     syns_lags_seqs_props['pred'] = np.exp(preds)
