@@ -130,21 +130,38 @@ def compute_norm_mprops(pdf: pDF, make_plot: bool, model: LinearRegression) -> p
 from src.lagtimes import lagtime_calculator as ltc
 
 if __name__ == '__main__':
-    from src.lagtimes import lagtime_calculator as lc
-    for degree_used in [5]:
-        # for tht_end_value_used in [lc.SQUARE_OF_STARTING_VALUE, lc.DOUBLE_STARTING_VALUE]:
-        for tht_end_value_used in [lc.SQUARE_OF_STARTING_VALUE]:
-            lt_filename = f'lagtime_means_polynDegree_{degree_used}_lagtimeEndvalue_{int(tht_end_value_used)}.csv'
 
-            if os.path.exists(os.path.join(ltc.LAGTIMES_PATH, lt_filename)):
+    from src.utils.Constants import LagTimeCalc
+    constants = LagTimeCalc()
+    for degree_used in [5]:
+        # for tht_end_value_used in [constants.SQUARE_OF_STARTING_VALUE, constants.DOUBLE_STARTING_VALUE]:
+        for tht_end_value_used in [constants.SQUARE_OF_STARTING_VALUE]:
+            lt_filename = f'ltMeans_polyDeg{degree_used}_ltEnd{int(tht_end_value_used)}.csv'
+            lt_path_f = os.path.join(constants.LAGTIME_MEANS_PATH, lt_filename)
+            if not os.path.exists(lt_path_f):
+                print(f'{os.path.exists(lt_path_f)} does not exist.')
+            else:
+                print(f'Reading {os.path.exists(lt_path_f)}')
                 _pdf = utils.get_loglags_and_build_seqs(csv_filename=lt_filename)
                 syns = list(_pdf.index)
-                print(f'The following {len(syns)} Synucleins used here are: {syns}')
-                for model in [LinearRegression(), Lasso(), Ridge(), ElasticNet()]:
-                    print(f'model used is {str(model)}')
-                    compute_norm_mprops(_pdf, make_plot=True, model=model)
+                print(f'This file has lag-times for {len(syns)} constructs. Namely: {syns}.')
+                syns_to_exclude = ['a1_80', 'a1_75', 'b1_73', 'fr_asyn', 'fr_bsyn',
+                                   'fr_gsyn1', 'fr_gsyn2', 'gsyn', 'ga']
+                print(f'Curation of this currently will exclude {len(syns_to_exclude)} constructs. '
+                      f'Namely: {syns_to_exclude}. They may not all be present in the data.')
+                for syn in syns_to_exclude:
+                    if syn in _pdf.index:
+                        _pdf = _pdf.drop(syn, axis=0)
 
+                syns = list(_pdf.index)
 
+                print(f'After excluding, there are now {len(syns)} constructs remaining. Namely: {list(_pdf.index)}.')
+                # for model_ in [LinearRegression(), Lasso(), Ridge(), ElasticNet()]:
+                for model_ in [LinearRegression(), HuberRegressor(epsilon=1.5, alpha=0.0)]:
+                    print(f'model used is {str(model_)}')
+                    _combo_pdf = compute_norm_mprops(_pdf, make_plot=True, model=model_)
+
+    print('end')
 # _syns_not_included_in_32_JBC  = ['gsyn', 'fr_asyn', 'fr_gsyn1', 'fr_gsyn2', 'mus_bsyn',
 #                                  'gallus_bsyn', 'b5V', 'a71_140', 'a1_45', 'a1_50', 'a1_55', 'a1_60',
 #                                  'a1_70', 'a1_75', 'g1_80', 'a71_76del', 'a71_82del', 'a74_84del',

@@ -115,5 +115,5 @@ def generate_combo(csv_filename: str, pdf=None, make_plot: bool = True) -> pDF:
 if __name__ == '__main__':
     import time
     st = time.time()
-    df = generate_combo(csv_filename='lagtime_means_polynDegree_4_lagtimeEndvalue_8.csv', make_plot=True)
+    df = generate_combo(csv_filename='ltMeans_polyDeg3_ltEnd16.csv', make_plot=True)
     print(f'time {round(time.time() - st, 2)} secs')

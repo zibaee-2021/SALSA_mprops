@@ -43,13 +43,13 @@ def fit_and_predict_syns(csv_filename: str, make_plots: bool) -> pDF:
 
 if __name__ == '__main__':
 
-    lagtime_dir_path = os.path.join(abspath_root, 'data', 'tht_data', 'lagtimes')
+    lagtime_dir_path = os.path.join(abspath_root, 'data', 'tht_data', 'lagtimes', 'lagtime_means')
     b_lagtime_dir_path = os.fsencode(lagtime_dir_path)
     syns_lnlags_seqs = None
 
     for b_csv_filename in os.listdir(b_lagtime_dir_path):
         filename = os.fsdecode(b_csv_filename)
-        if filename.endswith(".csv"):
-            syns_lnlags_seqs = fit_and_predict_syns(csv_filename=filename, make_plots=False)
+        if filename.endswith('.csv'):
+            syns_lnlags_seqs = fit_and_predict_syns(csv_filename=filename, make_plots=True)
             print(syns_lnlags_seqs.head(50))
 

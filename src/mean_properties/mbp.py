@@ -55,19 +55,23 @@ class CFP(Enum):
 
 
 if __name__ == '__main__':
-    pass
-    # import pandas as pd
-    # from matplotlib import pyplot as plt
-    # pdf = pd.DataFrame.from_dict(data=aa_mbp, orient='index', columns=['aa', 'MBP'])
-    # pdf.head()
-    #
-    # pdf.plot.bar(
-    #     x="aa",
-    #     y=["mbp"],
-    #     rot=0,
-    #     figsize=(12, 6),
-    #     ylabel="MBP",
-    #     title="Chou-Fasman MBP per amino acid tetrapeptide",
-    # )
-    # plt.show()
+    # pass
+    import pandas as pd
+    from matplotlib import pyplot as plt
+    all_20_AAs = list(CFP.BETASTRAND.value)
+    aa_mbp, mbps, AAs = {}, [], []
+    for aa in all_20_AAs:
+        AAs.append(aa)
+        mbps.append(compute_mean_beta_sheet_prop(sequence=aa))
+    aa_mbp['aa'] = AAs
+    aa_mbp['mbp'] = mbps
+
+    pdf = pd.DataFrame.from_dict(data=aa_mbp)
+    print(pdf.head())
+
+    pdf.plot.bar(x='aa', y=['mbp'], rot=0, figsize=(12, 6),
+                 ylabel='MEAN BETA-SHEET PROPENSITY',
+                 title='Chou-Fasman MBP for individual amino acids'
+                 )
+    plt.show()
 

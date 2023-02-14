@@ -139,8 +139,6 @@ def get_seqs_by_uniprot_acc_nums_or_names(prot_ids) -> dict[str:str]:
 
 
 if __name__ == '__main__':
-    # seq = read_protein_sequence_txt('SYUA_HUMAN.txt')
-    # print(f'type(sequence): {type(seq)}')
 
     prot_ids_not_in_csv_file = ['P05067']
     # actual = read_seqs.get_sequences_by_uniprot_accession_nums_or_names(prot_ids=prot_ids)

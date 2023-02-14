@@ -169,22 +169,12 @@ class Mutate(Enum):
 
 
 if __name__ == '__main__':
-
-    actual = make_point_mutants(prot_id_mutants_to_make={'P37840': {1: ['A'], 3: ['D']}})
+    # result = systematic_substitution(prot_seq='ACDEF', pos_to_mutate=[1, 4], mutate_to_aa=['F', 'E'])
+    # print(result)
+    result = systematic_substitution(prot_seq='ACDEF')
+    print(result)
+    # print(len(result))
+    # result = make_point_mutants(prot_id_mutants_to_make={'P37840': {1: ['A'], 3: ['D']}})
     # mydict = {'prot': {1: ['A'], 3: ['D', 'E']}, 'prot2': {1: ['A']}}
-    # blaa, blaaa = mydict.keys()
-    # for key in mydict.keys():
-    #     print(key)
-    # blaa, blaaa = mydict.items()
-
-    # print(blaa)
-    # print(blaaa)
-
-    # for name, pos_mut in bla.items():
-    #     blbla, = pos_mut.keys()
-
-    # mydict = {'prot': {1: ['A' 'C']}}
-    # bla, = mydict.keys()
-    # mydict = {'prot': {1: ['A'], 3: ['D', 'E']}}
-    # bla, = mydict.keys()
+    print('end')
 

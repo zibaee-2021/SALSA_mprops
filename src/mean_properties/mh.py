@@ -31,3 +31,5 @@ def compute_mean_hydrophobicity(sequence: str, scale: str = None):
 
 if __name__ == '__main__':
     print(compute_mean_hydrophilicity('VVDF'))
+    from data.protein_sequences import read_seqs
+    print(compute_mean_hydrophilicity(read_seqs.read_protein_sequence_txt('SYUA_HUMAN.txt')))
