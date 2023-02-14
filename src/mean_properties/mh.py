@@ -24,7 +24,8 @@ def compute_mean_hydrophobicity(sequence: str, scale: str = None):
     :param scale: Hydrophobicity scale to use for computing mean hydrophobicity.
     :return: Mean hydrophobicity of given protein.
     """
-    if scale is None: scale = Scales.EBERG.value
+    if scale is None:
+        scale = Scales.EBERG.value
     hb_scale = read_props.read_hydrophobicity_scale(scale)
     return np.mean([hb_scale[aa] for aa in sequence])
 

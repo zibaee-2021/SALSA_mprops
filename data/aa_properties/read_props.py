@@ -33,7 +33,8 @@ def read_hydrophobicity_scale(scale: str = None) -> dict:
     'Kyte-Doolittle' by default if no argument is passed.
     :return:
     """
-    if scale is None: scale = Scales.KD.value
+    if scale is None:
+        scale = Scales.KD.value
     df_col = pd.read_csv(hydroph_scales_csv, skipinitialspace=True, usecols=[scale, 'aa'])
     return dict(zip(df_col['aa'], df_col[scale]))
 
