@@ -15,4 +15,4 @@ ALL_CONCEIVABLE_SYN_NAMES = ['asyn', 'bsyn', 'b3V', 'b4V', 'b5V', 'b5V2Q', 'b5V2
 def check_syn_names(syn_names: list):
     for syn_name in syn_names:
         if syn_name not in ALL_CONCEIVABLE_SYN_NAMES:
-            raise ValueError(f"'{syn_name}' not in list of Synuclein names.")
+            raise ValueError(f"'{syn_name}' not in list of synuclein names.")

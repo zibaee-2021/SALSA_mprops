@@ -17,11 +17,11 @@ constants = LagTimeCalc()
 
 def _has_enough_nonnull_lagtimes(lagtimes: list) -> bool:
     """
-    Checks that the number of 'lag-times' in the given list is above the globally-defined value, (typically 3).
-    The given list of 'lag-times' may have already had all nulls removed, but this function can still handle a
+    Checks that the number of lagtimes in the given list is above the globally-defined value, (typically 3).
+    The given list of lagtimes may have already had all nulls removed, but this function can still handle a
     null-containing list.
-    :param lagtimes: 'Lag-times'.
-    :return: True if the given list has at least the minimum number of non-null 'lag-times'.
+    :param lagtimes: lagtimes.
+    :return: True if the given list has at least the minimum number of non-null lagtimes.
     """
     has_enough_nonnull_lagtimes = len([lagtime for lagtime in lagtimes if lagtime != 'NA']) >= \
                                   constants.MIN_NUM_OF_LAGTIMES_NEEDED
@@ -30,12 +30,12 @@ def _has_enough_nonnull_lagtimes(lagtimes: list) -> bool:
 
 def _has_high_enough_proportion_of_non_null_lagtimes(lagtimes: list) -> bool:
     """
-    Checks that the number of 'lag-times' in the given list has a sufficient proportion of non-null to null values.
-    (Typically it is approximated that there should be more than 7 non-null in 8 'lag-time' values, otherwise the
-    subsequent mean value is not reliably representative of the Synuclein's fibrillogenic propensity and is removed
-    from the subsequent linear regression-based predictions. Note, such Synuclein datasets will still be valuable
+    Checks that the number of lagtimes in the given list has a sufficient proportion of non-null to null values.
+    (Typically it is approximated that there should be more than 7 non-null in 8 lagtime values, otherwise the
+    subsequent mean value is not reliably representative of the synuclein's fibrillogenic propensity and is removed
+    from the subsequent linear regression-based predictions. Note, such synuclein datasets will still be valuable
     for classification-based predictions).
-    :param lagtimes: 'Lag-times' that have not had nulls previously removed.
+    :param lagtimes: lagtimes that have not had nulls previously removed.
     :return: True if the given list has at least the minimum proportion of non-null to null values.
     """
     num_of_nones = len([lag for lag in lagtimes if lag == 'NA'])
@@ -45,10 +45,10 @@ def _has_high_enough_proportion_of_non_null_lagtimes(lagtimes: list) -> bool:
 
 def _remove_nulls(lagtimes: list) -> list:
     """
-    Remove the value representing null within the given list of 'lag-times'.
+    Remove the value representing null within the given list of lagtimes.
     (Currently, it is represented by the string 'NA', although it may change without this comment being updated).
-    :param lagtimes: 'Lag-times', potentially containing null values.
-    :return: Non-null 'lag-times' only.
+    :param lagtimes: lagtimes, potentially containing null values.
+    :return: Non-null lagtimes only.
     """
     nonnulls = [lag for lag in lagtimes if lag != 'NA']
     return nonnulls
@@ -64,31 +64,31 @@ def _calc_mean_of_nonnulls(lagtimes: list) -> Tuple[float, float]:
 
 def calculate_mean(syn_lagtimes: Dict[str, list]) -> Dict[str, Tuple[float, float]]:
     """
-    Calculate mean of observed 'lag-times' for each Synucleins construct. It is expected that this function is called
-    only on the cleaned 'lag-times', such that only numerical values are included (`NA` is already removed) and
-    Synucleins with less than 3 'lag-times' are also removed.
-    :param syn_lagtimes: Synuclein names mapped to 'lag-times', with 3 or more values and without any `NA`,
-    mapped to the Synuclein name.
-    :return: Mean and standard deviation of given 'lag-times' mapped to corresponding Synuclein name.
+    Calculate mean of observed lagtimes for each synucleins construct. It is expected that this function is called
+    only on the cleaned lagtimes, such that only numerical values are included (`NA` is already removed) and
+    synucleins with less than 3 lagtimes are also removed.
+    :param syn_lagtimes: Synuclein names mapped to lagtimes, with 3 or more values and without any `NA`,
+    mapped to the synuclein name.
+    :return: Mean and standard deviation of given lagtimes mapped to corresponding synuclein name.
     """
-    return {syn: _calc_mean_of_nonnulls(lags) for syn, lags in syn_lagtimes.items()}
+    return {syn: _calc_means_and_stdev_of_nonnulls(lags) for syn, lags in syn_lagtimes.items()}
 
 
 def clean(syn_lagtimes: Dict[str, list]) -> Dict[str, list]:
     """
-    Validate and correct syntax of Synuclein names.
-    Remove Synuclein expts that do not have enough ThT data - i.e. less than 3 'lag-times'.
-    Some Synucleins may be slow to assemble such that the ThT value did not increase (above the heuristic value)
-    within the 96-hour cut-off, in one or more experiments. For example, given the following 'lag-times' 68 h, 75 h,
-    80 h, NA, NA, there are 3 numerical 'lag-time' values, which satisfies the minimum number required. However,
+    Validate and correct syntax of synuclein names.
+    Remove synuclein experiments that do not have enough ThT data - i.e. less than 3 lagtimes.
+    Some synucleins may be slow to assemble such that the ThT value did not increase (above the heuristic value)
+    within the 96-hour cut-off, in one or more experiments. For example, given the following lagtimes 68 h, 75 h,
+    80 h, NA, NA, there are 3 numerical lagtime values, which satisfies the minimum number required. However,
     the mean cannot include 2 of the 5 experiments because it is non-numeric. Therefore, the 74 h mean of the 3 is
     likely overestimating the fibrillogenic propensity of the protein, because in theory, the other 2
-    experiments may have 'lag-times' of 115 h and 125 h. The "real" mean would have been 93 h. To address this, another
+    experiments may have lagtimes of 115 h and 125 h. The "real" mean would have been 93 h. To address this, another
     heuristic cut-off is used - `ACCEPTABLE_MAX_PROPORTION_OF_NULL_LAGTIMES` - whereby even if the protein has the
-    minimum number of numerical 'lag-times', it will still be excluded from the subsequent regression modelling if
+    minimum number of numerical lagtimes, it will still be excluded from the subsequent regression modelling if
     there is a null in more than 1/8 proportion of experiments.
-    :param syn_lagtimes: Synuclein names mapped to 'lag-times'.
-    :return: Synucleins and expts mapped to their 'lag-times', where sufficient data for the Synuclein is available.
+    :param syn_lagtimes: Synuclein names mapped to lagtimes.
+    :return: Synucleins & experiments mapped to their lagtimes where sufficient data for the synuclein is available.
     """
     syn_lagtimes_cleaned = {syn.strip().replace('-', '_'): lags for syn, lags in syn_lagtimes.items()}
     try:
@@ -146,10 +146,10 @@ def _plot(preproc: PolynomialFeatures, lin_reg: LinearRegression, x: list, y: np
     :param x: Time points (expected to be only two time points).
     :param y: ThT values (expected to be only two ThT values).
     :param y_pred: Predicted ThT value according to the trained polynomial regression model.
-    :param syn_name: The Synuclein name.
+    :param syn_name: The synuclein name.
     :param degree_used: Polynomial degree used for fitting ThT data (for plot title).
-    :param tht_lag: ThT value immediately after the end of 'lag-time' (for plot title).
-    :param lag_hrs: 'lag-time' in hours.
+    :param tht_lag: ThT value immediately after the end of lagtime (for plot title).
+    :param lag_hrs: lagtime in hours.
     """
     X_grid = np.arange(min(x), max(x), 0.1)
     X_grid = X_grid.reshape((len(X_grid), 1))
@@ -162,23 +162,24 @@ def _plot(preproc: PolynomialFeatures, lin_reg: LinearRegression, x: list, y: np
     plt.show()
 
 
-def _calculate_lagtimes(syn_name: str, two_time_points: list, two_tht_values: list, lagtimes: Dict[str, list],
-                        make_plot: bool, degree_to_use: int, tht_lagtime_end_value: float) -> Dict[str, list]:
+def _calculate_lagtimes(syn_name: str, two_time_points: np.ndarray, two_tht_values: np.ndarray,
+                        lagtimes: Dict[str, list], make_plot: bool, degree_to_use: int,
+                        tht_lagtime_end_value: float) -> Dict[str, list]:
     """
-    Calculate the 'lag-time' as the time at which the square of the starting value is reached, from the given ThT
+    Calculate the lagtime as the time at which the square of the starting value is reached, from the given ThT
     values which are expected to only include values that reach this otherwise they are None. Use a polynomial
-    regression with the given degree and map all calculated values to the given Synuclein name. (The implementation
+    regression with the given degree and map all calculated values to the given synuclein name. (The implementation
     for assigning values to variables `x` and `y` includes filtering out empty rows which were present in an older
     version but are left in place as it is possible that I may alter the upstream functionality so that all the ThT
     values for the experiment are passed here.)
     :param syn_name: Synuclein name. Examples: `asyn`, `a11-140`, `a1-80`, `ba1`, `fr_asyn`, `b45V46V`, `a68-71Del`.
-    :param two_time_points: Time point immediately before and time point immediately after end of 'lag-time'.
-    :param two_tht_values: ThT value immediately before and ThT value immediately after end of 'lag-time'.
-    :param lagtimes: All 'lag-times' calculated thus far, to which the 'lag-time' being calculated here is added.
+    :param two_time_points: Time point immediately before and time point immediately after end of lagtime.
+    :param two_tht_values: ThT value immediately before and ThT value immediately after end of lagtime.
+    :param lagtimes: All lagtimes calculated thus far, to which the lagtime being calculated here is added.
     :param make_plot: True to display a plot of the polynomial regression used.
     :param degree_to_use: The degree to use for the polynomial regression.
     :param tht_lagtime_end_value: Value of ThT (relative to starting value) that is used to mark end of lag-phase.
-    :return: All 'lag-times', mapped to the corresponding Synuclein name.
+    :return: All lagtimes, mapped to the corresponding synuclein name.
     """
     if two_tht_values is None:
         lag_hours = 'NA'
@@ -266,16 +267,16 @@ def get_lagtimes(make_plot: bool, degree_to_use: int, tht_lagtime_end_value: flo
     """
     Read `translatedTo4.csv` file and determine the time taken for each protein's ThT fluorescence to reach the
     square of its starting value, which has been translated to 4.0. This is referred to here as a "lag-time".
-    The file contains all ThT data for filament-forming Synucleins measured between 01.11.01 and 30.10.09.
+    The file contains all ThT data for filament-forming synucleins measured between 01.11.01 and 30.10.09.
     It is expected to have a particular format, starting a date. This is immediately followed in the next
-    row down by `Time (h)` in the first column and the names of the Synuclein constructs in the adjoining columns.
+    row down by `Time (h)` in the first column and the names of the synuclein constructs in the adjoining columns.
     The subsequent time points at which measurements were taken and the corresponding ThT fluorescence for each
     construct follow in the rows below.
-    :param make_plot: True to generate a plot of the region of the ThT fluorescence curve that includes the value by which
-    the 'lag-time' is deemed to have ended.
+    :param make_plot: True to generate a plot of the region of the ThT fluorescence curve that includes the value by
+    which the lagtime is deemed to have ended.
     :param degree_to_use: The degree to use for the polynomial regression of the ThT data.
     :param tht_lagtime_end_value: Value of ThT (relative to starting value) that is used to mark end of 'lag-phase'.
-    :return: Each Synuclein name mapped to its 'lag-times', or 'NA' where the ThT does not or increases by
+    :return: Each synuclein name mapped to its lagtimes, or 'NA' where the ThT does not or increases by
     not above the threshold.
     """
     syn_names = ()
@@ -315,11 +316,11 @@ def get_lagtimes(make_plot: bool, degree_to_use: int, tht_lagtime_end_value: flo
 def _standardise_tht(pre_standardised_tht: list, translate_by: Dict[str, float], scaling_factor: float,
                      syn_names: list) -> list:
     """
-    Scale all ThT values to the concurrently run alpha-Synuclein and translate all values to start at 4.0 for the
+    Scale all ThT values to the concurrently run alpha-synuclein and translate all values to start at 4.0 for the
     given experiment.
-    :param pre_standardised_tht: Raw ThT values for one experiments.
-    :param translate_by: How much to translate each Synuclein's ThT values according to starting at 4.0.
-    :param scaling_factor: How much to scale all Synuclein's ThT values in one experiment.
+    :param raw_tht: Raw ThT values for one experiment.
+    :param translate_by: How much to translate each synuclein's ThT values according to starting at 4.0.
+    :param scaling_factor: How much to scale all synuclein's ThT values in one experiment.
     :param syn_names:
     :return:
     """
@@ -344,12 +345,12 @@ def _standardise_tht(pre_standardised_tht: list, translate_by: Dict[str, float],
 
 def standardise_tht() -> List[dict]:
     """
-    Scale all ThT values of all Synucleins in one experiment according to the final value (4 days) of the
-    concurrently run alpha-Synuclein, according to the equation: (100 / alpha-Synuclein's 4-day ThT value).
-    Translate all scaled ThT values for each Synuclein in one experiment according to the starting value (0 hours)
-    for each Synuclein, such that all will start at the STARTING_THT_VALUE (typically 4.0) and all subsequent time
+    Scale all ThT values of all synucleins in one experiment according to the final value (4 days) of the
+    concurrently run alpha-synuclein, according to the equation: (100 / alpha-synuclein's 4-day ThT value).
+    Translate all scaled ThT values for each synuclein in one experiment according to the starting value (0 hours)
+    for each synuclein, such that all will start at the STARTING_THT_VALUE (typically 4.0) and all subsequent time
     points will be translated by the same difference. (Note: the necessary order of operations, i.e. scaling followed
-    by translation, means that alpha-Synuclein's final standardised ThT value is rarely exactly 100.0)
+    by translation, means that alpha-synuclein's final standardised ThT value is rarely exactly 100.0)
     :return: Standardised ThT data
     """
     df = pd.read_csv(constants.ALL_THT_DATA_CSV_PATH, header=None)
@@ -393,9 +394,9 @@ def standardise_tht() -> List[dict]:
 
 def write_lagtimes(lagtimes: Dict[str, list], degree_used: int, tht_lagtime_end_value_used: float):
     """
-    Write 'lag-times' to csv for each and every assembly experiment.
-    May be used to explore effect of weighting subsequent regression models of 'lag-time' means to properties.
-    :param lagtimes: 'lag-times' for each and every Synuclein experiment. Not the averages.
+    Write lagtimes to csv for each and every assembly experiment.
+    May be used to explore effect of weighting subsequent regression models of lagtime means to properties.
+    :param lagtimes: lagtimes for each and every synuclein experiment. Not the averages.
     :param degree_used: Polynomial degree used to fit the two ThT values that span the end of 'lag-phase'.
     :param tht_lagtime_end_value_used: Value of ThT (relative to starting value) used to mark end of 'lag-phase'.
     """
@@ -407,11 +408,12 @@ def write_lagtimes(lagtimes: Dict[str, list], degree_used: int, tht_lagtime_end_
 def write_lagtime_means(lagtime_means: Dict[str, Tuple[float, float]], degree_used: int,
                         tht_lagtime_end_value_used: float):
     """
-    Write means and standard deviations of 'lag-times' per Synuclein.
+    Write means and standard deviations of lagtimes per synuclein.
     (These values are used for fitting regression models to the protein physicochemical properties.)
-    :param lagtime_means: Mean & standard deviation of the 'lag-times' for each Synuclein.
+    :param lagtime_means_stdev: Mean & standard deviation of the lagtimes for each synuclein.
     :param degree_used: Polynomial degree used to fit the two ThT values that span the end of 'lag-phase'.
     :param tht_lagtime_end_value_used: Value of ThT (relative to starting value) used to mark end of 'lag-phase'.
+    :param dst_dir: Destination directory (including absolute path). Default is data/tht_data/lagtimes/lagtime_means.
     """
     col_names = ['Synucleins', 'lagtime_means', 'std_devs']
     df = pd.DataFrame.from_dict(data=lagtime_means, orient='index', columns=col_names[1: 3])

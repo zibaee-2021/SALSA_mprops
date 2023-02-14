@@ -11,9 +11,9 @@ constants = LagTimeCalc()
 
 def _get_ln_lags(csv_filename: str) -> pDF:
     """
-    Calculate natural logs of all 'lag-time' means.
+    Calculate natural logs of all lagtime means.
     :param csv_filename: Name of csv filename. This must include the csv extension.
-    :return: Table of 4 columns including Synucleins as index, 'lag-time' means and log of 'lag-times':
+    :return: Table of 4 columns including synucleins as index, lagtime means and log of lagtimes:
     [(index), 'lagtime_means', 'ln_lags', 'seqs'].
     """
     pdf = pd.read_csv(os.path.join(constants.LAGTIME_MEANS_PATH, csv_filename), index_col=[0])
@@ -23,11 +23,11 @@ def _get_ln_lags(csv_filename: str) -> pDF:
 
 def _build_syn_sequences(pdf: pDF) -> dict:
     """
-    Generate the amino acid sequences of the given Synucleins.
-    (Note: Although the input is expected to include a column containing the 'lag-times', only the names are used in
+    Generate the amino acid sequences of the given synucleins.
+    (Note: Although the input is expected to include a column containing the lagtimes, only the names are used in
     this function).
-    Expected formats of Synuclein names are as follows:
-    1. All human Synuclein names begin with the identity of Synuclein (alpha, beta, gamma) represented by a single
+    Expected formats of synuclein names are as follows:
+    1. All human synuclein names begin with the identity of synuclein (alpha, beta, gamma) represented by a single
     lowercase letter (`a`, `b`, `g`).
     2. All hyphens replaced by underscores (e.g. `a1-80` replaced by `a1_80`).
     3. Deletion mutants have `del` suffixed to the stretch of residues that were deleted, e.g. `a68_71del`,
@@ -37,7 +37,7 @@ def _build_syn_sequences(pdf: pDF) -> dict:
     5. All other substitutions are use the wild-type residue (uppercase), followed by its position, followed by the
     mutant residue (uppercase), e.g. `aK45VE46VV71ET72E`.
     6. Fugu sequences have `fr_` prefix. Mouse beta is `mus_bsyn`, chicken beta is `gallus_bsyn`.
-    :param pdf: Table of 3 columns including Synucleins as index, 'lag-time' means and log of 'lag-times':
+    :param pdf: Table of 3 columns including synucleins as index, lagtime means and log of lagtimes:
     [(index), 'lagtime_means', 'ln_lags']
     :return: Synucleins mapped to their sequences.
     """
@@ -161,17 +161,17 @@ def _build_syn_sequences(pdf: pDF) -> dict:
 
 def get_loglags_and_build_seqs(csv_filename: str) -> pDF:
     """
-    Generate table of natural logs of 'lag-time' means and amino acid sequences
-    :param csv_filename: Name of 'lag-time' means csv filename (including csv extension).
-    :return: Table of 4 columns including Synucleins as index, 'lag-time' means, their natural log values and amino
-    acid sequences of corresponding Synuclein: [(index), 'lagtime_means', 'ln_lags', 'seqs'].
+    Generate table of natural logs of lagtime means and amino acid sequences
+    :param csv_filename: Name of lagtime means csv filename (including csv extension).
+    :return: Table of 4 columns including synucleins as index, lagtime means, their natural log values and amino
+    acid sequences of corresponding synuclein: [(index), 'lagtime_means', 'ln_lags', 'seqs'].
     """
     pdf = _get_ln_lags(csv_filename)
     syn_seqs_dict = _build_syn_sequences(pdf)
     pdf_ = pDF.from_dict(syn_seqs_dict, orient='index', columns=['seqs'])
     pdf__ = pdf.join(pdf_)
     syns = list(pdf__.index)
-    print(f"The following {len(syns)} Synucleins with 'lag-times' read in from csv file: {syns}")
+    print(f"The following {len(syns)} synucleins with lagtimes read in from csv file: {syns}")
     return pdf__
 
 

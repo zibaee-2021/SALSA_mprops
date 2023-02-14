@@ -21,9 +21,10 @@ from pandas import DataFrame as pDF
 def fit_and_predict_syns(csv_filename: str, make_plots: bool) -> pDF:
     """
     Generate the combination algorithm, from scratch, by fitting all 4 mean properties, mprops and beta-strand
-    contiguity to the log of 'lag-times' for synucleins.
-    :param csv_filename: Name of 'lag-time' means csv filename (including csv extension).
-    :return: Table of 5 columns including Synucleins as index, 'lag-time' means, predicted 'lag-times', normalised
+    contiguity to the log of lagtimes for synucleins.
+    :param csv_filename: Name of lagtime means csv filename (including csv extension).
+    :param make_plots: True to make plots in IDE.
+    :return: Table of 5 columns including synucleins as index, lagtime means, predicted lagtimes, normalised
     mean properties and normalised beta-strand contiguity: [(index), 'lagtime_means', 'pred', 'nmprops', 'nbsc']]
     """
     syns_lagmeans_lnlags_seqs = utils.get_loglags_and_build_seqs(csv_filename)
