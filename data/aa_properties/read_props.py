@@ -28,7 +28,7 @@ def read_all_hydrophobicity_scales_csv() -> pDF:
 def read_hydrophobicity_scale(scale: str = None) -> dict:
     """
     Read and map given hydrophobicity scale to amino acid as key and hydrophobicity number as value. (Note the scales
-    includes the Radzicka & Woldenden hydrophilicity scale).
+    includes the Radzicka & Wolfenden hydrophilicity scale).
     :param scale: Hydrophobicity scale name, specified by column name.
     'Kyte-Doolittle' by default if no argument is passed.
     :return:

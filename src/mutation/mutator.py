@@ -33,7 +33,8 @@ def _make_mutant_name(prot_id_seq: dict[str: str], point_mutation_to_make: dict[
     Add suffix to given protein id to indicate the amino acid substitution.
     :param prot_id_seq: Protein id mapped to its sequence, {'SYUA_HUMAN': 'MDVFMKGLS..'}. Protein sequence should be
     in 1-letter notation.
-    :param point_mutation_to_make: Position mapped to amino acid to mutate into. {1: 'A'}
+    :param point_mutation_to_make: Position mapped to amino acid to mutate into. {1: 'A'}.
+                                   Note: The corresponding array index = (position - 1)
     :return: The given protein id/name with suffix indicating the amino acid substitution,
     e.g. {'SYUA_HUMAN': 'MDVFMKGLS..'} and {1: 'A'} returns 'SYUA_HUMAN(M1A)'
     """
@@ -50,7 +51,8 @@ def _make_point_mutants(prot_id_seq: dict[str: str], point_mutants_to_make: dict
     substitution. Include original protein name/id and its wild-type sequence.
     :param prot_id_seq: One protein id/name mapped to its sequence. (Protein sequence should be in 1-letter notation.)
     e.g. {'A4_HUMAN(672-713)' :'DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA'}
-    :param point_mutants_to_make: Amino acid substitution, e.g. {1: ['Y', 'T'], 2 ['A', 'C']}
+    :param point_mutants_to_make: Amino acid substitution, e.g. {1: ['Y', 'T'], 2 ['A', 'C']}. The integer is the
+    position in the sequence starting from 1. The corresponding array index = (position - 1).
     :return: Name of new mutant mapped to the mutated sequence, as well as wild-type.
     e.g. {'A4_HUMAN(672-713)' :'DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA',
           'A4_HUMAN(672-713)(D1Y)' :'YAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA',
@@ -98,6 +100,14 @@ def make_point_mutants(prot_id_mutants_to_make: dict[str: dict[int: List[str]]])
 
 
 def make_fragment(syn_name: str) -> str:
+    """
+    Generate amino acid sequence of synuclein fragment based on given name, with the following specific format:
+    E.g. It is expected that alpha-synuclein(11-140) is given by 'a11_140'. Gamma-synuclein(1-80) is 'g1_80'.
+    Beta-synuclein(1-73) is 'b1_73'. Alpha-synuclein with 68-71 deleted is 'a68_71del'.
+    TODO: Add format validation using regex.
+    :param syn_name: Synuclein fragment name, according to specific format described above.
+    :return: Amino acid sequence of given fragment name.
+    """
     prot = ''
     asyn = read_seqs.get_seqs_by_uniprot_acc_nums_or_names('SYUA_HUMAN')['SYUA_HUMAN']
     bsyn = read_seqs.get_seqs_by_uniprot_acc_nums_or_names('SYUB_HUMAN')['SYUB_HUMAN']
@@ -121,14 +131,11 @@ def make_fragment(syn_name: str) -> str:
 
 def mutate(prot_seq: str, pos_aa: dict) -> str:
     """
-    Mutate given protein sequence at the given position(s) to the given residue(s). This function doesn't care about
-    the protein name/id, it just returns a sequence.
-    e.g. You want to mutate your sequence: ACDEFG to ACDYFG. Here pos_aa should be {4: 'Y'}. This will replace the 'E'
-    at array index position 3 to 'Y'.
+    Make point mutant(s) by substituting residue(s) of given protein sequence at specified position(s) to specified
+    residue(s). Note: position integer can be from 1 to the length of the sequence (not from 0 to length - 1).
     :param prot_seq: Protein sequence in 1-letter notation.
-    :param pos_aa: The position(s) in the sequence (using 1 to indicate position 0 in a zero-based array) to mutate
-    mapped to the residue(s) to mutate to. E.g. To mutate a given protein sequence at positions 4, 30 and 101 to
-    Alanine, Glutamine and Tyrosine, respectively, the argument is {4: 'A', 30: 'Q', 101: 'Y'}.
+    :param pos_aa: Position(s) and residue(s) for substitution. The corresponding array index = (position - 1).
+    E.g. To mutate protein sequence at positions 4, 30 and 101 to A, G and T, use {4: 'A', 30: 'Q', 101: 'Y'}.
     :return: The mutated protein sequence. (Sequence in 1-letter notation).
     """
     mutated_seq = ''

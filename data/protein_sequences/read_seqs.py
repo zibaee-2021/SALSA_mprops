@@ -83,6 +83,8 @@ def _has_expected_fragment_id_format(prot_id: str) -> bool:
         (\d+) As described above
         [)] Literal match to closed parenthesis )
 
+    Example prot_id `P05067(672-713)` would return True.
+
     re.match(re.compile, input_string) returns None if the input_string does not match the regex pattern.
 
     :return: False if the given protein id is not that of a protein fragment id.
