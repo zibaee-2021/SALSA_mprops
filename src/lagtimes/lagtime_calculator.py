@@ -347,7 +347,7 @@ def get_lagtimes(make_plot: bool, degree_to_use: int, tht_lagtime_end_value: flo
     return syn_lagtimes
 
 
-def _standardise_tht(pre_standardised_tht: list, translate_by: Dict[str, float], scaling_factor: float,
+def _standardise_tht(raw_tht: list, translate_by: Dict[str, float], scaling_factor: float,
                      syn_names: list) -> list:
     """
     Scale all ThT values to the concurrently run alpha-synuclein and translate all values to start at 4.0 for the
@@ -359,7 +359,7 @@ def _standardise_tht(pre_standardised_tht: list, translate_by: Dict[str, float],
     :return:
     """
     standardised_tht = []
-    for row_dict in pre_standardised_tht:
+    for row_dict in raw_tht:
         if _is_null(row_dict[0]):
             standardised_tht.append(row_dict)
         elif _is_date(row_dict[0]):
