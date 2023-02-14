@@ -2,8 +2,6 @@ import os
 import csv
 import numpy as np
 import pandas as pd
-from pandas import DataFrame as pDF
-from root_path import abspath_root
 from typing import Tuple, List, Dict
 import matplotlib.pyplot as plt
 import re

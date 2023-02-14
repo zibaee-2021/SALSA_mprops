@@ -1,7 +1,4 @@
 import time
-import os
-import pandas as pd
-import numpy as np
 from data.protein_sequences import read_seqs
 from data import write_outputs
 from src.salsa import Options

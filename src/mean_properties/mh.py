@@ -1,4 +1,3 @@
-from enum import Enum
 import numpy as np
 from data.aa_properties import read_props
 from data.aa_properties.read_props import Scales

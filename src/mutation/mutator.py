@@ -1,5 +1,4 @@
 from typing import List, Tuple
-from enum import Enum
 from data.protein_sequences import read_seqs
 _20_AA = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
 
