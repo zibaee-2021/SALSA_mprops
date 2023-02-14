@@ -93,6 +93,7 @@ def compute_4_normalised_props(pdf: pDF) -> pDF:
         min_ = np.min(list(pdf[prop_name]))
         pdf[f'n{prop_name}'] = pdf[prop_name].apply(
             lambda row: ((row - min_) / (max_ - min_)) + 0.01)
+    pdf = pdf.drop(['mbp', 'mh', 'mnc', 'mtc'], axis=1)
     return pdf
 
 
