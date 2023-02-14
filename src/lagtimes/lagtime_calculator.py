@@ -13,6 +13,37 @@ from src.utils import util_data
 from src.utils.Constants import LagTimeCalc
 
 constants = LagTimeCalc()
+"""
+Logic of the data pipeline that produces lag-time data from raw ThT data. 
+
+1. Read raw ThT data ('AllThtData.csv').
+2. Standardise and scale the fluorescence values.
+3. Write to csv ('standardised_tht_start_at_4_0.csv').
+write_standardised_tht_data_all(standardise_tht())
+
+4. Read in processed ThT data (('standardised_tht_start_at_4_0.csv').
+5. Parse data and calculate lag-times via polynomial fit of the early time-point values. 
+6. Write to csv.
+write_lagtimes(get_lagtimes())
+
+7. Clean lag time data. This includes a number of threshold heuristics that determine which synucleins have 
+sufficient data to include them in subsequent calculations. For example, synucleins that do not have enough ThT 
+lag-time data is currently determined to be those with less than 3 lagtimes. 
+Some synucleins may be too slow to assemble such that the ThT value did not increase (above the threshold 
+heuristic) within the 96-hour cut-off, leading to no ThT value for that experiment. Some synucleins had a proportion 
+of experiments with no lag-time, so a determination must be made as to what proportion of experiments a synuclein is 
+permitted to have no recorded lag-time for the average of the remaining experiments to be considered valid and 
+representative.
+8. Calculate the means of lag-times and the standard deviations.
+9. Write to csv.
+write_lagtime_means(calculate_means_and_stdev(clean(syn_lagtimes=_lagtimes)))
+
+Most of the steps in the pipeline described above in steps 1-9 above take heuristics are parameters, 
+enabling experimentation to find optimal settings, which can be inferred from the closeness of fit to protein 
+physicochemical properties by various models, performed downstream in the pipeline via functions in mprops.py, 
+salsa.py and mprops_bsc_combo.py modules.  
+
+"""
 
 
 def _has_enough_nonnull_lagtimes(lagtimes: list) -> bool:
