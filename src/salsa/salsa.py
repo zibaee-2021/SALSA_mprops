@@ -31,7 +31,7 @@ def _get_length_of_longest_prot_seq(summed_scores: dict) -> int:
     return max_len
 
 
-def plot_summed_scores(prot_id_summed_scores: dict, _property: str, prot_name_labels: list, params: dict):
+def plot_summed_scores(prot_id_summed_scores: dict, _property: str, prot_name_labels, params: dict):
     """
     NOTE: The pydevd debugger throws a Nonetype exception with matplotlib in this function.
     Plot the given protein(s)' amino acid sequence (numerical position) against the calculated SALSA property from the
@@ -41,6 +41,8 @@ def plot_summed_scores(prot_id_summed_scores: dict, _property: str, prot_name_la
     :param prot_name_labels: Protein id(s)/name(s) for labelling plot in legend.
     :param params: The SALSA parameters used for generating the scores.
     """
+    if isinstance(prot_name_labels, str):
+        prot_name_labels = [prot_name_labels]
     plt_title = f"{params['window_len_min']}-{params['window_len_max']} | {params['top_scoring_windows_num']} |" \
                 f" {'abs('+str(params['threshold'])+')' if params['abs_threshold'] else params['threshold']}" \
                 f"{' |'  + str(params['periodicity'])+'°' if params['periodicity'] else ''} "
